@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PORT="${PORT:-3000}"
+
+if ! gem list -i foreman > /dev/null 2>&1; then
+  echo "Installing foreman..."
+  gem install foreman
+fi
+
+exec foreman start -f Procfile.dev "$@"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🛑 Stopping and cleaning up all containers and volumes..."
+
+docker-compose down -v
+
+echo "🧹 Removing temporary .env files..."
+rm -f .env
+
+echo "✅ All stopped and cleaned up."

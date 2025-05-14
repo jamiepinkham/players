@@ -1,0 +1,29 @@
+<p>Hey <%= @trade.to_team.name %>!</p>
+
+<p><%= @trade.from_team.name %> has proposed the following trade:</p>
+<p>You Receive:</p>
+<ul>
+    <% @trade.from_contracts.each do |contract| %>
+        <li><%= contract.player.name %> - <%= number_to_currency(contract.amount, precision: 0) %> ending in <%= contract.last_season.end_date.year %>
+   <% end %>
+   <% if @trade.from_cash_amount %>
+        <li><%= number_to_currency(@trade.from_cash_amount, precision: 0) %> cash</li>
+   <% end %>
+</ul>
+
+<p><%= @trade.from_team.name %> Receives:</p>
+<ul>
+    <% @trade.to_contracts.each do |contract| %>
+        <li><%= contract.player.name %> - <%= number_to_currency(contract.amount, precision: 0) %> ending in <%= contract.last_season.end_date.year %>
+   <% end %>
+   <% if @trade.to_cash_amount %>
+        <li><%= number_to_currency(@trade.to_cash_amount, precision: 0) %> cash</li>
+   <% end %>
+</ul>
+
+<% unless @trade.note.blank? %>
+    <p>Here is a note from <%= @trade.from_team.name %>:</p>
+    <p><%= @trade.note %></p>
+<% end %>
+
+View your trades here: <%= ENV['BASE_URL'] + '/trade' %> 

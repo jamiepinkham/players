@@ -1,0 +1,48 @@
+{
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/preset-react": "^7.12.13",
+    "@fontsource/fira-sans": "^4.2.2",
+    "@svgr/webpack": "^5.5.0",
+    "axios": "^0.21.1",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "graphql-hooks": "^5.1.1",
+    "grommet": "^2.17.0",
+    "grommet-controls": "^3.0.1",
+    "grommet-icons": "^4.5.0",
+    "jwt-decode": "^3.1.2",
+    "locale-currency": "^0.0.2",
+    "moment-timezone": "^0.5.33",
+    "normalize.css": "^8.0.1",
+    "prop-types": "^15.7.2",
+    "rails_admin": "3.3.0",
+    "react": "^17.0.1",
+    "react-currency-format": "^1.0.0",
+    "react-currency-input-field": "^3.3.2",
+    "react-currency-masked-input": "^2.5.0",
+    "react-dom": "^17.0.1",
+    "react-moment": "^1.1.1",
+    "react-router-dom": "^5.2.0",
+    "sass": "^1.88.0",
+    "styled-components": "^5.2.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.4",
+    "install-peers": "^1.0.3",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "engines": {
+    "node": ">=15"
+  },
+  "resolutions": {
+    "rails_admin/@fortawesome/fontawesome-free": "^5.15.0"
+  },
+  "scripts": {
+    "build": "esbuild app/javascript/application.js --bundle --sourcemap --outdir=app/assets/builds",
+    "build:css": "sass --load-path=node_modules app/assets/stylesheets/application.scss app/assets/builds/application.css",
+    "watch": "esbuild app/javascript/application.js --bundle --sourcemap --outdir=app/assets/builds --watch",
+    "watch:css": "sass --watch app/assets/stylesheets/application.scss:app/assets/builds/application.css"
+  }
+
+}

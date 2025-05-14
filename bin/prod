@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔐 Injecting production secrets from 1Password..."
+
+bin/validate-env .env.production.template
+
+op inject -i .env.production.template -o .env.production
+
+echo "🚀 Starting production stack (players)..."
+docker-compose \
+  --env-file .env \
+  up players-prod "$@"
+
+# Optional cleanup
+trap 'rm -f .env.production' EXIT

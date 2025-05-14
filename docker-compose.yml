@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: players-postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  players:
+    build:
+      context: ./players
+    container_name: players
+    depends_on:
+      - postgres
+    volumes:
+      - ./players:/app
+    networks:
+      - backend
+
+volumes:
+  postgres-data:
+  players:
+
+networks:
+  backend:

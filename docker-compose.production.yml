@@ -1,0 +1,21 @@
+services:
+  postgres:
+    env_file: .env.production
+
+  mysql:
+    env_file: .env.production
+
+  blog:
+    env_file: .env.production
+    ports:
+      - "2368:2368"
+
+  players:
+    build:
+      context: ./players-public
+    command: foreman start -f Procfile
+    env_file: .env.production
+    volumes:
+      - players-public:/app/public
+    ports:
+      - "4000:3000"

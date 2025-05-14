@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../javascript/site-theme.js"],
+  "sourcesContent": ["// https://github.com/grommet/grommet/wiki/Grommet-v2-theming-documentation\n// https://github.com/grommet/grommet/tree/NEXT/src/js/themes\nexport default {\n  global: {\n    font: {\n      family: \"Fira Sans\"\n    },\n    colors: {\n      brand: \"#222426\"\n    },\n    breakpoints: {\n      xsmall: {\n        value: 300\n      },\n      small: {\n        value: 600\n      },\n      medium: {\n        value: 900\n      },\n      middle: {\n        value: 1200\n      }\n    }\n  },\n  heading: {\n    font: {\n      family: \"Fira Sans\"\n    }\n  }\n};"],
+  "mappings": ";AAEA,IAAO,qBAAQ;AAAA,EACb,QAAQ;AAAA,IACN,MAAM;AAAA,MACJ,QAAQ;AAAA,IACV;AAAA,IACA,QAAQ;AAAA,MACN,OAAO;AAAA,IACT;AAAA,IACA,aAAa;AAAA,MACX,QAAQ;AAAA,QACN,OAAO;AAAA,MACT;AAAA,MACA,OAAO;AAAA,QACL,OAAO;AAAA,MACT;AAAA,MACA,QAAQ;AAAA,QACN,OAAO;AAAA,MACT;AAAA,MACA,QAAQ;AAAA,QACN,OAAO;AAAA,MACT;AAAA,IACF;AAAA,EACF;AAAA,EACA,SAAS;AAAA,IACP,MAAM;AAAA,MACJ,QAAQ;AAAA,IACV;AAAA,EACF;AACF;",
+  "names": []
+}
