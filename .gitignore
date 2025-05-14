@@ -1,0 +1,59 @@
+# ----------------------------------------
+# 🔧 Rails
+# ----------------------------------------
+/log/*
+!/log/.keep
+/tmp/*
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+
+/public/assets
+/public/packs
+/public/builds
+/app/assets/builds
+
+.byebug_history
+.env
+.env.*
+!.env.template
+!.env.production.template
+!.env.blog.template
+credentials*.yml.enc
+master.key
+
+# ----------------------------------------
+# 📦 Node/Yarn/npm (jsbundling-rails)
+# ----------------------------------------
+node_modules/
+yarn-error.log
+package-lock.json # if you're using yarn, not npm
+
+# ----------------------------------------
+# 🐳 Docker
+# ----------------------------------------
+docker-compose.override.yml
+*.pid
+*.sock
+
+# Ignore Docker volumes if symlinked or mounted
+volumes/
+players-public/
+
+# ----------------------------------------
+# 🔐 1Password / Secrets
+# ----------------------------------------
+.env.production
+.env.blog
+.env.local
+.env.development
+
+# ----------------------------------------
+# 💻 IDEs & System Files
+# ----------------------------------------
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+*.code-workspace
