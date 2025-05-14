@@ -7,6 +7,7 @@
 !/tmp/.keep
 /storage/*
 !/storage/.keep
+rails/tmp/*
 
 /public/assets
 /public/packs

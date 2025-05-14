@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -10,19 +8,21 @@ services:
       - backend
 
   players:
+    platform: linux/arm64
     build:
-      context: ./players
+      context: .
+      dockerfile: rails/Dockerfile
+    command: foreman start -f Procfile.dev
     container_name: players
     depends_on:
       - postgres
     volumes:
-      - ./players:/app
+      - ./rails:/app
     networks:
       - backend
 
 volumes:
   postgres-data:
-  players:
 
 networks:
   backend:

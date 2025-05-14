@@ -1,0 +1,834 @@
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=60000ms state=ready
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=15000ms service=0ms state=active
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=15000ms service=0ms state=active
+Started GET "/" for 127.0.0.1 at 2025-05-13 20:34:58 -0400
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=15000ms service=1ms state=active
+  
+ActiveRecord::ConnectionNotEstablished (could not translate host name "postgres" to address: nodename nor servname provided, or not known
+):
+  
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:83:in `rescue in new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:77:in `new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:37:in `postgresql_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `public_send'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:926:in `checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:905:in `try_to_checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:866:in `acquire_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:588:in `checkout'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:428:in `connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:1128:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:327:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:283:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:611:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:606:in `build_watcher'
+activerecord (6.1.7) lib/active_record/migration.rb:588:in `block in call'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `synchronize'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:28:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=15000ms service=270ms state=completed
+source=rack-timeout id=5b148400-ec6e-4e66-b825-47036c1d1089 timeout=15000ms service=270ms state=completed
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=60000ms state=ready
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=60000ms service=0ms state=active
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=15000ms service=0ms state=ready
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=15000ms service=0ms state=active
+Started GET "/apple-touch-icon-precomposed.png" for 127.0.0.1 at 2025-05-13 20:34:58 -0400
+  
+ActiveRecord::ConnectionNotEstablished (could not translate host name "postgres" to address: nodename nor servname provided, or not known
+):
+  
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:83:in `rescue in new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:77:in `new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:37:in `postgresql_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `public_send'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:926:in `checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:905:in `try_to_checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:866:in `acquire_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:588:in `checkout'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:428:in `connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:1128:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:327:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:283:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:611:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:606:in `build_watcher'
+activerecord (6.1.7) lib/active_record/migration.rb:588:in `block in call'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `synchronize'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:28:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=15000ms service=19ms state=completed
+source=rack-timeout id=9e1e976c-1f1a-446a-96ee-ec59955017f7 timeout=15000ms service=20ms state=completed
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=60000ms state=ready
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=60000ms service=0ms state=active
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=15000ms service=0ms state=ready
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=15000ms service=0ms state=active
+Started GET "/apple-touch-icon.png" for 127.0.0.1 at 2025-05-13 20:34:58 -0400
+  
+ActiveRecord::ConnectionNotEstablished (could not translate host name "postgres" to address: nodename nor servname provided, or not known
+):
+  
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:83:in `rescue in new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:77:in `new_client'
+activerecord (6.1.7) lib/active_record/connection_adapters/postgresql_adapter.rb:37:in `postgresql_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `public_send'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:882:in `new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:926:in `checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:905:in `try_to_checkout_new_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:866:in `acquire_connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:588:in `checkout'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:428:in `connection'
+activerecord (6.1.7) lib/active_record/connection_adapters/abstract/connection_pool.rb:1128:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:327:in `retrieve_connection'
+activerecord (6.1.7) lib/active_record/connection_handling.rb:283:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:611:in `connection'
+activerecord (6.1.7) lib/active_record/migration.rb:606:in `build_watcher'
+activerecord (6.1.7) lib/active_record/migration.rb:588:in `block in call'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `synchronize'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:28:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=15000ms service=22ms state=completed
+source=rack-timeout id=82e3bff7-7ca8-4b00-9995-12b98ff41d91 timeout=15000ms service=22ms state=completed
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=60000ms state=ready
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=15000ms state=ready
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=15000ms service=7ms state=active
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=15000ms service=10ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:38:54 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (20.0ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY)[0m
+  [1m[35m (16.3ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  
+ActiveRecord::PendingMigrationError (
+
+Migrations are pending. To resolve this issue, run:
+
+        bin/rails db:migrate RAILS_ENV=development
+
+You have 29 pending migrations:
+
+20151130025530_create_players.rb
+20151201012037_create_teams.rb
+20151201021527_devise_create_users.rb
+20151201022447_add_columns_to_users.rb
+20151207022427_create_contracts.rb
+20151208025613_add_active_to_contracts.rb
+20151209014414_create_teams_users.rb
+20151209020039_create_bids.rb
+20151209022414_move_summer_franchise_from_player_to_contract.rb
+20151229012005_add_audit_columns_to_bids.rb
+20160113023935_add_admin_to_users.rb
+20160204182625_add_mlb_id_to_player.rb
+20161229153953_add_bb_ref_id_to_players.rb
+20171221195823_add_comment_to_team.rb
+20210311232205_add_minor_league_id.rb
+20210315143433_create_jwt_denylist.rb
+20210324164643_add_json_stats_to_player.rb
+20210325022554_fix_jwt_list.rb
+20210504140619_create_seasons.rb
+20210504140931_create_free_agency_periods.rb
+20210504141041_add_free_agency_period_to_bids.rb
+20210504161322_add_bid_id_to_contract.rb
+20210505144824_add_start_end_season_to_contract.rb
+20210505182357_add_season_start_end_to_bid.rb
+20210615125605_add_number_of_bids_to_fa_period.rb
+20210617004905_create_trades.rb
+20210617005645_create_contracts_trades.rb
+20220310125237_add_previous_next_season_to_season.rb
+20220310155856_add_finished_status_to_season.rb
+
+
+):
+  
+activerecord (6.1.7) lib/active_record/migration.rb:625:in `check_pending!'
+activerecord (6.1.7) lib/active_record/migration.rb:590:in `block (2 levels) in call'
+activesupport (6.1.7) lib/active_support/file_update_checker.rb:83:in `execute'
+activerecord (6.1.7) lib/active_record/migration.rb:595:in `block in call'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `synchronize'
+activerecord (6.1.7) lib/active_record/migration.rb:587:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=15000ms service=472ms state=completed
+source=rack-timeout id=ee567f21-7624-4bf5-8472-81c14b18a0dd timeout=15000ms service=476ms state=completed
+  [1m[35m (0.5ms)[0m  [1m[34mSELECT pg_try_advisory_lock(1914500759503835160)[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Migrating to CreatePlayers (20151130025530)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (7.8ms)[0m  [1m[35mCREATE TABLE "players" ("id" serial NOT NULL PRIMARY KEY, "name" character varying, "position" character varying, "summer" boolean DEFAULT FALSE, "franchise" boolean DEFAULT FALSE, "fangraphs_id" integer, "type" character varying, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.8ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151130025530"]]
+  [1m[36mTRANSACTION (0.8ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateTeams (20151201012037)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.1ms)[0m  [1m[35mCREATE TABLE "teams" ("id" serial NOT NULL PRIMARY KEY, "name" character varying, "budget" decimal, "stadium" character varying, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151201012037"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to DeviseCreateUsers (20151201021527)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "users" ("id" serial NOT NULL PRIMARY KEY, "email" character varying DEFAULT '' NOT NULL, "encrypted_password" character varying DEFAULT '' NOT NULL, "reset_password_token" character varying, "reset_password_sent_at" timestamp, "remember_created_at" timestamp, "sign_in_count" integer DEFAULT 0 NOT NULL, "current_sign_in_at" timestamp, "last_sign_in_at" timestamp, "current_sign_in_ip" inet, "last_sign_in_ip" inet, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email" ON "users" ("email")[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_reset_password_token" ON "users" ("reset_password_token")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151201021527"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddColumnsToUsers (20151201022447)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "users" ADD "name" character varying[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "users" ADD "team_id" integer[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151201022447"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateContracts (20151207022427)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "contracts" ("id" serial NOT NULL PRIMARY KEY, "amount" decimal, "final_year" integer, "team_id" integer, "player_id" integer, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL, CONSTRAINT "fk_rails_9736f1deaf"
+FOREIGN KEY ("team_id")
+  REFERENCES "teams" ("id")
+, CONSTRAINT "fk_rails_7eb224e7d1"
+FOREIGN KEY ("player_id")
+  REFERENCES "players" ("id")
+)[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_contracts_on_team_id" ON "contracts" ("team_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_contracts_on_player_id" ON "contracts" ("player_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151207022427"]]
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddActiveToContracts (20151208025613)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" ADD "active" boolean DEFAULT TRUE[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151208025613"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateTeamsUsers (20151209014414)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "teams_users" ("team_id" integer, "user_id" integer)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE INDEX "index_teams_users_on_team_id" ON "teams_users" ("team_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_teams_users_on_user_id" ON "teams_users" ("user_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151209014414"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateBids (20151209020039)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (4.2ms)[0m  [1m[35mCREATE TABLE "bids" ("id" serial NOT NULL PRIMARY KEY, "player_id" integer, "team_id" integer, "number_of_years" integer, "annual_amount" decimal, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL)[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_bids_on_player_id" ON "bids" ("player_id")[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_bids_on_team_id" ON "bids" ("team_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151209020039"]]
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT[0m
+Migrating to MoveSummerFranchiseFromPlayerToContract (20151209022414)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "contracts" ADD "summer" boolean[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" ADD "franchise" boolean[0m
+  [1m[36mContract Load (0.3ms)[0m  [1m[34mSELECT "contracts".* FROM "contracts"[0m
+  [1m[35m (0.9ms)[0m  [1m[35mALTER TABLE "players" DROP COLUMN "summer"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" DROP COLUMN "franchise"[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151209022414"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddAuditColumnsToBids (20151229012005)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "is_active" boolean DEFAULT TRUE NOT NULL[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "is_leading" boolean DEFAULT FALSE NOT NULL[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "contract_id" integer[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20151229012005"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddAdminToUsers (20160113023935)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "users" ADD "is_admin" boolean DEFAULT FALSE NOT NULL[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20160113023935"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddMlbIdToPlayer (20160204182625)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" ADD "mlb_id" integer[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20160204182625"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddBbRefIdToPlayers (20161229153953)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" ADD "bbrefid" character varying[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20161229153953"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddCommentToTeam (20171221195823)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "teams" ADD "comment" character varying[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20171221195823"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddMinorLeagueId (20210311232205)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" ADD "bbref_minors" character varying[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210311232205"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateJwtDenylist (20210315143433)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.2ms)[0m  [1m[35mCREATE TABLE "jwt_denylist" ("id" serial NOT NULL PRIMARY KEY, "jti" character varying NOT NULL, "expired_at" timestamp NOT NULL)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE INDEX "index_jwt_denylist_on_jti" ON "jwt_denylist" ("jti")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210315143433"]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddJsonStatsToPlayer (20210324164643)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" ADD "bbref_stats" json[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "players" DROP COLUMN "mlb_id"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "players" DROP COLUMN "fangraphs_id"[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "players" DROP COLUMN "type"[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210324164643"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT[0m
+Migrating to FixJwtList (20210325022554)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "jwt_denylist" DROP COLUMN "expired_at"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "jwt_denylist" ADD "exp" timestamp NOT NULL[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210325022554"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateSeasons (20210504140619)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE TABLE "seasons" ("id" serial NOT NULL PRIMARY KEY, "name" character varying, "is_active" boolean, "start_date" timestamp, "end_date" timestamp, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210504140619"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateFreeAgencyPeriods (20210504140931)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "free_agency_periods" ("id" serial NOT NULL PRIMARY KEY, "is_active" boolean, "season_id" integer, "start_date" timestamp, "end_date" timestamp, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL, CONSTRAINT "fk_rails_cef7cfc3b2"
+FOREIGN KEY ("season_id")
+  REFERENCES "seasons" ("id")
+)[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE INDEX "index_free_agency_periods_on_season_id" ON "free_agency_periods" ("season_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210504140931"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddFreeAgencyPeriodToBids (20210504141041)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "free_agency_period_id" integer[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE INDEX "index_bids_on_free_agency_period_id" ON "bids" ("free_agency_period_id")[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "bids" ADD CONSTRAINT "fk_rails_ac0559fb1a"
+FOREIGN KEY ("free_agency_period_id")
+  REFERENCES "free_agency_periods" ("id")
+[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210504141041"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddBidIdToContract (20210504161322)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" ADD "bid_id" integer[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_contracts_on_bid_id" ON "contracts" ("bid_id")[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "contracts" ADD CONSTRAINT "fk_rails_083dd86a5e"
+FOREIGN KEY ("bid_id")
+  REFERENCES "bids" ("id")
+[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210504161322"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddStartEndSeasonToContract (20210505144824)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" ADD "season_start_id" integer[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_contracts_on_season_start_id" ON "contracts" ("season_start_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" ADD "season_end_id" integer[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_contracts_on_season_end_id" ON "contracts" ("season_end_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210505144824"]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddSeasonStartEndToBid (20210505182357)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "first_season_id" integer[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_bids_on_first_season_id" ON "bids" ("first_season_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "bids" ADD "last_season_id" integer[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_bids_on_last_season_id" ON "bids" ("last_season_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" RENAME COLUMN "season_start_id" TO "first_season_id"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER INDEX "index_contracts_on_season_start_id" RENAME TO "index_contracts_on_first_season_id"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "contracts" RENAME COLUMN "season_end_id" TO "last_season_id"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER INDEX "index_contracts_on_season_end_id" RENAME TO "index_contracts_on_last_season_id"[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210505182357"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddNumberOfBidsToFaPeriod (20210615125605)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "free_agency_periods" ADD "max_bids_for_team" integer DEFAULT 7[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "free_agency_periods" ADD "max_contract_length" integer DEFAULT 5[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210615125605"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateTrades (20210617004905)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (1.8ms)[0m  [1m[35mCREATE TABLE "trades" ("id" bigserial primary key, "from_team_id" integer NOT NULL, "to_team_id" integer NOT NULL, "from_cash_amount" integer DEFAULT 0 NOT NULL, "to_cash_amount" integer DEFAULT 0 NOT NULL, "status" integer DEFAULT 0 NOT NULL, "note" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210617004905"]]
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateContractsTrades (20210617005645)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "contracts_trades" ("id" bigserial primary key, "contract_id" integer, "trade_id" integer, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL)[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20210617005645"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddPreviousNextSeasonToSeason (20220310125237)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "seasons" ADD "previous_season_id" bigint[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "seasons" ADD "next_season_id" bigint[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20220310125237"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddFinishedStatusToSeason (20220310155856)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "seasons" ADD "is_finished" boolean DEFAULT FALSE[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ($1) RETURNING "version"[0m  [["version", "20220310155856"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT "ar_internal_metadata".* FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = $1 LIMIT $2[0m  [["key", "environment"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.4ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "key"[0m  [["key", "environment"], ["value", "development"], ["created_at", "2025-05-14 01:44:32.027407"], ["updated_at", "2025-05-14 01:44:32.027407"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(1914500759503835160)[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=60000ms state=ready
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=15000ms state=ready
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=15000ms service=2ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:44:37 +0000
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=15000ms service=1ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.9ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 11.1ms | Allocations: 5424)
+Completed 500 Internal Server Error in 16ms (ActiveRecord: 0.0ms | Allocations: 7484)
+
+
+  
+ActionView::Template::Error (undefined method `javascript_pack_tag' for #<ActionView::Base:0x00000000020238>
+Did you mean?  javascript_path
+               javascript_tag):
+    14: 
+    15:   <body>
+    16:   <div id="app-root"></div>
+    17:   <%= javascript_pack_tag 'application' %>
+    18:   </body>
+    19: </html>
+  
+app/views/layouts/react.html.erb:17
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=15000ms service=234ms state=completed
+source=rack-timeout id=41d6c473-f5b5-43cd-bd9d-3a7cefb566bd timeout=15000ms service=236ms state=completed
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=60000ms state=ready
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms state=ready
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=6ms state=active
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=4ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:46:51 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 2.5ms | Allocations: 89)
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=1130ms state=active
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=1252ms state=active
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=2004ms state=active
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=2002ms state=active
+  Rendered layout layouts/react.html.erb (Duration: 2032.5ms | Allocations: 78089)
+Completed 200 OK in 2043ms (Views: 2038.2ms | ActiveRecord: 0.0ms | Allocations: 78975)
+
+
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=2094ms state=completed
+source=rack-timeout id=e6bc737c-dd38-4daa-9a63-9341692c0cbb timeout=15000ms service=2097ms state=completed
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=60000ms state=ready
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=60000ms service=1ms state=active
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=15000ms service=1ms state=ready
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=15000ms service=2ms state=active
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=15000ms service=37ms state=completed
+source=rack-timeout id=f446ccb0-1e3e-47d0-8327-00210a874cc9 timeout=15000ms service=38ms state=completed
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=60000ms state=ready
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=15000ms state=ready
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=15000ms service=0ms state=active
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=15000ms service=1ms state=active
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=15000ms service=13ms state=completed
+source=rack-timeout id=8975a532-c852-4105-be5d-d007ab492ac5 timeout=15000ms service=13ms state=completed
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=60000ms state=ready
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=15000ms state=ready
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=15000ms service=2ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:50:55 +0000
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=15000ms service=4ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.9ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 94.8ms | Allocations: 16743)
+Completed 200 OK in 101ms (Views: 98.2ms | ActiveRecord: 0.0ms | Allocations: 18856)
+
+
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=15000ms service=211ms state=completed
+source=rack-timeout id=94838a90-697e-4039-8ff9-e101a96d81a4 timeout=15000ms service=213ms state=completed
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=60000ms state=ready
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=15000ms state=ready
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=15000ms service=1ms state=active
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=15000ms service=3ms state=active
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=15000ms service=16ms state=completed
+source=rack-timeout id=d2e8edf6-07f2-4eca-86b7-8e018cd639cb timeout=15000ms service=17ms state=completed
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=60000ms state=ready
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=15000ms service=1ms state=ready
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=15000ms service=1ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:50:57 +0000
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=15000ms service=7ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.1ms | Allocations: 4)
+  Rendered layout layouts/react.html.erb (Duration: 7.3ms | Allocations: 1366)
+Completed 200 OK in 9ms (Views: 8.3ms | ActiveRecord: 0.0ms | Allocations: 1605)
+
+
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=15000ms service=32ms state=completed
+source=rack-timeout id=9e24e139-8afb-4a6b-bc41-956a4b747c99 timeout=15000ms service=34ms state=completed
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=60000ms state=ready
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=15000ms state=ready
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=15000ms service=1ms state=active
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=15000ms service=2ms state=active
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=15000ms service=14ms state=completed
+source=rack-timeout id=2f03d511-f5fe-4948-b738-161150091133 timeout=15000ms service=15ms state=completed
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=60000ms state=ready
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=60000ms service=2ms state=active
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=15000ms service=2ms state=ready
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=15000ms service=7ms state=active
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=15000ms service=33ms state=completed
+source=rack-timeout id=367e18b1-3c77-4444-8ff3-d3306a1a6a0c timeout=15000ms service=36ms state=completed
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=60000ms state=ready
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=15000ms service=2ms state=ready
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=15000ms service=2ms state=ready
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=15000ms service=6ms state=active
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=15000ms service=38ms state=completed
+source=rack-timeout id=1f5872cc-4e80-48da-8cd0-f90756d04bd3 timeout=15000ms service=42ms state=completed
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=60000ms state=ready
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=15000ms service=0ms state=ready
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=60000ms service=0ms state=ready
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=15000ms service=2ms state=active
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=15000ms service=10ms state=completed
+source=rack-timeout id=001db009-f2ad-4047-a00c-132d3fbeebd1 timeout=15000ms service=11ms state=completed
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=60000ms state=ready
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=15000ms state=ready
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=15000ms service=9ms state=active
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=15000ms service=5ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:53:09 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.7ms | Allocations: 4)
+  Rendered layout layouts/react.html.erb (Duration: 8.5ms | Allocations: 1365)
+Completed 200 OK in 11ms (Views: 9.8ms | ActiveRecord: 0.0ms | Allocations: 1599)
+
+
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=15000ms service=48ms state=completed
+source=rack-timeout id=a41e1c82-fbec-48b2-a20f-61a62ce229d1 timeout=15000ms service=52ms state=completed
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=60000ms state=ready
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=15000ms service=1ms state=active
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=15000ms state=ready
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=15000ms service=3ms state=active
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=15000ms service=16ms state=completed
+source=rack-timeout id=aad49041-3cf1-400b-9951-e39ebb90f604 timeout=15000ms service=17ms state=completed
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=60000ms state=ready
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=15000ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:53:25 +0000
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=15000ms service=2ms state=active
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=15000ms service=2ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 1.2ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 102.5ms | Allocations: 16834)
+Completed 200 OK in 108ms (Views: 105.6ms | ActiveRecord: 0.0ms | Allocations: 18947)
+
+
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=15000ms service=190ms state=completed
+source=rack-timeout id=b19e3855-267b-4537-b6b0-85c70d401334 timeout=15000ms service=191ms state=completed
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=60000ms state=ready
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=15000ms state=ready
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=15000ms service=1ms state=active
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=15000ms service=2ms state=active
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=15000ms service=18ms state=completed
+source=rack-timeout id=c2842239-2101-4f56-93db-1a7c7d750f98 timeout=15000ms service=19ms state=completed
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=60000ms state=ready
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=15000ms service=1ms state=ready
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=15000ms service=1ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:53:27 +0000
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=15000ms service=4ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.1ms | Allocations: 4)
+  Rendered layout layouts/react.html.erb (Duration: 5.6ms | Allocations: 1367)
+Completed 200 OK in 8ms (Views: 7.1ms | ActiveRecord: 0.0ms | Allocations: 1606)
+
+
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=15000ms service=30ms state=completed
+source=rack-timeout id=7de7b4f0-2c28-44d2-ae09-570df68b6c74 timeout=15000ms service=32ms state=completed
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=60000ms state=ready
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=15000ms service=0ms state=active
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=15000ms service=0ms state=active
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=15000ms service=2ms state=active
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=15000ms service=12ms state=completed
+source=rack-timeout id=82403e73-c8e2-4259-b73c-edde56f03947 timeout=15000ms service=12ms state=completed
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=60000ms state=ready
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms state=ready
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=2ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 01:57:35 +0000
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=1ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.8ms | Allocations: 312)
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=1002ms state=active
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=1002ms state=active
+  Rendered layout layouts/react.html.erb (Duration: 1550.2ms | Allocations: 81078)
+Completed 500 Internal Server Error in 1555ms (ActiveRecord: 0.0ms | Allocations: 83145)
+
+
+  
+ActionView::Template::Error (Asset `application.js` was not declared to be precompiled in production.
+Declare links to your assets in `app/assets/config/manifest.js`.
+
+  //= link application.js
+
+and restart your server):
+    14: 
+    15:   <body>
+    16:   <div id="app-root"></div>
+    17:   <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    18:   </body>
+    19: </html>
+  
+app/views/layouts/react.html.erb:17
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=1802ms state=completed
+source=rack-timeout id=db4548dc-4977-49be-bd81-c1c33d3add3f timeout=15000ms service=1804ms state=completed
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=60000ms state=ready
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=15000ms state=ready
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=15000ms service=2ms state=active
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=15000ms service=2ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-14 02:00:18 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 1.0ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 124.2ms | Allocations: 21083)
+Completed 500 Internal Server Error in 131ms (ActiveRecord: 0.0ms | Allocations: 23136)
+
+
+  
+LoadError (cannot load such file -- sassc):
+  
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `require'
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `block in require'
+activesupport (6.1.7) lib/active_support/dependencies.rb:299:in `load_dependency'
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `require'
+sprockets (4.1.1) lib/sprockets/autoload/sassc.rb:2:in `<top (required)>'
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `require'
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `block in require'
+activesupport (6.1.7) lib/active_support/dependencies.rb:299:in `load_dependency'
+activesupport (6.1.7) lib/active_support/dependencies.rb:332:in `require'
+sprockets (4.1.1) lib/sprockets/sassc_processor.rb:42:in `initialize'
+sprockets (4.1.1) lib/sprockets/sassc_processor.rb:27:in `new'
+sprockets (4.1.1) lib/sprockets/sassc_processor.rb:27:in `instance'
+sprockets (4.1.1) lib/sprockets/sassc_processor.rb:31:in `call'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:84:in `call_processor'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:66:in `block in call_processors'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `reverse_each'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `call_processors'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:22:in `block in <class:CompositeProcessor>'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:33:in `call'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:84:in `call_processor'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:66:in `block in call_processors'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `reverse_each'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `call_processors'
+sprockets (4.1.1) lib/sprockets/loader.rb:182:in `load_from_unloaded'
+sprockets (4.1.1) lib/sprockets/loader.rb:59:in `block in load'
+sprockets (4.1.1) lib/sprockets/loader.rb:337:in `fetch_asset_from_dependency_cache'
+sprockets (4.1.1) lib/sprockets/loader.rb:43:in `load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `block in load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `fetch'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `load'
+sprockets (4.1.1) lib/sprockets/bundle.rb:27:in `call'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:84:in `call_processor'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:66:in `block in call_processors'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `reverse_each'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `call_processors'
+sprockets (4.1.1) lib/sprockets/loader.rb:182:in `load_from_unloaded'
+sprockets (4.1.1) lib/sprockets/loader.rb:59:in `block in load'
+sprockets (4.1.1) lib/sprockets/loader.rb:337:in `fetch_asset_from_dependency_cache'
+sprockets (4.1.1) lib/sprockets/loader.rb:43:in `load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `block in load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `fetch'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `load'
+sprockets (4.1.1) lib/sprockets/bundle.rb:32:in `block in call'
+/usr/local/lib/ruby/3.1.0/set.rb:511:in `each_key'
+/usr/local/lib/ruby/3.1.0/set.rb:511:in `each'
+sprockets (4.1.1) lib/sprockets/bundle.rb:31:in `call'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:84:in `call_processor'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:66:in `block in call_processors'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `reverse_each'
+sprockets (4.1.1) lib/sprockets/processor_utils.rb:65:in `call_processors'
+sprockets (4.1.1) lib/sprockets/loader.rb:182:in `load_from_unloaded'
+sprockets (4.1.1) lib/sprockets/loader.rb:59:in `block in load'
+sprockets (4.1.1) lib/sprockets/loader.rb:337:in `fetch_asset_from_dependency_cache'
+sprockets (4.1.1) lib/sprockets/loader.rb:43:in `load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `block in load'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `fetch'
+sprockets (4.1.1) lib/sprockets/cached_environment.rb:44:in `load'
+sprockets (4.1.1) lib/sprockets/base.rb:81:in `find_asset'
+sprockets (4.1.1) lib/sprockets/base.rb:88:in `find_all_linked_assets'
+sprockets (4.1.1) lib/sprockets/manifest.rb:125:in `each'
+sprockets (4.1.1) lib/sprockets/manifest.rb:125:in `to_a'
+sprockets (4.1.1) lib/sprockets/manifest.rb:125:in `block (2 levels) in find'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/safe_task_executor.rb:24:in `block in execute'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/synchronization/mutex_lockable_object.rb:47:in `block in synchronize'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/synchronization/mutex_lockable_object.rb:47:in `synchronize'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/synchronization/mutex_lockable_object.rb:47:in `synchronize'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/safe_task_executor.rb:22:in `execute'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/promise.rb:564:in `block in realize'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:352:in `run_task'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:343:in `block (3 levels) in create_worker'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:334:in `loop'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:334:in `block (2 levels) in create_worker'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:333:in `catch'
+concurrent-ruby (1.1.10) lib/concurrent-ruby/concurrent/executor/ruby_thread_pool_executor.rb:333:in `block in create_worker'
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=15000ms service=332ms state=completed
+source=rack-timeout id=f87777a5-18da-4d34-a0c4-c04d4eeb771b timeout=15000ms service=334ms state=completed

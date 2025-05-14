@@ -2,14 +2,6 @@ services:
   postgres:
     env_file: .env.production
 
-  mysql:
-    env_file: .env.production
-
-  blog:
-    env_file: .env.production
-    ports:
-      - "2368:2368"
-
   players:
     build:
       context: ./players-public
