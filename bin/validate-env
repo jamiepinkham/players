@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Extract OP_CONNECT_HOST and OP_CONNECT_TOKEN from the template and export them
+export OP_CONNECT_HOST=$(grep '^OP_CONNECT_HOST=' .env.template | cut -d '=' -f2-)
+export OP_CONNECT_TOKEN=$(grep '^OP_CONNECT_TOKEN=' .env.template | cut -d '=' -f2-)
+
+echo $OP_CONNECT_HOST
+echo $OP_CONNECT_TOKEN
+
+
 TEMPLATE_FILE="${1:-.env.template}"
 
 if [[ ! -f "$TEMPLATE_FILE" ]]; then

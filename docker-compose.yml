@@ -23,9 +23,6 @@ services:
 
   db:
     image: postgres:13
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
     volumes:
       - pgdata:/var/lib/postgresql/data
 
