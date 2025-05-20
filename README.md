@@ -1,4 +1,5 @@
 ```
+cp .env.template .env //fill in values
 docker compose up --build
 ```
 
@@ -35,3 +36,6 @@ web-1     | 09:30:13 web.1  | Use Ctrl-C to stop
 assets-1  | Sass is watching for changes. Press Ctrl-C to stop.
 assets-1  | 
 ```
+or if you have access to https://connect-api.cuscus-morpho.ts.net use
+
+`bin/dev`
