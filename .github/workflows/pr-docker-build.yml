@@ -1,21 +1,51 @@
-name: PR Docker Compose Build
+name: Docker Build PR Feedback
 
 on:
   pull_request:
     branches:
-      - main  # or your default branch
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  docker-compose-build:
-    name: Docker Compose Build Check
+  docker-build:
+    name: Docker Compose Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build all services via Docker Compose
-        run: docker compose -f docker-compose.yml build
+      - name: Run docker compose build and capture logs
+        id: build
+        run: |
+          set -o pipefail
+          docker compose -f docker-compose.yml build 2>&1 | tee docker-build.log || echo "build failed" >> docker-build.log
+
+          if grep -q "build failed" docker-build.log; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract and escape last 20 lines of log
+        if: steps.build.outputs.status == 'failure'
+        id: log
+        run: |
+          tail -n 20 docker-build.log | sed 's/`/\\`/g' > docker-build-truncated.log
+          echo 'log<<EOF' >> $GITHUB_OUTPUT
+          cat docker-build-truncated.log >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Post PR comment
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: docker-build-status
+          message: |
+            ${{ steps.build.outputs.status == 'success' && '✅ Docker build succeeded!' || '❌ Docker build failed. Showing last 50 lines of the build log:\n\n```\n' }}${{ steps.log.outputs.log }}${{ steps.build.outputs.status == 'failure' && '\n```' || '' }}

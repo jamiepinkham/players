@@ -1,5 +1,6 @@
 ### PR Checks
 * docker build
+* linear history (squash or rebase)
 
 ### Getting Started
 1. Clone the repo
