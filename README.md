@@ -1,3 +1,6 @@
+### PR Checks
+* docker build
+
 ### Getting Started
 1. Clone the repo
 2. [Ensure op cli is installed](https://developer.1password.com/docs/cli/get-started/)
