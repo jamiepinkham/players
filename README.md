@@ -370,13 +370,12 @@ This script pulls a backup of your Heroku Postgres database and restores it into
 * [pg-container-name]: (Optional) The Docker container name for Postgres. Defaults to db.
 #### What It Does
 1. Fetches Postgres credentials from 1Password:
-   - Reads from op://bmpl/secrets/postgres-dev/... or op://bmpl/secrets/postgres-production/... based on the environment.
 2. Ensures Postgres container is running:
    - Starts it via Docker Compose if not already running.
-3. Waits until Postgres is ready via pg_isready.
+3. Waits until Postgres is ready via `pg_isready`.
 4. Captures and downloads the latest Heroku Postgres backup.
 5. Drops and recreates your local Postgres database.
-6. Restores the downloaded backup into the local database using pg_restore.
+6. Restores the downloaded backup into the local database using `pg_restore`.
 #### 🔐 Required 1Password Secrets
 Stored in your 1Password vault under bmpl:
 * For dev:
