@@ -1,0 +1,53 @@
+# Rails defaults
+rails/log/*
+rails/tmp/*
+!rails/log/.keep
+!rails/tmp/.keep
+rails/.bundle/
+rails/db/*.sqlite3
+rails/db/*.sqlite3-journal
+rails/public/packs
+rails/public/assets/*
+!rails/public/assets/.keep
+rails/public/packs-test
+rails/public/system
+rails/public/uploads
+rails/.byebug_history
+rails/storage/*
+!rails/storage/.keep
+rails/node_modules
+rails/.yarn/cache
+rails/.yarn/unplugged
+rails/.yarn/install-state.gz
+rails/.yarn/build-state.yml
+rails/.yarn/patches
+rails/.yarn/releases
+rails/.yarn/versions
+/rails/tmp/*
+rails/node_modules
+
+# Ignore master key if using credentials
+rails/config/master.key
+
+# dotenv files
+.env
+.env.*
+
+# Yarn and lock files
+rails/yarn-error.log
+
+# macOS and IDE cruft
+.DS_Store
+.idea/
+/.vscode/
+
+# Docker
+*.pid
+*.sock
+docker-compose.override.yml
+
+# Optional: ignore system test screenshots
+/tmp/screenshots/*
+
+# Optional: if using foreman or Procfile-based setups
+.procfile.dev

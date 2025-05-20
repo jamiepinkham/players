@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title><%= content_for?(:title) ? yield(:title) : "BMPL" %></title>
+    <%= csrf_meta_tags %>
+    <link rel="stylesheet" href="/assets/application.css">
+    <script src="/assets/application.js" defer></script>
+  </head>
+
+  <body>
+    <%= render partial: 'shared/topbar' %>
+    <div class="grid-x grid-padding-x">
+   	    <div class="cell">
+   	      <p class="notice"><%= notice %></p>
+   	    </div>
+   	    <div class="cell">
+   	      <p class="alert"><%= alert %></p>
+   	    </div>
+
+    <%= yield %>
+</div>
+  </body>
+</html>

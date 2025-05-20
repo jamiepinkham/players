@@ -1,0 +1,13 @@
+services:
+  postgres:
+    env_file: .env.production
+
+  players:
+    build:
+      context: ./players-public
+    command: foreman start -f Procfile
+    env_file: .env.production
+    volumes:
+      - players-public:/app/public
+    ports:
+      - "4000:3000"

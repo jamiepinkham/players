@@ -1,0 +1,34 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    volumes:
+      - ./rails:/app
+      - ./rails/app/assets/builds:/app/app/assets/builds
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  assets:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.assets
+    volumes:
+      - ./rails:/app
+      - ./rails/app/assets/builds:/app/app/assets/builds
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+  assets:
