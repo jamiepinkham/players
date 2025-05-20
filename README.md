@@ -66,8 +66,8 @@ db:
   volumes:
     - pgdata:/var/lib/postgresql/data
 ```
-Stores database data in a named volume (pgdata) to persist across runs
-Credentials and DB config should be managed via environment variables (POSTGRES_USER, etc.)
+* Stores database data in a named volume (pgdata) to persist across runs
+* Credentials and DB config should be managed via environment variables (POSTGRES_USER, etc.)
 
 ### 🗃️ Volumes
 
