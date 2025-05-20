@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENVIRONMENT="${1:-dev}"
+shift || true  # shift off the env argument so "$@" contains docker-compose args
+
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
+  echo "❌ Invalid environment: $ENVIRONMENT"
+  echo "Usage: $0 [dev|production] [docker-compose args]"
+  exit 1
+fi
+
+# File paths
+TEMPLATE_FILE=".env${ENVIRONMENT:+.${ENVIRONMENT}}.template"
+ENV_FILE=".env${ENVIRONMENT:+.${ENVIRONMENT}}"
+COMPOSE_FILE="docker-compose.${ENVIRONMENT}.yml"
+[[ -f "$COMPOSE_FILE" ]] || COMPOSE_FILE="docker-compose.yml"
+
+# Logging
+LOG_DIR="logs"
+LOG_FILE="${LOG_DIR}/${ENVIRONMENT}_start_$(date +%Y%m%d_%H%M%S).log"
+mkdir -p "$LOG_DIR"
+
+echo "🔧 Environment: $ENVIRONMENT"
+echo "📄 Using env template: $TEMPLATE_FILE"
+echo "📦 Using compose file: $COMPOSE_FILE"
+echo "📂 Logging to: $LOG_FILE"
+
+# Ensure `op` CLI is available
+if ! command -v op >/dev/null 2>&1; then
+  echo "❌ 1Password CLI (op) is not installed"
+  exit 1
+fi
+
+# Read OP_CONNECT secrets securely
+export OP_CONNECT_HOST=$(op read "op://bmpl/secrets/host")
+export OP_CONNECT_TOKEN=$(op read "op://bmpl/secrets/token")
+
+echo "🔐 Injecting secrets from 1Password..."
+if [[ ! -x bin/validate-env ]]; then
+  echo "❌ bin/validate-env not found or not executable"
+  exit 1
+fi
+
+bin/validate-env "$TEMPLATE_FILE"
+op inject -i "$TEMPLATE_FILE" -o "$ENV_FILE"
+
+# Cleanup injected env file on exit
+trap "rm -f \"$ENV_FILE\"" EXIT
+
+echo "🚀 Starting $ENVIRONMENT stack via nohup..."
+echo "🧪 docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE up $*" >> "$LOG_FILE"
+nohup docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up "$@" > "$LOG_FILE" 2>&1 &
+
+echo "✅ $ENVIRONMENT stack launched in background."
+echo "📄 To monitor: tail -f $LOG_FILE"

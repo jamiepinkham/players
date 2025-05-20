@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENVIRONMENT="${1:-dev}"
+shift || true  # shift off env so remaining args are passed to start.sh
+
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
+  echo "❌ Invalid environment: $ENVIRONMENT"
+  echo "Usage: $0 [dev|production] [docker-compose args]"
+  exit 1
+fi
+
+echo "🔄 Restarting $ENVIRONMENT stack..."
+
+./stop.sh "$ENVIRONMENT"
+./start.sh "$ENVIRONMENT" "$@"
+
+echo "✅ $ENVIRONMENT stack restarted."

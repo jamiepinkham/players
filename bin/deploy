@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_PATH="${1:-}"
+ENVIRONMENT="${2:-dev}"
+
+if [[ -z "$APP_PATH" || -z "$ENVIRONMENT" ]]; then
+  echo "❌ Usage: $0 /path/to/app [dev|production]"
+  exit 1
+fi
+
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
+  echo "❌ Invalid environment: $ENVIRONMENT"
+  exit 1
+fi
+
+TEMPLATE_FILE="$APP_PATH/.env.${ENVIRONMENT}.template"
+ENV_FILE="$APP_PATH/.env.${ENVIRONMENT}"
+REPO="jamiepinkham/players"  # <-- UPDATE THIS
+
+echo "📁 Deploying to: $APP_PATH"
+mkdir -p "$APP_PATH"
+cd "$APP_PATH"
+
+# Read OP_CONNECT secrets securely — NOT from .env.template
+export OP_CONNECT_HOST=$(op read "op://bmpl/secrets/host")
+export OP_CONNECT_TOKEN=$(op read "op://bmpl/secrets/token")
+
+# Inject application secrets (excluding OP secrets)
+echo "🔐 Injecting secrets from 1Password..."
+op inject -i "$TEMPLATE_FILE" -o "$ENV_FILE"
+trap 'rm -f "$ENV_FILE"' EXIT
+
+# Get GitHub PAT from injected .env
+GITHUB_PAT=$(op read "op://bmpl/secrets/github/deploy_token")
+REPO_URL="https://${GITHUB_PAT}@github.com/${REPO}.git"
+
+# Clone or pull
+if [[ ! -d ".git" ]]; then
+  echo "📦 Cloning $REPO..."
+  git clone "$REPO_URL" .
+else
+  echo "🔄 Pulling latest changes..."
+  git pull origin main
+fi
+
+# Make sure scripts are executable
+chmod +x start.sh stop.sh restart.sh || true
+
+# Restart
+./restart.sh "$ENVIRONMENT"
+
+echo "✅ Deployment complete for $ENVIRONMENT."
