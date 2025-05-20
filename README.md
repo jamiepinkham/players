@@ -354,3 +354,40 @@ GITHUB_PAT=ghp_exampletokenfortestingonly
 ```
 
 ⚠️ Do not use these values in production. They are insecure and intended for local use only.
+
+### 🛠 `bin/pull-from-heroku.sh`
+
+This script pulls a backup of your Heroku Postgres database and restores it into your local Dockerized Postgres container. It supports multiple environments by reading credentials from 1Password based on the environment (`dev` or `production`).
+
+---
+
+#### 📜 Usage
+
+`bin/pull-from-heroku.sh <heroku-app-name> <local-db-name> [environment=dev] [pg-container-name=db]`
+* `<heroku-app-name>`: (Required) The name of your Heroku app.
+* `<local-db-name>`: (Required) The name of your local Postgres database.
+* `[environment]`: (Optional) dev or production. Defaults to dev.
+* [pg-container-name]: (Optional) The Docker container name for Postgres. Defaults to db.
+#### What It Does
+1. Fetches Postgres credentials from 1Password:
+   - Reads from op://bmpl/secrets/postgres-dev/... or op://bmpl/secrets/postgres-production/... based on the environment.
+2. Ensures Postgres container is running:
+   - Starts it via Docker Compose if not already running.
+3. Waits until Postgres is ready via pg_isready.
+4. Captures and downloads the latest Heroku Postgres backup.
+5. Drops and recreates your local Postgres database.
+6. Restores the downloaded backup into the local database using pg_restore.
+#### 🔐 Required 1Password Secrets
+Stored in your 1Password vault under bmpl:
+* For dev:
+   - `op://bmpl/secrets/postgres-dev/username`
+   - `op://bmpl/secrets/postgres-dev/password`
+* For production:
+   - `op://bmpl/secrets/postgres-production/username`
+   - `op://bmpl/secrets/postgres-production/password`
+#### 🧪 Example
+```
+bin/pull-from-heroku.sh myapp-staging players_development
+bin/pull-from-heroku.sh myapp-prod players_production production
+bin/pull-from-heroku.sh myapp-prod players_production production pg_container_name
+```
