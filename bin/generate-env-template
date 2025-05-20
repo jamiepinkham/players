@@ -17,6 +17,4 @@ DATABASE_USER=postgres
 DATABASE_PASSWORD=password
 DATABASE_NAME=players_${ENV}
 
-# GitHub
-GITHUB_PAT=your-pat-here
 EOF
