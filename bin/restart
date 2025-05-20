@@ -2,17 +2,31 @@
 set -euo pipefail
 
 ENVIRONMENT="${1:-dev}"
-shift || true  # shift off env so remaining args are passed to start.sh
+shift || true
+
+# Default: foreground
+BACKGROUND=false
+
+# Check for --background flag
+if [[ "${1:-}" == "--background" ]]; then
+  BACKGROUND=true
+  shift
+fi
 
 if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
   echo "❌ Invalid environment: $ENVIRONMENT"
-  echo "Usage: $0 [dev|production] [docker-compose args]"
+  echo "Usage: $0 [dev|production] [--background] [docker-compose args...]"
   exit 1
 fi
 
 echo "🔄 Restarting $ENVIRONMENT stack..."
 
-./stop.sh "$ENVIRONMENT"
-./start.sh "$ENVIRONMENT" "$@"
+bin/stop "$ENVIRONMENT"
+
+if [[ "$BACKGROUND" == true ]]; then
+  bin/start.sh "$ENVIRONMENT" --background "$@"
+else
+  bin/start.sh "$ENVIRONMENT" "$@"
+fi
 
 echo "✅ $ENVIRONMENT stack restarted."

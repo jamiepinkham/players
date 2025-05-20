@@ -2,11 +2,20 @@
 set -euo pipefail
 
 ENVIRONMENT="${1:-dev}"
-shift || true  # shift off the env argument so "$@" contains docker-compose args
+shift || true
+
+# Default: foreground mode
+BACKGROUND=false
+
+# Check for --background flag
+if [[ "${1:-}" == "--background" ]]; then
+  BACKGROUND=true
+  shift
+fi
 
 if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
   echo "❌ Invalid environment: $ENVIRONMENT"
-  echo "Usage: $0 [dev|production] [docker-compose args]"
+  echo "Usage: $0 [dev|production] [--background] [docker-compose args...]"
   exit 1
 fi
 
@@ -18,23 +27,23 @@ COMPOSE_FILE="docker-compose.${ENVIRONMENT}.yml"
 
 # Logging
 LOG_DIR="logs"
-LOG_FILE="${LOG_DIR}/${ENVIRONMENT}_start_$(date +%Y%m%d_%H%M%S).log"
 mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/${ENVIRONMENT}_start_$(date +%Y%m%d_%H%M%S).log"
 
 echo "🔧 Environment: $ENVIRONMENT"
 echo "📄 Using env template: $TEMPLATE_FILE"
 echo "📦 Using compose file: $COMPOSE_FILE"
 echo "📂 Logging to: $LOG_FILE"
 
-# Ensure `op` CLI is available
+# Ensure op CLI is available
 if ! command -v op >/dev/null 2>&1; then
   echo "❌ 1Password CLI (op) is not installed"
   exit 1
 fi
 
-# Read OP_CONNECT secrets securely
-export OP_CONNECT_HOST=$(op read "op://bmpl/secrets/host")
-export OP_CONNECT_TOKEN=$(op read "op://bmpl/secrets/token")
+source "$(dirname "$0")/secrets-helper"
+op_test || exit 1
+
 
 echo "🔐 Injecting secrets from 1Password..."
 if [[ ! -x bin/validate-env ]]; then
@@ -45,12 +54,15 @@ fi
 bin/validate-env "$TEMPLATE_FILE"
 op inject -i "$TEMPLATE_FILE" -o "$ENV_FILE"
 
-# Cleanup injected env file on exit
-trap "rm -f \"$ENV_FILE\"" EXIT
-
-echo "🚀 Starting $ENVIRONMENT stack via nohup..."
-echo "🧪 docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE up $*" >> "$LOG_FILE"
-nohup docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up "$@" > "$LOG_FILE" 2>&1 &
-
-echo "✅ $ENVIRONMENT stack launched in background."
-echo "📄 To monitor: tail -f $LOG_FILE"
+# Decide whether to clean up the env file
+if [[ "$BACKGROUND" == true ]]; then
+  echo "🚀 Starting $ENVIRONMENT stack in background via nohup..."
+  echo "🧪 docker-compose -f $COMPOSE_FILE --env-file $ENV_FILE up $*" >> "$LOG_FILE"
+  nohup docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up "$@" > "$LOG_FILE" 2>&1 &
+  echo "✅ $ENVIRONMENT stack launched in background."
+  echo "📄 To monitor: tail -f $LOG_FILE"
+else
+  echo "🚀 Starting $ENVIRONMENT stack in foreground..."
+  trap "rm -f \"$ENV_FILE\"" EXIT
+  docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up "$@"
+fi

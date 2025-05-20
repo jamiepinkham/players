@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Read OP_CONNECT secrets securely — NOT from .env.template
-export OP_CONNECT_HOST=$(op read "op://bmpl/secrets/host")
-export OP_CONNECT_TOKEN=$(op read "op://bmpl/secrets/token")
+# Securely export OP Connect vars
+source "$(dirname "$0")/secrets-helper"
+op_test || exit 1
+
+echo "Using OP_CONNECT_HOST: $OP_CONNECT_HOST"
 
 
 TEMPLATE_FILE="${1:-.env.template}"
