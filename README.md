@@ -14,7 +14,7 @@
 ├── docker-compose.yml
 ├── docker-compose.production.yml
 ├── .env.dev.template
-├── .env.dev.production.template
+├── .env.production.template
 ├── .dockerignore //supposed to skip node_modules, it doesn't
 ├── Dockerfile.web
 ├── Dockerfile.assets
