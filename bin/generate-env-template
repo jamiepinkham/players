@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENV="${1:-dev}"
+
+cat <<EOF
+# Environment: $ENV
+
+# Rails
+RAILS_ENV=$ENV
+SECRET_KEY_BASE=changeme-$ENV
+
+# Database
+DATABASE_HOST=db
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=password
+DATABASE_NAME=players_${ENV}
+
+# GitHub
+GITHUB_PAT=your-pat-here
+EOF

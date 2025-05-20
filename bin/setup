@@ -74,11 +74,13 @@ fi
 mkdir -p logs
 echo "📁 Ensured logs/ directory exists."
 
-# 4. Validate env templates exist
+# 4. Validate env templates exist or generate them
 for env in dev production; do
   TEMPLATE=".env.${env}.template"
   if [[ ! -f "$TEMPLATE" ]]; then
-    echo "⚠️  Missing $TEMPLATE"
+    echo "⚠️  Missing $TEMPLATE — generating it..."
+    bin/generate-env-template "$env" > "$TEMPLATE"
+    echo "✅ Generated $TEMPLATE"
   else
     echo "✅ Found $TEMPLATE"
   fi
