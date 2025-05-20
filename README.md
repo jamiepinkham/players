@@ -1,7 +1,9 @@
 ### Getting Started
 1. Clone the repo
-2. Ensure op cli is installed
-3. Have op url and token handy
+2. [Ensure op cli is installed](https://developer.1password.com/docs/cli/get-started/)
+3. Have secrets server url and token handy
+   - `OP_CONNECT_HOST`
+   - `OP_CONNECT_TOKEN`
 4. `bin/setup`
 5. `bin/run`
 6. 🤞
