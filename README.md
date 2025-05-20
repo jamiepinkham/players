@@ -363,11 +363,11 @@ This script pulls a backup of your Heroku Postgres database and restores it into
 
 #### 📜 Usage
 
-`bin/pull-from-heroku.sh <heroku-app-name> <local-db-name> [environment=dev] [pg-container-name=db]`
+`bin/seed_from_heroku` <heroku-app-name> <local-db-name> [environment=dev] [pg-container-name=db]`
 * `<heroku-app-name>`: (Required) The name of your Heroku app.
 * `<local-db-name>`: (Required) The name of your local Postgres database.
 * `[environment]`: (Optional) dev or production. Defaults to dev.
-* [pg-container-name]: (Optional) The Docker container name for Postgres. Defaults to db.
+* `[pg-container-name]`: (Optional) The Docker container name for Postgres. Defaults to db.
 #### What It Does
 1. Fetches Postgres credentials from 1Password:
 2. Ensures Postgres container is running:
