@@ -8,12 +8,12 @@
        margin: 0;
      }
    </style>
-   <link rel="stylesheet" href="https://code.cdn.mozilla.net/fonts/fira.css">
+    <link rel="stylesheet" href="https://code.cdn.mozilla.net/fonts/fira.css">
     <title><%= content_for?(:title) ? yield(:title) : "BMPL" %></title>
   </head>
 
   <body>
   <div id="app-root"></div>
-  <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <script src="/assets/application.js" defer></script>
   </body>
 </html>

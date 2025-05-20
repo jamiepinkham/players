@@ -14,5 +14,7 @@ Rails.application.routes.draw do
     }
   
   root 'static#index'
-  get '*path', to: 'static#index'
+  get '*path', to: 'static#index', constraints: lambda { |req|
+    !req.path.start_with?('/assets', '/images', '/packs')
+  }
 end

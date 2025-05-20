@@ -1,0 +1,42 @@
+FROM node:18-slim
+
+# Install curl for Dart Sass
+RUN apt-get update && apt-get install -y curl
+
+# Install Dart Sass (x86 version; use arm64 if needed)
+RUN curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-x64.tar.gz \
+  | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass
+
+WORKDIR /app
+
+# Copy package files and install deps
+COPY rails/package.json rails/yarn.lock ./
+RUN yarn install
+
+# Add esbuild for dev
+RUN yarn add --dev esbuild
+
+# Make sure yarn binaries are available in PATH
+ENV PATH="./node_modules/.bin:$PATH"
+
+# Copy the full app (excluding node_modules via .dockerignore)
+COPY rails/ ./
+
+# Start both asset builders
+CMD sh -c "esbuild app/javascript/application.jsx \
+  --bundle \
+  --sourcemap \
+  --outdir=public/assets \
+  --loader:.js=jsx \
+  --loader:.jsx=jsx \
+  --loader:.woff2=file \
+  --loader:.woff=file \
+  --loader:.ttf=file \
+  --loader:.eot=file \
+  --loader:.svg=file \
+  --loader:.jpg=file \
+  --asset-names=images/[name]-[hash] \
+  --watch=forever \
+  & sass app/assets/stylesheets/application.scss:public/assets/application.css --load-path=node_modules --watch"
+
+

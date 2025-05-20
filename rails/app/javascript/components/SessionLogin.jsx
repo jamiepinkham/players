@@ -21,6 +21,7 @@ import { CircleQuestion, Lock, MailOption } from "grommet-icons";
 
 import sliding from "../images/sliding.jpg";
 
+
 function SessionLogin() {
   const auth = useAuth();
   const [hasError, setHasError] = useState(false);
@@ -45,10 +46,13 @@ function SessionLogin() {
     return (
       <Box
         align="center"
-        background={`url(${sliding})`}
+        background={{
+          image: `url(${sliding})`,
+          size: 'cover',
+          position: 'center'
+        }}
         round="small"
-        pad="medium"
-      >
+        pad="medium">
         <Card pad="medium" background="light-5">
           <CardHeader pad="medium">Please sign in to continue</CardHeader>
           <CardBody>

@@ -1,16 +1,1 @@
 web: bundle exec rails server -b 0.0.0.0 -p 3000
-
-esbuild: yarn esbuild app/javascript/application.jsx --bundle --sourcemap --outdir=app/assets/builds \
-  --loader:.js=jsx \
-  --loader:.jsx=jsx \
-  --loader:.woff2=file \
-  --loader:.woff=file \
-  --loader:.ttf=file \
-  --loader:.eot=file \
-  --loader:.svg=file \
-  --loader:.jpg=file \
-  --watch
-
-sass: sass app/assets/stylesheets/application.scss \
-  --load-path=node_modules \
-  --watch
