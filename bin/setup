@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔧 Running initial setup..."
+
+# 1. Ensure required CLI tools are available
+REQUIRED_TOOLS=(docker-compose git op)
+
+# Detect OS
+OS="$(uname -s)"
+
+echo "🔍 Checking for required tools..."
+for tool in "${REQUIRED_TOOLS[@]}"; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "❌ '$tool' is not installed."
+
+    case "$OS" in
+      Darwin)
+        echo "💡 Try: brew install $tool"
+        ;;
+      Linux)
+        if [ -f /etc/debian_version ]; then
+          case "$tool" in
+            docker-compose)
+              echo "💡 Try: sudo apt-get install docker-compose-plugin"
+              ;;
+            git|op)
+              echo "💡 Try: sudo apt-get install $tool"
+              ;;
+          esac
+        else
+          echo "💡 Please install '$tool' using your package manager."
+        fi
+        ;;
+      *)
+        echo "💡 Unsupported OS. Please install '$tool' manually."
+        ;;
+    esac
+
+    exit 1
+  else
+    echo "✅ $tool found"
+  fi
+done
+
+# Check if Docker is running
+if ! docker info >/dev/null 2>&1; then
+  echo "❌ Docker daemon is not running."
+  case "$OS" in
+    Darwin)
+      echo "💡 Start Docker Desktop from Applications."
+      ;;
+    Linux)
+      echo "💡 Try: sudo systemctl start docker"
+      ;;
+  esac
+  exit 1
+else
+  echo "✅ Docker daemon is running"
+fi
+
+echo "✅ Required tools are available."
+
+# 2. Ensure scripts in bin/ are executable
+if [[ -d "bin" ]]; then
+  echo "🔐 Making scripts in bin/ executable..."
+  find bin -type f -exec chmod +x {} \;
+  echo "✅ bin/ scripts are executable."
+else
+  echo "⚠️  No bin/ directory found. Skipping chmod."
+fi
+
+# 3. Create logs/ directory if needed
+mkdir -p logs
+echo "📁 Ensured logs/ directory exists."
+
+# 4. Validate env templates exist
+for env in dev production; do
+  TEMPLATE=".env.${env}.template"
+  if [[ ! -f "$TEMPLATE" ]]; then
+    echo "⚠️  Missing $TEMPLATE"
+  else
+    echo "✅ Found $TEMPLATE"
+  fi
+done
+
+# Prompt user for values if not already set
+if [[ -z "${OP_CONNECT_HOST:-}" ]]; then
+  read -rp "Enter OP_CONNECT_HOST (e.g. https://connect-api.example.ts.net): " OP_CONNECT_HOST
+fi
+
+if [[ -z "${OP_CONNECT_TOKEN:-}" ]]; then
+  read -rsp "Enter OP_CONNECT_TOKEN: " OP_CONNECT_TOKEN
+  echo ""
+fi
+
+source "$(dirname "$0")/secrets-helper"
+op_test || exit 1
+
+
+echo "🎉 Setup complete!"

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ENVIRONMENT="${1:-dev}"
+ENV_FILE=".env.${ENVIRONMENT}"
+
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "production" ]]; then
+  echo "❌ Invalid environment: $ENVIRONMENT"
+  echo "Usage: $0 [dev|production]"
+  exit 1
+fi
+
+if [[ -f "$ENV_FILE" ]]; then
+  echo "⚠️  $ENV_FILE already exists. Delete it first if you want to regenerate."
+  exit 1
+fi
+
+echo "📝 Generating fallback $ENV_FILE..."
+
+cat > "$ENV_FILE" <<EOF
+# 🚧 WARNING: This is a fallback file for local dev only. Do not use in production.
+
+RAILS_ENV=$ENVIRONMENT
+RAILS_LOG_TO_STDOUT=true
+RAILS_SERVE_STATIC_FILES=true
+SECRET_KEY_BASE=dev-placeholder-secret-key
+
+DATABASE_HOST=db
+DATABASE_PORT=5432
+DATABASE_NAME=players_${ENVIRONMENT}
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+
+GITHUB_PAT=ghp_exampletokenfortestingonly
+EOF
+
+echo "✅ Created $ENV_FILE"
