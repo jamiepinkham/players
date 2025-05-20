@@ -34,8 +34,6 @@ RUN node node_modules/esbuild/install.js
 RUN node_modules/.bin/esbuild --version
 
 # Conditionally precompile only in production
-ARG RAILS_ENV=development
-ENV RAILS_ENV=${RAILS_ENV}
 RUN if [ "$RAILS_ENV" = "production" ]; then bundle exec rails assets:precompile; fi
 
 EXPOSE 3000
