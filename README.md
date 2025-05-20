@@ -355,7 +355,7 @@ GITHUB_PAT=ghp_exampletokenfortestingonly
 
 ⚠️ Do not use these values in production. They are insecure and intended for local use only.
 
-### 🛠 `bin/pull-from-heroku.sh`
+### 🛠 `bin/seed_from_heroku`
 
 This script pulls a backup of your Heroku Postgres database and restores it into your local Dockerized Postgres container. It supports multiple environments by reading credentials from 1Password based on the environment (`dev` or `production`).
 
