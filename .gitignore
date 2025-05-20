@@ -1,61 +1,51 @@
-# ----------------------------------------
-# 🔧 Rails
-# ----------------------------------------
+# Rails defaults
 /log/*
-!/log/.keep
 /tmp/*
+!/log/.keep
 !/tmp/.keep
-/storage/*
-!/storage/.keep
-rails/tmp/*
-
+/.bundle/
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/public/packs
 /public/assets/*
 !/public/assets/.keep
-/public/packs
-/public/builds
-/app/assets/builds
+/public/packs-test
+/public/system
+/public/uploads
+/.byebug_history
+/storage/*
+!/storage/.keep
+/node_modules
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+.yarn/build-state.yml
+.yarn/patches
+.yarn/releases
+.yarn/versions
 
-.byebug_history
+# Ignore master key if using credentials
+/config/master.key
+
+# dotenv files
 .env
 .env.*
-!.env.template
-!.env.production.template
-!.env.blog.template
-credentials*.yml.enc
-master.key
 
-# ----------------------------------------
-# 📦 Node/Yarn/npm (jsbundling-rails)
-# ----------------------------------------
-node_modules/
+# Yarn and lock files
 yarn-error.log
-package-lock.json # if you're using yarn, not npm
 
-# ----------------------------------------
-# 🐳 Docker
-# ----------------------------------------
-docker-compose.override.yml
-*.pid
-*.sock
-
-# Ignore Docker volumes if symlinked or mounted
-volumes/
-players-public/
-
-# ----------------------------------------
-# 🔐 1Password / Secrets
-# ----------------------------------------
-.env.production
-.env.blog
-.env.local
-.env.development
-
-# ----------------------------------------
-# 💻 IDEs & System Files
-# ----------------------------------------
-*.swp
-*.swo
+# macOS and IDE cruft
 .DS_Store
 .idea/
-.vscode/
-*.code-workspace
+/.vscode/
+
+# Docker
+*.pid
+*.sock
+docker-compose.override.yml
+
+# Optional: ignore system test screenshots
+/tmp/screenshots/*
+
+# Optional: if using foreman or Procfile-based setups
+.procfile.dev
