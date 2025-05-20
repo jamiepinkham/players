@@ -20,7 +20,7 @@ import {
 import { CircleQuestion, Lock, MailOption } from "grommet-icons";
 
 import sliding from "../images/sliding.jpg";
-
+console.log(sliding);
 
 function SessionLogin() {
   const auth = useAuth();

@@ -53986,9 +53986,10 @@ mutation CreateBid($input: CreateBidMutationInput!) {
   var import_react116 = __toESM(require_react());
 
   // app/javascript/images/sliding.jpg
-  var sliding_default = "./images/sliding-KL5HJWIM.jpg";
+  var sliding_default = "/assets/images/sliding-KL5HJWIM.jpg";
 
   // app/javascript/components/SessionLogin.jsx
+  console.log(sliding_default);
   function SessionLogin() {
     const auth = useAuth();
     const [hasError, setHasError] = (0, import_react116.useState)(false);
@@ -55157,4 +55158,4 @@ moment-timezone/moment-timezone.js:
   (*! license : MIT *)
   (*! github.com/moment/moment-timezone *)
 */
-//# sourceMappingURL=application.js.map
+//# sourceMappingURL=/assets/application.js.map

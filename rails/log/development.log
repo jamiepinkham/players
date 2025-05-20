@@ -2580,3 +2580,903 @@ ActionController::RoutingError (No route matches [GET] "/images/sliding-KL5HJWIM
   
 source=rack-timeout id=fb096458-2da0-4777-8721-41f629ad35ba timeout=15000ms service=25ms state=completed
 source=rack-timeout id=fb096458-2da0-4777-8721-41f629ad35ba timeout=15000ms service=25ms state=completed
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=60000ms state=ready
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=15000ms state=ready
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=15000ms service=2ms state=active
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=15000ms service=1ms state=active
+Started GET "/" for 192.168.65.1 at 2025-05-20 08:58:30 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 1.0ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 1.7ms | Allocations: 559)
+Completed 200 OK in 9ms (Views: 4.8ms | ActiveRecord: 0.0ms | Allocations: 2673)
+
+
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=15000ms service=128ms state=completed
+source=rack-timeout id=c170cb30-5cd7-4376-a2dc-b0d9904ac9d5 timeout=15000ms service=131ms state=completed
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=60000ms state=ready
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=15000ms state=ready
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=15000ms service=0ms state=active
+Started GET "/images/sliding-KL5HJWIM.jpg" for 192.168.65.1 at 2025-05-20 08:58:30 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=15000ms service=1ms state=active
+  
+ActionController::RoutingError (No route matches [GET] "/images/sliding-KL5HJWIM.jpg"):
+  
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=15000ms service=10ms state=completed
+source=rack-timeout id=53107b36-320c-4fa7-bfaa-fdc318ae09af timeout=15000ms service=10ms state=completed
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=60000ms state=ready
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=15000ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-20 08:59:36 +0000
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=15000ms service=3ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=15000ms service=15ms state=active
+  [1m[35m (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.7ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 1.4ms | Allocations: 559)
+Completed 200 OK in 6ms (Views: 3.7ms | ActiveRecord: 0.0ms | Allocations: 2673)
+
+
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=15000ms service=100ms state=completed
+source=rack-timeout id=0d41b0b4-bebf-40b3-861a-922960ddca44 timeout=15000ms service=102ms state=completed
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=60000ms state=ready
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=60000ms service=0ms state=active
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=15000ms service=0ms state=ready
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=15000ms service=0ms state=active
+Started GET "/images/sliding-KL5HJWIM.jpg" for 192.168.65.1 at 2025-05-20 08:59:36 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as JPEG
+  Parameters: {"path"=>"images/sliding-KL5HJWIM"}
+Completed 406 Not Acceptable in 2ms (ActiveRecord: 0.0ms | Allocations: 1744)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["image/jpeg"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=15000ms service=40ms state=completed
+source=rack-timeout id=3b99c31b-bf04-491f-87a4-254a54fb0a98 timeout=15000ms service=41ms state=completed
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=60000ms state=ready
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=15000ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-20 09:02:13 +0000
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=15000ms service=2ms state=active
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=15000ms service=2ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 2.7ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 3.8ms | Allocations: 559)
+Completed 200 OK in 15ms (Views: 10.7ms | ActiveRecord: 0.0ms | Allocations: 2673)
+
+
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=15000ms service=155ms state=completed
+source=rack-timeout id=5ebee4b3-f948-4c45-82fa-15b674121d62 timeout=15000ms service=157ms state=completed
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=60000ms state=ready
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=60000ms service=0ms state=active
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=15000ms service=0ms state=ready
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=15000ms service=0ms state=active
+Started GET "/images/sliding-KL5HJWIM.jpg" for 192.168.65.1 at 2025-05-20 09:02:13 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  
+ActionController::RoutingError (No route matches [GET] "/images/sliding-KL5HJWIM.jpg"):
+  
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=15000ms service=28ms state=completed
+source=rack-timeout id=ef603a68-89e4-463b-8626-cadd1b8eb87a timeout=15000ms service=29ms state=completed
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=60000ms state=ready
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=15000ms service=7ms state=active
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=15000ms state=ready
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=15000ms service=6ms state=active
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:05:29 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 6ms (ActiveRecord: 0.0ms | Allocations: 1757)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=15000ms service=146ms state=completed
+source=rack-timeout id=3957742d-8728-4a01-926f-6b1f1f1edf4e timeout=15000ms service=153ms state=completed
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=60000ms state=ready
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=15000ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-20 09:07:13 +0000
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=15000ms service=7ms state=active
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=15000ms service=6ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.2ms | Allocations: 6)
+  Rendered layout layouts/react.html.erb (Duration: 1.5ms | Allocations: 94)
+Completed 200 OK in 7ms (Views: 5.5ms | ActiveRecord: 0.0ms | Allocations: 369)
+
+
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=15000ms service=41ms state=completed
+source=rack-timeout id=e5dfb3b6-b69f-4e12-953d-6e3e94c6e56d timeout=15000ms service=45ms state=completed
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=60000ms state=ready
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=60000ms service=0ms state=active
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=15000ms service=0ms state=ready
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:07:13 +0000
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=15000ms service=3ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 2ms (ActiveRecord: 0.0ms | Allocations: 553)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=15000ms service=139ms state=completed
+source=rack-timeout id=8d2d38fd-ee15-450f-aed2-175f3d97dca0 timeout=15000ms service=140ms state=completed
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=60000ms state=ready
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=60000ms service=1ms state=active
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=15000ms service=1ms state=ready
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=15000ms service=0ms state=active
+Started GET "/images/sliding-KL5HJWIM.jpg" for 192.168.65.1 at 2025-05-20 09:07:14 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  
+ActionController::RoutingError (No route matches [GET] "/images/sliding-KL5HJWIM.jpg"):
+  
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=15000ms service=25ms state=completed
+source=rack-timeout id=15dfe2e0-fa2b-426e-847d-cfbcedc6a450 timeout=15000ms service=26ms state=completed
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=60000ms state=ready
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=15000ms service=2ms state=ready
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=60000ms service=2ms state=ready
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:07:27 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=15000ms service=5ms state=active
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 2ms (ActiveRecord: 0.0ms | Allocations: 558)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=15000ms service=110ms state=completed
+source=rack-timeout id=c687c4a8-a305-428c-a137-c6b685cc978a timeout=15000ms service=113ms state=completed
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=60000ms state=ready
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=15000ms state=ready
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=15000ms service=0ms state=active
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:07:27 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=15000ms service=1ms state=active
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 1ms (ActiveRecord: 0.0ms | Allocations: 553)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=15000ms service=66ms state=completed
+source=rack-timeout id=f2756949-dd7c-4717-9ba9-57bb3c74f6af timeout=15000ms service=67ms state=completed
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=60000ms state=ready
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=15000ms service=5ms state=ready
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=15000ms service=5ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-20 09:07:37 +0000
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=15000ms service=6ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 0.2ms | Allocations: 4)
+  Rendered layout layouts/react.html.erb (Duration: 0.7ms | Allocations: 88)
+Completed 200 OK in 3ms (Views: 1.8ms | ActiveRecord: 0.0ms | Allocations: 322)
+
+
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=15000ms service=24ms state=completed
+source=rack-timeout id=139049c6-4dbe-4d0f-9372-209daded4737 timeout=15000ms service=33ms state=completed
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=60000ms state=ready
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=15000ms state=ready
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=15000ms service=1ms state=active
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:07:37 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=15000ms service=2ms state=active
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 1ms (ActiveRecord: 0.0ms | Allocations: 553)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=15000ms service=47ms state=completed
+source=rack-timeout id=2d138125-9ea7-436a-8633-bbbb940365d1 timeout=15000ms service=48ms state=completed
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=60000ms state=ready
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=15000ms state=ready
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=15000ms service=0ms state=active
+Started GET "/images/sliding-KL5HJWIM.jpg" for 192.168.65.1 at 2025-05-20 09:07:37 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=15000ms service=1ms state=active
+  
+ActionController::RoutingError (No route matches [GET] "/images/sliding-KL5HJWIM.jpg"):
+  
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=15000ms service=14ms state=completed
+source=rack-timeout id=e2d7451c-641d-48f5-90dc-ed8ca259c741 timeout=15000ms service=15ms state=completed
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=60000ms state=ready
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=15000ms state=ready
+Started GET "/" for 192.168.65.1 at 2025-05-20 09:09:27 +0000
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=15000ms service=4ms state=active
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=15000ms service=15ms state=active
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+  [1m[35m (1.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by StaticController#index as HTML
+  Rendering layout layouts/react.html.erb
+  Rendering static/index.html.erb within layouts/react
+  Rendered static/index.html.erb within layouts/react (Duration: 1.0ms | Allocations: 312)
+  Rendered layout layouts/react.html.erb (Duration: 1.6ms | Allocations: 559)
+Completed 200 OK in 6ms (Views: 3.9ms | ActiveRecord: 0.0ms | Allocations: 2673)
+
+
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=15000ms service=109ms state=completed
+source=rack-timeout id=56094751-e508-4e74-b51d-e740040744f3 timeout=15000ms service=110ms state=completed
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=60000ms state=ready
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=15000ms service=2ms state=active
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=15000ms service=2ms state=active
+Started GET "/.well-known/appspecific/com.chrome.devtools.json" for 192.168.65.1 at 2025-05-20 09:09:27 +0000
+Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=15000ms service=3ms state=active
+Processing by StaticController#index as JSON
+  Parameters: {"path"=>".well-known/appspecific/com.chrome.devtools"}
+Completed 406 Not Acceptable in 5ms (ActiveRecord: 0.0ms | Allocations: 1753)
+
+
+  
+ActionController::UnknownFormat (StaticController#index is missing a template for this request format and variant.
+
+request.formats: ["application/json"]
+request.variant: []):
+  
+actionpack (6.1.7) lib/action_controller/metal/implicit_render.rb:42:in `default_render'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `block in send_action'
+<internal:kernel>:90:in `tap'
+actionpack (6.1.7) lib/action_controller/metal/basic_implicit_render.rb:6:in `send_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:228:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rendering.rb:30:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:42:in `block in process_action'
+activesupport (6.1.7) lib/active_support/callbacks.rb:117:in `block in run_callbacks'
+turbo-rails (2.0.11) lib/turbo-rails.rb:24:in `with_request_id'
+turbo-rails (2.0.11) app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+activesupport (6.1.7) lib/active_support/callbacks.rb:126:in `block in run_callbacks'
+activesupport (6.1.7) lib/active_support/callbacks.rb:137:in `run_callbacks'
+actionpack (6.1.7) lib/abstract_controller/callbacks.rb:41:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/rescue.rb:22:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:34:in `block in process_action'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `block in instrument'
+activesupport (6.1.7) lib/active_support/notifications/instrumenter.rb:24:in `instrument'
+activesupport (6.1.7) lib/active_support/notifications.rb:203:in `instrument'
+actionpack (6.1.7) lib/action_controller/metal/instrumentation.rb:33:in `process_action'
+actionpack (6.1.7) lib/action_controller/metal/params_wrapper.rb:249:in `process_action'
+activerecord (6.1.7) lib/active_record/railties/controller_runtime.rb:27:in `process_action'
+actionpack (6.1.7) lib/abstract_controller/base.rb:165:in `process'
+actionview (6.1.7) lib/action_view/rendering.rb:39:in `process'
+actionpack (6.1.7) lib/action_controller/metal.rb:190:in `dispatch'
+actionpack (6.1.7) lib/action_controller/metal.rb:254:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:50:in `dispatch'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:33:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:19:in `block in <class:Constraints>'
+actionpack (6.1.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:50:in `block in serve'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `each'
+actionpack (6.1.7) lib/action_dispatch/journey/router.rb:32:in `serve'
+actionpack (6.1.7) lib/action_dispatch/routing/route_set.rb:842:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/token_dispatcher.rb:20:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware/revocation_manager.rb:21:in `call'
+rack (2.2.4) lib/rack/builder.rb:244:in `call'
+warden-jwt_auth (0.5.0) lib/warden/jwt_auth/middleware.rb:23:in `call'
+rack (2.2.4) lib/rack/session/abstract/id.rb:266:in `context'
+rack (2.2.4) lib/rack/session/abstract/id.rb:260:in `call'
+rack (2.2.4) lib/rack/method_override.rb:24:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/cookies.rb:689:in `call'
+warden (1.2.9) lib/warden/manager.rb:36:in `block in call'
+warden (1.2.9) lib/warden/manager.rb:34:in `catch'
+warden (1.2.9) lib/warden/manager.rb:34:in `call'
+rack (2.2.4) lib/rack/etag.rb:27:in `call'
+rack (2.2.4) lib/rack/conditional_get.rb:27:in `call'
+rack (2.2.4) lib/rack/head.rb:12:in `call'
+activerecord (6.1.7) lib/active_record/migration.rb:601:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:27:in `block in call'
+activesupport (6.1.7) lib/active_support/callbacks.rb:98:in `run_callbacks'
+actionpack (6.1.7) lib/action_dispatch/middleware/callbacks.rb:26:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/debug_exceptions.rb:29:in `call'
+web-console (4.2.0) lib/web_console/middleware.rb:132:in `call_app'
+web-console (4.2.0) lib/web_console/middleware.rb:19:in `block in call'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `catch'
+web-console (4.2.0) lib/web_console/middleware.rb:17:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/show_exceptions.rb:33:in `call'
+railties (6.1.7) lib/rails/rack/logger.rb:37:in `call_app'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `block in call'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `block in tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:37:in `tagged'
+activesupport (6.1.7) lib/active_support/tagged_logging.rb:99:in `tagged'
+railties (6.1.7) lib/rails/rack/logger.rb:26:in `call'
+sprockets-rails (3.4.2) lib/sprockets/rails/quiet_assets.rb:13:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/remote_ip.rb:81:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/request_id.rb:26:in `call'
+rack (2.2.4) lib/rack/runtime.rb:22:in `call'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:148:in `block in call'
+rack-timeout (0.6.3) lib/rack/timeout/support/timeout.rb:19:in `timeout'
+rack-timeout (0.6.3) lib/rack/timeout/core.rb:147:in `call'
+activesupport (6.1.7) lib/active_support/cache/strategy/local_cache_middleware.rb:29:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/executor.rb:14:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/static.rb:24:in `call'
+rack (2.2.4) lib/rack/sendfile.rb:110:in `call'
+actionpack (6.1.7) lib/action_dispatch/middleware/host_authorization.rb:148:in `call'
+rack-cors (2.0.2) lib/rack/cors.rb:102:in `call'
+railties (6.1.7) lib/rails/engine.rb:539:in `call'
+puma (6.0.0) lib/puma/configuration.rb:268:in `call'
+puma (6.0.0) lib/puma/request.rb:89:in `block in handle_request'
+puma (6.0.0) lib/puma/thread_pool.rb:343:in `with_force_shutdown'
+puma (6.0.0) lib/puma/request.rb:88:in `handle_request'
+puma (6.0.0) lib/puma/server.rb:430:in `process_client'
+puma (6.0.0) lib/puma/server.rb:233:in `block in run'
+puma (6.0.0) lib/puma/thread_pool.rb:150:in `block in spawn_thread'
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=15000ms service=57ms state=completed
+source=rack-timeout id=5adb7464-9ab2-4616-8cdf-cb506a48e400 timeout=15000ms service=58ms state=completed

@@ -36,6 +36,7 @@ CMD sh -c "esbuild app/javascript/application.jsx \
   --loader:.svg=file \
   --loader:.jpg=file \
   --asset-names=images/[name]-[hash] \
+  --public-path=/assets \
   --watch=forever \
   & sass app/assets/stylesheets/application.scss:public/assets/application.css --load-path=node_modules --watch"
 
