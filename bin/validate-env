@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Extract OP_CONNECT_HOST and OP_CONNECT_TOKEN from the template and export them
-export OP_CONNECT_HOST=$(grep '^OP_CONNECT_HOST=' .env.template | cut -d '=' -f2-)
-export OP_CONNECT_TOKEN=$(grep '^OP_CONNECT_TOKEN=' .env.template | cut -d '=' -f2-)
-
-echo $OP_CONNECT_HOST
-echo $OP_CONNECT_TOKEN
+# Read OP_CONNECT secrets securely — NOT from .env.template
+export OP_CONNECT_HOST=$(op read "op://bmpl/secrets/host")
+export OP_CONNECT_TOKEN=$(op read "op://bmpl/secrets/token")
 
 
 TEMPLATE_FILE="${1:-.env.template}"
