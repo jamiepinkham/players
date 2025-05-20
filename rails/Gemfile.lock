@@ -108,6 +108,7 @@ GEM
       railties (>= 5.0.0)
     faker (3.0.0)
       i18n (>= 1.8.11, < 2)
+    ffi (1.17.2)
     foreman (0.87.2)
     globalid (1.0.0)
       activesupport (>= 5.0)
@@ -224,6 +225,14 @@ GEM
     responders (3.0.1)
       actionpack (>= 5.0)
       railties (>= 5.0)
+    sassc (2.4.0)
+      ffi (~> 1.9)
+    sassc-rails (2.1.2)
+      railties (>= 4.0.0)
+      sassc (>= 2.0)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
     spring (4.1.0)
     sprockets (4.1.1)
       concurrent-ruby (~> 1.0)
@@ -233,6 +242,7 @@ GEM
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
     thor (1.2.1)
+    tilt (2.6.0)
     timeout (0.3.0)
     turbo-rails (2.0.11)
       actionpack (>= 6.0.0)
@@ -294,6 +304,7 @@ DEPENDENCIES
   rails (~> 6.1)
   rails_12factor
   rails_admin (~> 3.0)
+  sassc-rails
   spring
   web-console
 
