@@ -1,3 +1,11 @@
+### Getting Started
+1. Clone the repo
+2. Ensure op cli is installed
+3. Have op url and token handy
+4. `bin/setup`
+5. `bin/run`
+6. 🤞
+
 ### 📁 File Structure
 ```
 .
