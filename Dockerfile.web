@@ -6,12 +6,21 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnup
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
+# 🔒 Create a non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
 WORKDIR /app
 
 COPY rails/Gemfile rails/Gemfile.lock ./
 RUN gem install bundler foreman && bundle install
 
 COPY rails/ ./
+
+# 🔒 Change ownership of app files
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
 
 EXPOSE 3000
 CMD ["foreman", "start", "-f", "Procfile.dev"]

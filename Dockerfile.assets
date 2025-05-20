@@ -1,43 +1,39 @@
 FROM node:18-slim
 
-# Install curl for Dart Sass
+# Install system dependencies (curl for Dart Sass)
 RUN apt-get update && apt-get install -y curl
 
-# Install Dart Sass (x86 version; use arm64 if needed)
+# ✅ Install Dart Sass
 RUN curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-x64.tar.gz \
   | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass
 
+# 🔒 Create a non-root user
+RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install deps
+# Copy package files and install deps as root
 COPY rails/package.json rails/yarn.lock ./
-RUN yarn install
+RUN yarn install && yarn add --dev esbuild
 
-# Add esbuild for dev
-RUN yarn add --dev esbuild
+# Copy rest of the app
+COPY rails/ ./
+
+# 🔒 Adjust permissions so non-root user can access everything
+RUN chown -R appuser:appgroup /app
 
 # Make sure yarn binaries are available in PATH
 ENV PATH="./node_modules/.bin:$PATH"
 
-# Copy the full app (excluding node_modules via .dockerignore)
-COPY rails/ ./
+# Copy script as root
+COPY assets_entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Start both asset builders
-CMD sh -c "esbuild app/javascript/application.jsx \
-  --bundle \
-  --sourcemap \
-  --outdir=public/assets \
-  --loader:.js=jsx \
-  --loader:.jsx=jsx \
-  --loader:.woff2=file \
-  --loader:.woff=file \
-  --loader:.ttf=file \
-  --loader:.eot=file \
-  --loader:.svg=file \
-  --loader:.jpg=file \
-  --asset-names=images/[name]-[hash] \
-  --public-path=/assets \
-  --watch=forever \
-  & sass app/assets/stylesheets/application.scss:public/assets/application.css --load-path=node_modules --watch"
+# Set ownership and permissions: only appuser can read/execute
+RUN chown appuser:appgroup /usr/local/bin/entrypoint.sh && \
+    chmod 500 /usr/local/bin/entrypoint.sh
 
+USER appuser
 
+# Use JSON form of CMD for proper signal handling
+CMD ["/usr/local/bin/entrypoint.sh"]

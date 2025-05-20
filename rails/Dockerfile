@@ -14,9 +14,13 @@ RUN curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass
   | tar -xz -C /opt && \
   ln -s /opt/dart-sass/sass /usr/local/bin/sass
 
+# 🔒 Create non-root user and group
+RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
+
+# Set working directory
 WORKDIR /app
 
-# Install Ruby deps
+# Install Ruby deps (still as root)
 COPY rails/Gemfile rails/Gemfile.lock ./
 RUN gem install bundler foreman && bundle install
 
@@ -24,18 +28,25 @@ RUN gem install bundler foreman && bundle install
 COPY rails/package.json rails/yarn.lock ./
 RUN yarn install
 
-# Copy app source
+# Copy application code
 COPY rails/ ./
 
-# Ensure esbuild native binary is present
+# Ensure esbuild binary is present
 RUN node node_modules/esbuild/install.js
 
 # Optional: confirm binary works
 RUN node_modules/.bin/esbuild --version
 
-# Conditionally precompile only in production
+# Fix permissions so appuser owns the app directory
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Conditionally precompile only in production (still allowed as non-root if app dir is writable)
 RUN if [ "$RAILS_ENV" = "production" ]; then bundle exec rails assets:precompile; fi
 
 EXPOSE 3000
 
+# Use JSON CMD form
 CMD ["foreman", "start", "-f", "Procfile"]
