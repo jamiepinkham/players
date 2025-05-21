@@ -1,1 +1,1 @@
-web: bundle exec puma -C config/puma.rb
+web: sh -c "rm -f tmp/pids/server.pid && ./wait-for-it.sh db:5432 -- bundle exec rails server -b 0.0.0.0 -p 3000"

@@ -1,16 +1,21 @@
 
 services:
-  web:
+  players:
     build:
       context: .
       dockerfile: Dockerfile.web
     volumes:
       - ./rails:/app
       - ./rails/app/assets/builds:/app/app/assets/builds
+      - ./bin/wait-for-it.sh:/app/wait-for-it.sh
+      - ./docker/db/restore:/app/db/restore
     ports:
       - "3000:3000"
     depends_on:
       - db
+      - assets
+    env_file:
+      - .env
 
   assets:
     platform: linux/amd64
@@ -20,11 +25,20 @@ services:
     volumes:
       - ./rails:/app
       - ./rails/app/assets/builds:/app/app/assets/builds
+    env_file:
+      - .env
 
   db:
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     image: postgres:13
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
 
 volumes:
   pgdata:
