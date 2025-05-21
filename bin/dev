@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🚀 Starting app..."
+docker compose --env-file .env up
