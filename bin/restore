@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Load .env if available
+if [[ -f .env ]]; then
+  export $(grep -v '^#' .env | xargs -d '\n')
+fi
+
+RAILS_ENV="${RAILS_ENV:-development}"
+HOST_SEED_FILE="docker/db/restore/latest.restore"
+CONTAINER_SEED_FILE="/app/db/restore/latest.restore"
+
+if [[ "$RAILS_ENV" != "development" ]]; then
+  echo "ℹ️ Skipping DB restore: not in development environment."
+  exit 0
+fi
+
+echo "🕒 Waiting for Postgres to be ready..."
+until docker compose exec db pg_isready -U "${DATABASE_USER:-postgres}" >/dev/null 2>&1; do
+  sleep 1
+done
+
+if [[ -f "$HOST_SEED_FILE" ]]; then
+  echo "📦 Found $HOST_SEED_FILE, restoring database..."
+
+  docker compose run --rm players bash -c "
+    bundle exec rails db:create &&
+    PGPASSWORD=\$DATABASE_PASSWORD pg_restore --clean --no-owner -U \$DATABASE_USER -h db --dbname=\$DATABASE_NAME /app/db/restore/latest.restore &&
+    bundle exec rails db:migrate
+  "
+else
+  echo "🧱 No seed dump found at $HOST_SEED_FILE. Falling back to Rails setup..."
+
+  docker compose run --rm players bundle exec rails db:create db:migrate db:seed
+fi
+
+echo "✅ Database ready."
