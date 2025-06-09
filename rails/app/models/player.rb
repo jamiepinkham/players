@@ -1,4 +1,5 @@
 class Player < ApplicationRecord
+  has_many :contracts
   has_one :contract, -> { where(active: true) }
 
   has_one :leading_bid, -> { where(is_leading: true) }, class_name: 'Bid'
@@ -8,6 +9,33 @@ class Player < ApplicationRecord
     .where
     .not(bbref_stats: nil) 
   }
+
+  scope :with_stats_or_current_contract, ->(season_id) {
+    left_outer_joins(:contracts)
+      .where(
+        <<~SQL.squish, season_id: season_id
+          (
+            players.bbref_stats IS NOT NULL
+            AND players.bbref_stats::text != ''
+            AND players.bbref_stats::jsonb != '{}'::jsonb
+            AND players.bbrefid IS NOT NULL
+            AND players.bbrefid != ''
+            AND players.bbrefid ~ '^[a-z0-9]{9}$'
+          )
+          OR (
+            contracts.first_season_id <= :season_id
+            AND contracts.last_season_id >= :season_id
+            AND contracts.active = TRUE
+            AND players.bbref_stats IS NOT NULL
+            AND players.bbref_stats::text != ''
+            AND players.bbref_stats::jsonb != '{}'::jsonb
+          )
+        SQL
+      )
+      .select('DISTINCT ON (players.bbrefid) players.*')
+  }
+
+
 
   def is_free_agent?
     self.contract.blank? || is_contract_expiring?

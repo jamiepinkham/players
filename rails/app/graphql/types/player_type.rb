@@ -46,28 +46,17 @@ module Types
     
 
     def stats
-      # puts "object.bbref_stats: #{object.bbref_stats.inspect}"
-      stats = []
-      JSON.parse(object.bbref_stats || "{}").each do |key, value| 
-      #   puts "key: #{key}, value: #{value}"
-      #   # puts "looking at #{entry[1].class.name}: #{key.inspect}"
-      #   stat = Types::Stat.new
-      #   stat.title = key
-        stat = Types::Stat.new
-        stat.title = key
-        stat.value = value
-        if key == 'Pos'
-          stat.value = object.position
-        end
-        stats << stat
+      raw = object.bbref_stats
+      return [] unless raw.present?
+
+      parsed = raw.is_a?(String) ? JSON.parse(raw) : raw rescue {}
+      return [] unless parsed.is_a?(Hash) && parsed.any?
+
+      parsed.map do |key, value|
+        { title: key, value: (key == 'Pos' ? object.position : value) }
       end
-      # stat = Types::Stat.new
-      # stat.title = 'foo'
-      # stat.value = 'bar'
-      # # return [{'title' => 'foo', 'value' => 'bar'}]
-      # return [{title: 'foo', value: 'bar'}]
-      return stats
     end
+
 
     def team
       player_id = object.id

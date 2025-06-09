@@ -12,7 +12,7 @@ import ChangePassword from "./ChangePassword";
 import TeamComponent from "./TeamComponent";
 import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
-import PlayerSearch from "./PlayerSearch";
+import AllPlayersListSearch from "./AllPlayersListSearch";
 
 
 import { Box, Header, Heading, Nav, Anchor, Main } from "grommet";
@@ -97,10 +97,9 @@ export default function App(props) {
             <Route exact path="/sign_in" component={SessionLogin} />
             <Route exact path="/forgot" component={EmailResetForm} />
             <Route path="/reset/:token" component={ChangePassword} />
-            <Route path="player_search" component={PlayerSearch} />
             <Route exact path="/teams" component={TeamsList} />
             <Route exact path="/team/:id" component={TeamComponent} />
-            <Route exact path="/player_search" component={PlayerSearch} />
+            <Route exact path="/player_search" component={AllPlayersListSearch} />
             <PrivateRoute exact path="/profile" component={Profile} />
             <PrivateRoute exact path="/bidding" component={Bidding} />
             <PrivateRoute exact path='/trade' component={TradeOfferComponent} />
