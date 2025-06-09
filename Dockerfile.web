@@ -16,6 +16,8 @@ RUN gem install bundler foreman && bundle install
 
 # Copy the full app from rails/
 COPY rails/ ./
+COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
 # Set ownership and switch to non-root
 RUN chown -R appuser:appgroup /app

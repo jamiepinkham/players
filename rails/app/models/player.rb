@@ -10,31 +10,39 @@ class Player < ApplicationRecord
     .not(bbref_stats: nil) 
   }
 
-  scope :with_stats_or_current_contract, ->(season_id) {
-    left_outer_joins(:contracts)
-      .where(
-        <<~SQL.squish, season_id: season_id
-          (
-            players.bbref_stats IS NOT NULL
-            AND players.bbref_stats::text != ''
-            AND players.bbref_stats::jsonb != '{}'::jsonb
-            AND players.bbrefid IS NOT NULL
-            AND players.bbrefid != ''
-            AND players.bbrefid ~ '^[a-z0-9]{9}$'
-          )
-          OR (
-            contracts.first_season_id <= :season_id
-            AND contracts.last_season_id >= :season_id
-            AND contracts.active = TRUE
-            AND players.bbref_stats IS NOT NULL
-            AND players.bbref_stats::text != ''
-            AND players.bbref_stats::jsonb != '{}'::jsonb
-          )
-        SQL
-      )
-      .select('DISTINCT ON (players.bbrefid) players.*')
-  }
+  # Returns players who either:
+  # 1. Have valid `bbref_stats` and a well-formed `bbrefid`, OR
+  # 2. Have an active contract in the given season (first_season_id >= season_id <= last_season_id).
+  #
+  # A player’s stats are considered valid if:
+  # - bbref_stats is not null
+  # - bbref_stats is not an empty string
+  # - bbref_stats is not an empty JSON object (`{}`)
+  # - bbrefid is present, not blank
+  #
+  # The scope uses a `LEFT OUTER JOIN` to include contracts, then filters using an OR:
+  # - one path for players with standalone stats,
+  # - another for players with an active contract *and* stats.
+  # It uses `DISTINCT ON (players.bbrefid)` to deduplicate cases where players have multiple contracts.
 
+  scope :with_stats_or_current_contract, ->(season_id) {
+    players = arel_table
+    contracts = Contract.arel_table
+
+    stats_present = players[:bbref_stats].not_eq(nil)
+      .and(players[:bbref_stats].not_eq(''))
+      .and(Arel.sql("players.bbref_stats::jsonb != '{}'::jsonb"))
+      .and(players[:bbrefid].not_eq(nil))
+      .and(players[:bbrefid].not_eq(''))
+
+    contract_active = contracts[:first_season_id].gteq(season_id)
+      .and(contracts[:last_season_id].lteq(season_id))
+      .and(contracts[:active].eq(true))
+
+    left_outer_joins(:contracts)
+      .where(stats_present.or(contract_active))
+      .select('DISTINCT ON (players.bbrefid) players.*')
+  } 
 
 
   def is_free_agent?
