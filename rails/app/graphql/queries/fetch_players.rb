@@ -51,21 +51,7 @@ module Queries
         type [Types::PlayerType], null: false
         def resolve
             season_id = Season.current.id
-
-            Player.with_stats_or_current_contract(season_id).select do |player|
-                next true if player.contracts.any?(&:active?)
-
-                raw = player.bbref_stats
-                next false unless raw.present?
-
-                begin
-                    parsed = raw.is_a?(String) ? JSON.parse(raw) : raw
-                rescue JSON::ParserError
-                    next false
-                end
-
-                parsed.is_a?(Hash) && parsed.any?
-            end
+            Player.with_stats_or_current_contract(season_id)
         end
     end
 end
