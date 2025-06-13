@@ -15,7 +15,11 @@ WORKDIR /app
 
 # Copy package files and install deps as root
 COPY rails/package.json rails/yarn.lock ./
-RUN yarn install && yarn add --dev esbuild
+RUN yarn install && \
+    yarn global add esbuild && \
+    yarn global add @parcel/watcher-linux-x64-glibc
+# && \
+# ln -sf $(yarn global bin)/esbuild /usr/local/bin/esbuild
 
 # Copy rest of the app
 COPY rails/ ./
