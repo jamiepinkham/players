@@ -48,15 +48,24 @@ const AllPlayersListSearch = () => {
     if (!data?.activePlayers) return [];
     return data.activePlayers.filter(player => {
       const nameMatch = player.name.toLowerCase().includes(search.toLowerCase());
-      const positionMatch = !positionFilter || player.position === positionFilter;
+      const positionMatch = !positionFilter || player?.position?.match(positionFilter.value);
       return nameMatch && positionMatch;
     });
   }, [data, search, positionFilter]);
 
-  const uniquePositions = useMemo(() => {
-    const set = new Set(data?.activePlayers.map(p => p.position));
-    return Array.from(set);
-  }, [data]);
+const uniquePositions = [
+    { label: "SP", value: "SP" },
+    { label: "RP", value: "RP" },
+    { label: "C", value: "2" },
+    { label: "1B", value: "3" },
+    { label: "2B", value: "4" },
+    { label: "3B", value: "5" },
+    { label: "SS", value: "6" },
+    { label: "LF", value: "7" },
+    { label: "CF", value: "8" },
+    { label: "RF", value: "9" },
+    { label: "DH", value: "D" },
+  ];
 
   if (loading) return <Text>Loading players...</Text>;
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
