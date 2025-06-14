@@ -46,4 +46,12 @@ module Queries
             end
         end
     end
+
+    class ActivePlayers < Queries::BaseQuery
+        type [Types::PlayerType], null: false
+        def resolve
+            season_id = Season.current.id
+            Player.with_stats_or_current_contract(season_id)
+        end
+    end
 end
