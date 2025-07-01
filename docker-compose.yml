@@ -1,4 +1,3 @@
-
 services:
   players:
     build:
@@ -7,7 +6,6 @@ services:
     volumes:
       - ./rails:/app
       - ./rails/app/assets/builds:/app/app/assets/builds
-      - ./bin/wait-for-it.sh:/app/wait-for-it.sh
       - ./docker/db/restore:/app/db/restore
     ports:
       - "3000:3000"
