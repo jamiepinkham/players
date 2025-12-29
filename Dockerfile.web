@@ -30,4 +30,5 @@ ENV DB_USERNAME_LINK bmpl-secrets/prod-db-username
 ENV DB_PW_LINK bmpl-secrets/prod-db-password
 
 EXPOSE 3000
-CMD ["foreman", "start", "-f", "Procfile"]
+# Run the web service on container startup.
+CMD ["bash", "web-entrypoint.sh"]
