@@ -1,22 +1,24 @@
+# config/database.yml
+
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
-  username: <%= ENV.fetch("DATABASE_USER", "postgres") %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 10 } %>
+  host: localhost
 
 development:
   <<: *default
-  database: <%= ENV.fetch("DATABASE_NAME", "players_development") %>
+  database: bmpl-development
 
 test:
   <<: *default
-  database: players_test
+  database: bmpl-test
 
 production:
   <<: *default
-  host: <%= ENV.fetch("DATABASE_HOST") %>
-  username: <%= ENV.fetch("DATABASE_USER") %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") %>
-  database: <%= ENV.fetch("DATABASE_NAME") %>
+  database: bmpl-finances
+  username: <%= ENV.fetch("PROD_DB_USERNAME") %>
+  password: <%= ENV.fetch("PROD_DB_PASSWORD") %>
+  host: cellardoordotcom:us-central1:billy-db
+  # For example, my host looks like this: 
+  # /cloudsql/vp-demo-383902:us-west1:vp-sql-instance
