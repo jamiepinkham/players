@@ -2,6 +2,9 @@ FROM ruby:3.1.2
 
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
 
+# Get berglas
+COPY --from=gcr.io/berglas/berglas:latest /bin/berglas /bin/berglas
+
 # ✅ Install Node.js so ExecJS works
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
@@ -22,6 +25,9 @@ RUN chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
+
+ENV DB_USERNAME_LINK bmpl-secrets/prod-db-username
+ENV DB_PW_LINK bmpl-secrets/prod-db-password
 
 EXPOSE 3000
 CMD ["foreman", "start", "-f", "Procfile"]
