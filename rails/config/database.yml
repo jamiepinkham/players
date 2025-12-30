@@ -9,6 +9,8 @@ default: &default
 development:
   <<: *default
   database: bmpl-development
+  username: admin
+  password: password
 
 test:
   <<: *default

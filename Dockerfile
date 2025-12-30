@@ -88,6 +88,8 @@ ENV DB_HOST "/cloudsql/cellardoordotcom:us-central1:billy-db"
 
 # Add a script to be executed every time the container starts. Fixes a glitch with the pids directory by removing the server.pid file on execute.
 COPY web-entrypoint.sh /usr/local/bin/
+
+COPY rails/assets/builds/ public/assets
 #RUN chmod +x /bin/web-entrypoint.sh
 
 EXPOSE 3000
