@@ -19,6 +19,6 @@ production:
   database: bmpl-finances
   username: <%= ENV.fetch("PROD_DB_USERNAME") %>
   password: <%= ENV.fetch("PROD_DB_PASSWORD") %>
-  host: cellardoordotcom:us-central1:billy-db
-  # For example, my host looks like this: 
+  host: <%= ENV.fetch("DB_HOST") %>
+  # For example, my host looks like this:
   # /cloudsql/vp-demo-383902:us-west1:vp-sql-instance

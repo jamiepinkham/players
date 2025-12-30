@@ -2,7 +2,7 @@ services:
   players:
     build:
       context: .
-      dockerfile: Dockerfile.web
+      dockerfile: Dockerfile
     volumes:
       - ./rails:/app
       - ./rails/app/assets/builds:/app/app/assets/builds
@@ -11,20 +11,20 @@ services:
       - "3000:3000"
     depends_on:
       - db
-      - assets
+      # - assets
     env_file:
       - .env
 
-  assets:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Dockerfile.assets
-    volumes:
-      - ./rails:/app
-      - ./rails/app/assets/builds:/app/app/assets/builds
-    env_file:
-      - .env
+  # assets:
+  #   platform: linux/amd64
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.assets
+  #   volumes:
+  #     - ./rails:/app
+  #     - ./rails/app/assets/builds:/app/app/assets/builds
+  #   env_file:
+  #     - .env
 
   db:
     env_file:
@@ -40,4 +40,4 @@ services:
 
 volumes:
   pgdata:
-  assets:
+  # assets:

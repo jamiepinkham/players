@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 # Start sass in background
 sass app/assets/stylesheets/application.scss:public/assets/application.css \
   --load-path=node_modules \
@@ -20,5 +21,5 @@ exec esbuild app/javascript/application.jsx \
   --loader:.svg=file \
   --loader:.jpg=file \
   --asset-names=images/[name]-[hash] \
-  --public-path=/assets \
+  --public-path=/app/assets \
   --watch=forever
