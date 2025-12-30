@@ -4,7 +4,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-cyrillic-ext-400-normal-WVOY7NRO.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-cyrillic-ext-400-normal-WVOY7NRO.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range:
     U+0460-052F,
     U+1C80-1C88,
@@ -18,7 +18,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-cyrillic-400-normal-UNEFG6UZ.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-cyrillic-400-normal-UNEFG6UZ.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range:
     U+0301,
     U+0400-045F,
@@ -31,7 +31,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-greek-ext-400-normal-MKGGKMJ5.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-greek-ext-400-normal-MKGGKMJ5.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range: U+1F00-1FFF;
 }
 @font-face {
@@ -39,7 +39,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-greek-400-normal-PY2QUVXT.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-greek-400-normal-PY2QUVXT.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range: U+0370-03FF;
 }
 @font-face {
@@ -47,7 +47,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-vietnamese-400-normal-7XQHLZ3D.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-vietnamese-400-normal-7XQHLZ3D.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range:
     U+0102-0103,
     U+0110-0111,
@@ -63,7 +63,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-latin-ext-400-normal-3G4ONXQH.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-latin-ext-400-normal-3G4ONXQH.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range:
     U+0100-024F,
     U+0259,
@@ -80,7 +80,7 @@
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url("./fira-sans-latin-400-normal-BVHR5GIK.woff2") format("woff2"), url("./fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
+  src: url("/assets/images/fira-sans-latin-400-normal-BVHR5GIK.woff2") format("woff2"), url("/assets/images/fira-sans-all-400-normal-Z3W4I7VT.woff") format("woff");
   unicode-range:
     U+0000-00FF,
     U+0131,
@@ -100,4 +100,4 @@
     U+FEFF,
     U+FFFD;
 }
-/*# sourceMappingURL=application.css.map */
+/*# sourceMappingURL=/assets/application.css.map */

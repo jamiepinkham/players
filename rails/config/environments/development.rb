@@ -79,4 +79,6 @@ Rails.application.configure do
 
   config.assets.precompile += ['graphiql/rails/application.js', 'graphiql/rails/application.css']
 
+  config.hosts.clear
+
 end

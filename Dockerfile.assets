@@ -1,41 +1,24 @@
 FROM node:18-slim
 
-# Install system dependencies (curl for Dart Sass)
-RUN apt-get update && apt-get install -y curl
-
-# ✅ Install Dart Sass
-RUN curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-x64.tar.gz \
-  | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass
+# (optional but nice) tini for clean signal handling
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tini \
+  && rm -rf /var/lib/apt/lists/*
 
 # 🔒 Create a non-root user
 RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files and install deps as root
+# Install deps (cached layer)
 COPY rails/package.json rails/yarn.lock ./
-RUN yarn install && \
-    yarn global add esbuild && \
-    yarn global add @parcel/watcher-linux-x64-glibc
+RUN yarn install --frozen-lockfile
 
-# Copy rest of the app
-COPY rails/ ./
-
-# 🔒 Adjust permissions so non-root user can access everything
-RUN chown -R appuser:appgroup /app
-
-# Make sure yarn binaries are available in PATH
-ENV PATH="./node_modules/.bin:$PATH"
-
-# Copy script as root
+# Entrypoint
 COPY assets_entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Set ownership and permissions: only appuser can read/execute
-RUN chown appuser:appgroup /usr/local/bin/entrypoint.sh && \
-    chmod 500 /usr/local/bin/entrypoint.sh
+RUN chown appuser:appgroup /usr/local/bin/entrypoint.sh && chmod 500 /usr/local/bin/entrypoint.sh
 
 USER appuser
+ENV PATH="/app/node_modules/.bin:$PATH"
 
-# Use JSON form of CMD for proper signal handling
+ENTRYPOINT ["/usr/bin/tini","--"]
 CMD ["/usr/local/bin/entrypoint.sh"]

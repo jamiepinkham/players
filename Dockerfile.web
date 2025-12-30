@@ -1,26 +1,30 @@
 FROM ruby:3.1.2
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
+# OS deps
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev postgresql-client ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/*
 
-# ✅ Install Node.js so ExecJS works
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+# Node + Yarn (from Debian repos; simple and reliable)
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    nodejs npm \
+  && npm install -g yarn \
+  && rm -rf /var/lib/apt/lists/*
 
-# 🔒 Create a non-root user
+# 🔒 Non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 WORKDIR /app
 
+# Ruby deps (cacheable)
 COPY rails/Gemfile rails/Gemfile.lock ./
-RUN gem install bundler foreman && bundle install
+RUN gem install -N foreman && bundle config set without 'test' \
+  && bundle install
 
-# Copy the full app from rails/
+# App code
 COPY rails/ ./
 
-# Set ownership and switch to non-root
 RUN chown -R appuser:appgroup /app
-
-# Switch to non-root user
 USER appuser
 
 EXPOSE 3000
