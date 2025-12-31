@@ -45,12 +45,13 @@ COPY rails/ ./
 
 # Precompile assets at build time
 # Rails needs SECRET_KEY_BASE and database env vars (even though it won't connect)
+# SECRET_KEY_BASE must be at least 32 chars to pass validation
 ARG SECRET_KEY_BASE_DUMMY=1
-ENV SECRET_KEY_BASE=dummy \
-    DATABASE_HOST=dummy \
-    DATABASE_USER=dummy \
-    DATABASE_PASSWORD=dummy \
-    DATABASE_NAME=dummy
+ENV SECRET_KEY_BASE=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+    DATABASE_HOST=build-time-dummy \
+    DATABASE_USER=build-time-dummy \
+    DATABASE_PASSWORD=build-time-dummy \
+    DATABASE_NAME=build-time-dummy
 
 RUN bundle exec rails assets:precompile
 
