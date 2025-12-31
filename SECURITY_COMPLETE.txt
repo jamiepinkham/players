@@ -1,0 +1,405 @@
+=================================================================
+SECURITY CONFIGURATION - COMPLETE
+=================================================================
+
+Summary: Locked Rails host authorization and enforced HTTPS for
+production with comprehensive security measures.
+
+=================================================================
+✅ ALL ACCEPTANCE CRITERIA MET
+=================================================================
+
+1. ✅ Rails accepts only expected hostname
+   - Host authorization enforced in production
+   - Primary host: players.billymartinplayersleague.com
+   - Additional hosts via TRUSTED_HOSTS env var
+   - Configured in: rails/config/initializers/host_authorization.rb
+
+2. ✅ SSL enforced in production
+   - config.force_ssl = true enabled
+   - All HTTP requests redirect to HTTPS (301)
+   - HSTS header automatically added
+   - Secure cookies enforced
+   - Asset URLs use HTTPS protocol
+
+3. ✅ No wildcard host allowlist
+   - Wildcards explicitly forbidden
+   - Validation checks for wildcard patterns
+   - Application fails to start if wildcards detected
+   - Each hostname must be explicitly listed
+
+=================================================================
+📁 FILES CREATED/UPDATED
+=================================================================
+
+NEW FILES (Commit these):
+-------------------------
+✓ rails/config/initializers/host_authorization.rb
+  - Host authorization configuration
+  - Per-environment rules (prod/dev/test)
+  - Wildcard validation
+  - Startup logging
+
+✓ SECURITY.md
+  - Complete security documentation (11 KB)
+  - Host authorization guide
+  - HTTPS enforcement details
+  - Testing procedures
+  - Troubleshooting guide
+
+✓ scripts/verify_security.sh
+  - Security verification script
+  - Tests host authorization
+  - Tests HTTPS redirects
+  - Tests HSTS headers
+  - Tests secure cookies
+
+UPDATED FILES (Commit these):
+-----------------------------
+✓ rails/config/environments/production.rb
+  - Enabled config.force_ssl = true
+  - Configured HTTPS asset URLs
+  - Asset host uses HTTPS protocol
+
+✓ .env.production.example
+  - Added APP_HOST configuration
+  - Added TRUSTED_HOSTS documentation
+  - Updated security section
+  - Added wildcard warnings
+
+✓ deploy/docker-compose.prod.yml
+  - Added APP_HOST environment variable
+  - Added TRUSTED_HOSTS environment variable
+  - Default value for APP_HOST
+
+✓ deploy/.env.example
+  - Added APP_HOST configuration
+  - Added TRUSTED_HOSTS examples
+  - Updated domain configuration
+
+✓ ENV_VARS.md
+  - Documented APP_HOST variable
+  - Documented TRUSTED_HOSTS variable
+  - Updated FORCE_SSL status (always enabled)
+  - Added security warnings
+
+=================================================================
+🔒 HOST AUTHORIZATION
+=================================================================
+
+How It Works:
+-------------
+1. Rails checks Host header on every request
+2. Compares against explicit allowlist
+3. Rejects requests with invalid Host (403 Forbidden)
+4. Prevents DNS rebinding attacks
+
+Configuration:
+--------------
+# Primary hostname (required)
+APP_HOST=players.billymartinplayersleague.com
+
+# Additional hostnames (optional)
+TRUSTED_HOSTS=www.players.billymartinplayersleague.com
+
+Default Hostname:
+-----------------
+players.billymartinplayersleague.com
+
+Rules:
+------
+✅ Explicit hostnames only
+❌ NO wildcards (*.example.com)
+✅ Subdomain.example.com is separate from example.com
+❌ NO protocols (https://)
+❌ NO ports (:443)
+
+Allowed Hosts by Environment:
+-----------------------------
+Production:
+  • Explicit list from APP_HOST + TRUSTED_HOSTS
+  • NO wildcards
+  • Fails on startup if wildcards detected
+
+Development:
+  • localhost, 127.0.0.1
+  • *.local, *.localhost patterns
+  • All IPv4 and IPv6 addresses
+
+Test:
+  • localhost, 127.0.0.1
+  • example.com, www.example.com
+  • test.host
+
+Startup Logging:
+----------------
+================================================================================
+Host Authorization Configured
+================================================================================
+Allowed hosts:
+  • players.billymartinplayersleague.com
+  • www.players.billymartinplayersleague.com
+================================================================================
+
+=================================================================
+🔐 HTTPS ENFORCEMENT
+=================================================================
+
+Status: ✅ ALWAYS ENABLED in production
+
+Configuration:
+--------------
+File: rails/config/environments/production.rb
+Setting: config.force_ssl = true
+
+What It Does:
+-------------
+1. HTTP → HTTPS Redirect
+   - All HTTP requests → 301 Redirect to HTTPS
+   - Automatic and transparent
+
+2. Secure Cookies
+   - All cookies have Secure flag
+   - Cookies only sent over HTTPS
+   - Session cookies are secure
+
+3. HSTS Header
+   - Strict-Transport-Security header added
+   - Tells browsers to always use HTTPS
+   - Duration: 1 year (max-age=31536000)
+
+4. Asset URLs
+   - All assets served over HTTPS
+   - CSS, JavaScript, images use HTTPS URLs
+
+HSTS Header:
+-----------
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+Asset URLs:
+-----------
+✅ https://players.billymartinplayersleague.com/assets/application.js
+❌ http://players.billymartinplayersleague.com/assets/application.js
+
+=================================================================
+🧪 VERIFICATION & TESTING
+=================================================================
+
+Local Verification Script:
+--------------------------
+./scripts/verify_security.sh [URL] [HOST]
+
+Example:
+  ./scripts/verify_security.sh http://localhost:3000 players.billymartinplayersleague.com
+
+Tests Performed:
+----------------
+1. Valid host header accepted (200 OK)
+2. Invalid host header blocked (403 Forbidden)
+3. HTTP redirects to HTTPS (301 Redirect)
+4. HSTS header present
+5. Secure cookie flags set
+
+Manual Testing:
+---------------
+# Test valid host
+curl -H "Host: players.billymartinplayersleague.com" http://localhost:3000/health
+
+# Test invalid host (should return 403 in production)
+curl -H "Host: evil.com" http://localhost:3000/health
+
+# Test HTTPS redirect
+curl -I http://your-app.com/
+
+# Test HSTS header
+curl -I https://your-app.com/ | grep -i strict-transport
+
+# Check logs for allowed hosts
+docker logs <container> | grep "Host Authorization"
+
+=================================================================
+🚀 DEPLOYMENT CHECKLIST
+=================================================================
+
+Before Deploying:
+-----------------
+✓ Set APP_HOST environment variable
+✓ Set TRUSTED_HOSTS if using multiple domains
+✓ Verify no wildcards in configuration
+✓ Ensure SSL certificate is valid
+✓ Configure reverse proxy to set X-Forwarded-Proto
+✓ Test with ./scripts/verify_security.sh
+✓ Check application startup logs
+✓ Test with valid and invalid Host headers
+
+Environment Variables Required:
+-------------------------------
+✓ APP_HOST=players.billymartinplayersleague.com
+□ TRUSTED_HOSTS=www.players.billymartinplayersleague.com (optional)
+
+After Deploying:
+----------------
+✓ Verify HTTP redirects to HTTPS
+✓ Check HSTS header in responses
+✓ Test invalid host returns 403
+✓ Review startup logs for allowed hosts
+✓ Test assets load over HTTPS
+✓ Verify secure cookies are set
+
+=================================================================
+🔧 REVERSE PROXY CONFIGURATION
+=================================================================
+
+Caddy (Already Configured):
+---------------------------
+{$DOMAIN} {
+    reverse_proxy web:3000 {
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+Nginx Example:
+--------------
+location / {
+    proxy_pass http://upstream;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+
+Required Headers:
+-----------------
+✓ Host: Original hostname
+✓ X-Forwarded-Proto: https
+✓ X-Forwarded-For: Client IP
+
+=================================================================
+⚠️ SECURITY WARNINGS
+=================================================================
+
+DO NOT:
+-------
+❌ Use wildcards in host configuration
+❌ Disable force_ssl in production
+❌ Accept requests from untrusted hosts
+❌ Use HTTP for assets in production
+❌ Skip HTTPS certificate validation
+❌ Use self-signed certificates in production
+
+DO:
+---
+✅ List each hostname explicitly
+✅ Keep force_ssl enabled always
+✅ Use valid SSL/TLS certificates
+✅ Monitor blocked host attempts
+✅ Rotate SSL certificates before expiry
+✅ Keep HSTS enabled
+
+=================================================================
+🐛 TROUBLESHOOTING
+=================================================================
+
+Issue: "Blocked host" error in production
+Fix:
+  1. Add hostname to TRUSTED_HOSTS
+  2. Restart application
+  3. Check startup logs
+
+Issue: Infinite redirect loop
+Fix:
+  1. Ensure proxy sets X-Forwarded-Proto: https
+  2. Check reverse proxy configuration
+  3. Verify force_ssl is not duplicated
+
+Issue: Mixed content warnings
+Fix:
+  1. Verify APP_HOST is set
+  2. Check asset URLs use HTTPS
+  3. Update hardcoded HTTP URLs to HTTPS
+
+Issue: Wildcard rejected
+Fix:
+  1. List each subdomain explicitly
+  2. Example: www.example.com,api.example.com
+  3. Do NOT use *.example.com
+
+Issue: Health check fails with valid host
+Fix:
+  1. Verify APP_HOST matches request Host header
+  2. Check application logs for errors
+  3. Test with: curl -H "Host: ..." /health
+
+=================================================================
+📖 DOCUMENTATION REFERENCE
+=================================================================
+
+Complete Documentation:
+-----------------------
+SECURITY.md          - Full security guide (11 KB)
+                     - Host authorization details
+                     - HTTPS enforcement
+                     - Configuration examples
+                     - Testing procedures
+                     - Troubleshooting
+
+ENV_VARS.md          - Environment variables
+                     - APP_HOST documentation
+                     - TRUSTED_HOSTS documentation
+                     - Security settings
+
+Quick Reference:
+----------------
+IMAGE_VERIFICATION_QUICKSTART.md - Health check endpoints
+HEALTHCHECK.md                   - Health check documentation
+
+Scripts:
+--------
+scripts/verify_security.sh       - Security verification
+scripts/verify_production_image.sh - Image verification
+
+=================================================================
+✅ TASKS COMPLETED
+=================================================================
+
+✓ Enabled config.force_ssl in production.rb
+✓ Created host authorization initializer
+✓ Configured APP_HOST environment variable
+✓ Configured TRUSTED_HOSTS environment variable
+✓ Added wildcard validation
+✓ Updated asset URLs to use HTTPS
+✓ Updated .env.production.example
+✓ Updated deploy/docker-compose.prod.yml
+✓ Updated deploy/.env.example
+✓ Created comprehensive SECURITY.md
+✓ Created verification script
+✓ Updated ENV_VARS.md documentation
+✓ Added startup logging for allowed hosts
+✓ Tested configuration per environment
+
+=================================================================
+🎯 SECURITY POSTURE
+=================================================================
+
+Before:
+-------
+❌ No host authorization
+❌ HTTPS not enforced
+❌ Any hostname accepted
+❌ Vulnerable to DNS rebinding
+❌ HTTP assets possible
+
+After:
+------
+✅ Host authorization enforced
+✅ HTTPS always enforced
+✅ Explicit hostname allowlist
+✅ Protected from DNS rebinding
+✅ All assets over HTTPS
+✅ HSTS header enabled
+✅ Secure cookies enforced
+✅ No wildcard patterns
+✅ Per-environment configuration
+✅ Comprehensive documentation
+
+=================================================================
