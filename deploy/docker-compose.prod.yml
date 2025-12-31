@@ -1,0 +1,92 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - backend
+
+  # Rails Application (production image)
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile.web.prod
+    restart: unless-stopped
+    environment:
+      RAILS_ENV: production
+      RACK_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+      DATABASE_HOST: db
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      APP_HOST: ${APP_HOST:-players.billymartinplayersleague.com}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:-}
+      # Add any other production env vars here
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    # No ports exposed to host - accessed only through proxy
+
+  # Caddy Reverse Proxy (HTTPS termination)
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frontend
+    depends_on:
+      - web
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+
+  # Cloudflare Tunnel (exposes to internet)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - frontend
+    depends_on:
+      - proxy
+
+volumes:
+  # Named volume for Postgres data persistence
+  pgdata_prod:
+    driver: local
+  # Caddy volumes for SSL certificates and config
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  # Internal network for db <-> web
+  backend:
+    driver: bridge
+  # Network for web <-> proxy <-> tunnel
+  frontend:
+    driver: bridge

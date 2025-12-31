@@ -31,6 +31,10 @@ rails/config/master.key
 
 # dotenv files
 .env
+.env.production
+.env.staging
+.env.local
+.env.*.local
 
 # Yarn and lock files
 rails/yarn-error.log

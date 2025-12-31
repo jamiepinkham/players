@@ -1,0 +1,94 @@
+# syntax=docker/dockerfile:1
+
+############################
+# Build stage
+############################
+FROM ruby:3.1.2-slim AS build
+
+ENV RAILS_ENV=production \
+    RACK_ENV=production \
+    BUNDLE_WITHOUT="development:test" \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_DEPLOYMENT=true \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3
+
+# System deps for gems + asset build
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    libpq-dev \
+    curl \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 18 from NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+  && npm install -g yarn \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Ruby deps first (better caching)
+COPY rails/Gemfile rails/Gemfile.lock ./
+RUN gem update --system --no-document && \
+    gem install bundler --no-document && \
+    bundle install
+
+# JS deps next (better caching)
+COPY rails/package.json rails/yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Copy app
+COPY rails/ ./
+
+# Precompile assets at build time
+# Rails needs SECRET_KEY_BASE and database env vars (even though it won't connect)
+ARG SECRET_KEY_BASE_DUMMY=1
+ENV SECRET_KEY_BASE=dummy \
+    DATABASE_HOST=dummy \
+    DATABASE_USER=dummy \
+    DATABASE_PASSWORD=dummy \
+    DATABASE_NAME=dummy
+
+RUN bundle exec rails assets:precompile
+
+############################
+# Runtime stage
+############################
+FROM ruby:3.1.2-slim AS runtime
+
+ENV RAILS_ENV=production \
+    RACK_ENV=production \
+    BUNDLE_WITHOUT="development:test" \
+    BUNDLE_PATH=/usr/local/bundle \
+    BUNDLE_DEPLOYMENT=true
+
+# Runtime deps only (no compilers)
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    libpq5 \
+    ca-certificates \
+    curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# Non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+WORKDIR /app
+
+# Bring over gems + app (including precompiled assets)
+COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --from=build /app /app
+
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Run Puma (no foreman, no watchers)
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
