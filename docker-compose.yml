@@ -3,6 +3,7 @@
 
 services:
   players:
+    image: ghcr.io/jamiepinkham/players:main
     depends_on:
       db:
         condition: service_healthy
@@ -12,6 +13,7 @@ services:
       - .env
 
   assets:
+    image: ghcr.io/jamiepinkham/players:main
     command: ["/usr/local/bin/entrypoint.sh"]
     env_file:
       - .env

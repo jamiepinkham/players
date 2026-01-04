@@ -6,6 +6,7 @@ This project uses docker-compose with environment-specific configurations to avo
 
 - `docker-compose.yml` - Base configuration (common settings)
 - `docker-compose.override.yml` - Development overrides (auto-loaded locally)
+- `docker-compose.dev.yml` - Development overrides (explicit alternative)
 - `docker-compose.qa.yml` - QA environment overrides
 - `docker-compose.prod.yml` - Production environment overrides
 - `.env` - Environment variables (create from `.env.example`)
@@ -21,9 +22,13 @@ This project uses docker-compose with environment-specific configurations to avo
 
 2. Edit `.env` with your local settings
 
-3. Run docker-compose (automatically uses base + override):
+3. Run docker-compose using either method:
    ```bash
+   # Auto-loads docker-compose.override.yml
    docker-compose up --build
+
+   # Or explicitly specify (same result)
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
    ```
 
 ### QA Environment
@@ -59,7 +64,7 @@ This project uses docker-compose with environment-specific configurations to avo
 
 | Feature | Development | QA | Production |
 |---------|-------------|-----|------------|
-| Image | Built locally | ghcr.io/jamiepinkham/players:qa | ghcr.io/jamiepinkham/players:main |
+| Image | Built locally | ghcr.io/jamiepinkham/players:main | ghcr.io/jamiepinkham/players:main |
 | Volumes | Mounted for hot-reload | None | None |
 | Restart | No | unless-stopped | unless-stopped |
 | Ports | 3000:3000 | 3000:3000 | Not exposed directly |
@@ -78,7 +83,9 @@ See `.env.example` for all available environment variables. Key variables:
 
 ## Notes
 
-- Development automatically includes hot-reload and volume mounts
-- QA and Production pull pre-built images from GitHub Container Registry
+- Development builds from local source with hot-reload and volume mounts
+- QA and Production use the same pre-built image from GitHub Container Registry
 - The `web` network in production is external (for reverse proxy integration)
+- `docker-compose.override.yml` is auto-loaded for convenience in development
+- Use explicit `-f` flags for QA/Prod to avoid accidentally loading the dev overrides
 - Never commit your `.env` file - it contains secrets
