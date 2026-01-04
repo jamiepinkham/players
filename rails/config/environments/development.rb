@@ -81,5 +81,4 @@ Rails.application.configure do
 
   config.hosts.clear
 
->>>>>>> ae3068f5 (rebase)
 end
