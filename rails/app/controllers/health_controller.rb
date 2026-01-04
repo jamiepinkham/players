@@ -4,7 +4,6 @@
 class HealthController < ApplicationController
   # Skip authentication/authorization for health checks
   skip_before_action :verify_authenticity_token
-  skip_before_action :authenticate_user!, if: :devise_controller?
 
   # GET /health or GET /healthz
   # Returns 200 OK if application is running
