@@ -10,7 +10,9 @@ A Rails application for managing the Billy Martin Players League, featuring play
 - [Database Management](#-database-management)
 - [Project Structure](#-project-structure)
 - [Production Deployment](#-production-deployment)
+- [Environment Variables](#-environment-variables)
 - [Troubleshooting](#-troubleshooting)
+- [Quick Reference](#-quick-reference)
 
 ---
 
@@ -232,12 +234,20 @@ players/
 │   └── verify-production-image.yml
 ├── scripts/                   # Utility scripts
 ├── Dockerfile                 # Multi-stage Docker image (assets + web)
-├── docker-compose.yml         # Development services
+├── docker-compose.yml         # Base configuration (all environments)
+├── docker-compose.override.yml # Dev overrides (auto-loaded)
+├── docker-compose.dev.yml     # Dev overrides (explicit)
+├── docker-compose.qa.yml      # QA environment overrides
+├── docker-compose.prod.yml    # Production environment overrides
+├── deploy.sh                  # Deployment script for all environments
 ├── assets_entrypoint.sh       # Assets container entrypoint
 ├── web-entrypoint.sh          # Web container entrypoint
-├── .env.template              # Environment template (development)
-├── .env.production.example    # Environment template (production)
+├── .env.example               # Environment template (development)
+├── .env.qa                    # Environment template (QA)
+├── .env.prod                  # Environment template (production)
 ├── .env                       # Your local config (gitignored)
+├── DOCKER_SETUP.md            # Detailed Docker deployment guide
+├── DEPLOYMENT_CHECKLIST.md    # Quick deployment reference
 └── README.md                  # This file
 ```
 
@@ -245,26 +255,147 @@ players/
 
 ## 🚀 Production Deployment
 
-### Production Setup
+### Multi-Environment Architecture
 
-The project uses GitHub Container Registry (GHCR) for production deployments.
+The project supports three environments with optimized configurations:
 
-**Environment Setup:**
-1. Copy the production environment template:
-   ```bash
-   cp .env.production.example .env.production
-   ```
+- **Development** - Local development with hot-reload and volume mounts
+- **QA** - Testing environment with production settings but relaxed security
+- **Production** - Production-ready with strict security and reverse proxy support
 
-2. Edit `.env.production` with your production values:
-   - `SECRET_KEY_BASE` - Generate with: `openssl rand -hex 64`
-   - `DATABASE_PASSWORD` - Secure password
-   - `APP_HOST` - Your domain name
-   - Other required environment variables
+**Documentation:**
+- [DOCKER_SETUP.md](DOCKER_SETUP.md) - Detailed deployment guide
+- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Quick reference checklist
 
-**Docker Image:**
-The multi-stage Dockerfile builds both the assets and web services in a single image:
+### Quick Deployment
+
+Use the deployment script for any environment:
+
 ```bash
-docker build -t players:latest .
+# Deploy to QA
+./deploy.sh qa
+
+# Deploy to Production (with confirmation)
+./deploy.sh prod
+```
+
+### Files Required on Host Machine
+
+Each deployment server needs only these files:
+
+#### QA Server Files
+```
+/opt/players/              # or your deployment directory
+├── docker-compose.yml     # Base configuration
+├── docker-compose.qa.yml  # QA overrides
+├── deploy.sh              # Deployment script
+└── .env                   # QA environment variables (from .env.qa template)
+```
+
+#### Production Server Files
+```
+/opt/players/              # or your deployment directory
+├── docker-compose.yml     # Base configuration
+├── docker-compose.prod.yml # Production overrides
+├── deploy.sh              # Deployment script
+└── .env                   # Production environment variables (from .env.prod template)
+```
+
+**Note:** No source code, Dockerfile, or build dependencies needed on servers - they pull pre-built images from GitHub Container Registry.
+
+### Initial Server Setup
+
+**1. Copy files to server:**
+```bash
+# For QA server
+scp docker-compose.yml deploy@qa-server:/opt/players/
+scp docker-compose.qa.yml deploy@qa-server:/opt/players/
+scp deploy.sh deploy@qa-server:/opt/players/
+scp .env.qa deploy@qa-server:/opt/players/.env.template
+
+# For Production server
+scp docker-compose.yml deploy@prod-server:/opt/players/
+scp docker-compose.prod.yml deploy@prod-server:/opt/players/
+scp deploy.sh deploy@prod-server:/opt/players/
+scp .env.prod deploy@prod-server:/opt/players/.env.template
+```
+
+**2. Configure environment on server:**
+```bash
+ssh deploy@server
+cd /opt/players
+
+# Copy template
+cp .env.template .env
+
+# Generate secure secrets
+openssl rand -hex 64
+
+# Edit .env with secure values
+nano .env
+```
+
+Required environment variables:
+- `DATABASE_PASSWORD` - Secure database password
+- `SECRET_KEY_BASE` - Generated secret (from openssl command)
+- `DATABASE_NAME` - `players_qa` or `players_production`
+- `RAILS_ENV` - `production` for both QA and prod
+
+**QA-specific settings:**
+```bash
+DISABLE_HOST_CHECK=true     # Allow any IP/hostname
+DISABLE_FORCE_SSL=true      # Allow HTTP (for testing)
+```
+
+**Production settings:**
+```bash
+# Do NOT set DISABLE_HOST_CHECK or DISABLE_FORCE_SSL
+# Use APP_HOST or TRUSTED_HOSTS for allowed domains
+APP_HOST=yourdomain.com
+```
+
+**3. Make deploy script executable:**
+```bash
+chmod +x deploy.sh
+```
+
+**4. Login to GitHub Container Registry:**
+```bash
+# You need a GitHub Personal Access Token with read:packages scope
+echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+**5. Deploy:**
+```bash
+# QA
+./deploy.sh qa
+
+# Production
+./deploy.sh prod
+```
+
+### Building and Publishing Images
+
+Images are built locally and pushed to GitHub Container Registry:
+
+```bash
+# Build image
+docker build -t ghcr.io/jamiepinkham/players:main .
+
+# Login to GHCR (needs write:packages scope)
+echo "YOUR_TOKEN" | docker login ghcr.io -u jamiepinkham --password-stdin
+
+# Push to registry
+docker push ghcr.io/jamiepinkham/players:main
+```
+
+After pushing, update servers:
+```bash
+# On QA server
+./deploy.sh qa
+
+# On production server
+./deploy.sh prod
 ```
 
 ### CI/CD Pipeline
@@ -279,9 +410,12 @@ The project includes GitHub Actions workflows:
 - ✅ Multi-stage Docker build (assets + web)
 - ✅ Asset precompilation with esbuild and Dart Sass
 - ✅ Non-root container users for security
-- ✅ Health checks for database
-- ✅ Automated CI verification
+- ✅ Health checks for database and application
+- ✅ Environment-specific configurations
+- ✅ Automated deployments with validation
 - ✅ GitHub Container Registry integration
+- ✅ Host authorization and SSL enforcement (production)
+- ✅ Reverse proxy support (production)
 
 ---
 
@@ -433,9 +567,14 @@ docker compose run --rm players bundle exec brakeman
 
 ## 📝 Environment Variables
 
-The application uses environment variables for configuration. See `.env.template` for available options.
+The application uses environment variables for configuration with templates for each environment:
 
-**Development defaults:**
+- `.env.example` - Development template
+- `.env.qa` - QA environment template
+- `.env.prod` - Production environment template
+
+### Development Environment Variables
+
 ```bash
 DATABASE_USER=postgres
 DATABASE_PASSWORD=postgres
@@ -443,14 +582,53 @@ DATABASE_NAME=players_development
 DATABASE_HOST=db
 SECRET_KEY_BASE=123ChangeMe
 RAILS_ENV=development
+
+# Development settings
+DISABLE_HOST_CHECK=true
+DISABLE_FORCE_SSL=true
 ```
 
-**Required for production:**
-- `SECRET_KEY_BASE` - Generate with: `openssl rand -hex 64`
-- `DATABASE_PASSWORD` - Secure password
-- `APP_HOST` - Your domain name
+### QA Environment Variables
 
-See `.env.production.example` for a complete list of production environment variables.
+```bash
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<secure-password>
+DATABASE_NAME=players_qa
+DATABASE_HOST=db
+SECRET_KEY_BASE=<generated-secret>
+RAILS_ENV=production
+
+# QA-specific settings (allow testing from any IP/host)
+DISABLE_HOST_CHECK=true
+DISABLE_FORCE_SSL=true
+```
+
+### Production Environment Variables
+
+```bash
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<very-secure-password>
+DATABASE_NAME=players_production
+DATABASE_HOST=db
+SECRET_KEY_BASE=<generated-secret>
+RAILS_ENV=production
+
+# Production host authorization
+APP_HOST=yourdomain.com
+# Or for multiple hosts:
+TRUSTED_HOSTS=yourdomain.com,www.yourdomain.com
+```
+
+**Generate secure secrets:**
+```bash
+# Generate SECRET_KEY_BASE
+openssl rand -hex 64
+
+# Or use Rails (if available)
+rails secret
+```
+
+**Important:** Never commit `.env` files with real secrets. Only the templates (`.env.example`, `.env.qa`, `.env.prod`) are committed to git.
 
 ---
 
@@ -489,6 +667,8 @@ For issues or questions, create an issue in the repository.
 
 ## 🎯 Quick Reference
 
+### Local Development
+
 **Start development:**
 ```bash
 ./bin/dev-setup  # First time only
@@ -510,8 +690,39 @@ For issues or questions, create an issue in the repository.
 docker compose down        # Stop everything
 ```
 
+### Deployment
+
+**Deploy to environments:**
+```bash
+./deploy.sh dev   # Development
+./deploy.sh qa    # QA
+./deploy.sh prod  # Production (asks for confirmation)
+```
+
+**Build and push images:**
+```bash
+docker build -t ghcr.io/jamiepinkham/players:main .
+docker push ghcr.io/jamiepinkham/players:main
+```
+
+**Files needed on servers:**
+- QA: `docker-compose.yml`, `docker-compose.qa.yml`, `deploy.sh`, `.env`
+- Prod: `docker-compose.yml`, `docker-compose.prod.yml`, `deploy.sh`, `.env`
+
+**Health checks:**
+```bash
+curl http://localhost:3000/health        # Basic health
+curl http://localhost:3000/health/ready  # Database connection
+curl http://localhost:3000/health/live   # Process alive
+```
+
 **Need help?**
 ```bash
 ./bin/rails --help
 docker compose --help
+./deploy.sh          # Shows usage
 ```
+
+**Documentation:**
+- [DOCKER_SETUP.md](DOCKER_SETUP.md) - Detailed Docker configuration and deployment
+- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Quick deployment checklist
