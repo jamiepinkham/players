@@ -226,18 +226,17 @@ players/
 │   ├── db/restore/            # Database dump files
 │   │   └── latest.restore     # Latest database backup
 │   └── postgres/              # PostgreSQL initialization
-├── deploy/                    # Production deployment
-│   ├── docker-compose.prod.yml
-│   └── README.md
+├── .github/workflows/         # CI/CD workflows
+│   ├── pr-docker-build.yml    # PR build verification
+│   ├── ghcr-publish.yml       # GHCR image publishing
+│   └── verify-production-image.yml
 ├── scripts/                   # Utility scripts
-│   ├── verify_env.sh          # Verify environment setup
-│   ├── verify_security.sh     # Security checks
-│   └── verify_production_image.sh
-├── Dockerfile.web             # Development Rails image
-├── Dockerfile.web.prod        # Production Rails image
-├── Dockerfile.assets          # Asset compilation image
+├── Dockerfile                 # Multi-stage Docker image (assets + web)
 ├── docker-compose.yml         # Development services
-├── .env.template              # Environment template
+├── assets_entrypoint.sh       # Assets container entrypoint
+├── web-entrypoint.sh          # Web container entrypoint
+├── .env.template              # Environment template (development)
+├── .env.production.example    # Environment template (production)
 ├── .env                       # Your local config (gitignored)
 └── README.md                  # This file
 ```
@@ -248,29 +247,41 @@ players/
 
 ### Production Setup
 
-See detailed production deployment documentation:
-- [deploy/README.md](deploy/README.md) - Complete deployment guide
-- [SECURITY.md](SECURITY.md) - Security configuration
-- [ENV_VARS.md](ENV_VARS.md) - Environment variables reference
+The project uses GitHub Container Registry (GHCR) for production deployments.
 
-**Quick production deploy:**
+**Environment Setup:**
+1. Copy the production environment template:
+   ```bash
+   cp .env.production.example .env.production
+   ```
+
+2. Edit `.env.production` with your production values:
+   - `SECRET_KEY_BASE` - Generate with: `openssl rand -hex 64`
+   - `DATABASE_PASSWORD` - Secure password
+   - `APP_HOST` - Your domain name
+   - Other required environment variables
+
+**Docker Image:**
+The multi-stage Dockerfile builds both the assets and web services in a single image:
 ```bash
-cd deploy
-cp .env.example .env
-# Edit .env with production values
-docker-compose -f docker-compose.prod.yml up -d
+docker build -t players:latest .
 ```
+
+### CI/CD Pipeline
+
+The project includes GitHub Actions workflows:
+- **pr-docker-build.yml** - Validates Docker builds on pull requests
+- **ghcr-publish.yml** - Publishes images to GitHub Container Registry
+- **verify-production-image.yml** - Verifies production image integrity
 
 ### Production Features
 
-- ✅ Multi-stage Docker build
-- ✅ Asset precompilation
-- ✅ HTTPS enforcement (force_ssl)
-- ✅ Host authorization (no wildcards)
-- ✅ Health check endpoints
+- ✅ Multi-stage Docker build (assets + web)
+- ✅ Asset precompilation with esbuild and Dart Sass
+- ✅ Non-root container users for security
+- ✅ Health checks for database
 - ✅ Automated CI verification
-- ✅ Caddy reverse proxy
-- ✅ Cloudflare Tunnel support
+- ✅ GitHub Container Registry integration
 
 ---
 
@@ -386,17 +397,6 @@ docker rmi $(docker images -q players*)
 
 ---
 
-## 📚 Additional Documentation
-
-- **[ENV_VARS.md](ENV_VARS.md)** - Complete environment variables reference
-- **[ENV_SETUP.md](ENV_SETUP.md)** - Environment setup quick start
-- **[SECURITY.md](SECURITY.md)** - Security configuration and best practices
-- **[HEALTHCHECK.md](HEALTHCHECK.md)** - Health check endpoints documentation
-- **[deploy/README.md](deploy/README.md)** - Production deployment guide
-- **[deploy/ARCHITECTURE.md](deploy/ARCHITECTURE.md)** - System architecture
-
----
-
 ## 🤝 Contributing
 
 ### Pull Request Requirements
@@ -450,7 +450,7 @@ RAILS_ENV=development
 - `DATABASE_PASSWORD` - Secure password
 - `APP_HOST` - Your domain name
 
-See [ENV_VARS.md](ENV_VARS.md) for complete documentation.
+See `.env.production.example` for a complete list of production environment variables.
 
 ---
 
