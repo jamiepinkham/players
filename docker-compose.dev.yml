@@ -1,0 +1,28 @@
+# Development environment overrides
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or just: docker-compose up (automatically uses docker-compose.override.yml)
+
+services:
+  players:
+    build:
+      context: .
+      target: web
+    volumes:
+      - ./rails:/app
+      - ./docker/db/restore:/app/db/restore
+    ports:
+      - "3000:3000"
+
+  assets:
+    build:
+      context: .
+      target: assets
+    environment:
+      WATCH: "1"
+    volumes:
+      - ./rails:/app
+      - /app/node_modules
+
+  db:
+    volumes:
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
