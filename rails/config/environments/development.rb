@@ -79,10 +79,7 @@ Rails.application.configure do
 
   config.assets.precompile += ['graphiql/rails/application.js', 'graphiql/rails/application.css']
 
-<<<<<<< HEAD
   config.hosts.clear
 
-=======
-  config.hosts << "bmpl-cloud-run-356060559372.us-central1.run.app"
->>>>>>> 40ed07da (Almost working)
+>>>>>>> ae3068f5 (rebase)
 end
