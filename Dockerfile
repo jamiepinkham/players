@@ -4,9 +4,15 @@ FROM node:18-slim AS assets
 # Install system dependencies (curl for Dart Sass)
 RUN apt-get update && apt-get install -y curl
 
-# Install Dart Sass
-RUN curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-x64.tar.gz \
-  | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass
+# Install Dart Sass based on architecture
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+      curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-x64.tar.gz \
+        | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass; \
+    elif [ "$ARCH" = "arm64" ]; then \
+      curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-arm64.tar.gz \
+        | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass; \
+    fi
 
 # Create a non-root user
 RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
@@ -16,9 +22,7 @@ WORKDIR /app
 
 # Copy package files and install deps as root
 COPY rails/package.json rails/yarn.lock ./
-RUN yarn install && \
-    yarn global add esbuild && \
-    yarn global add @parcel/watcher-linux-x64-glibc
+RUN yarn install
 
 # Copy rest of the app
 COPY rails/ ./
