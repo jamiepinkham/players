@@ -44,6 +44,8 @@ jobs:
           file: Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=ghcr.io/jamiepinkham/players:buildcache
+          cache-to: type=registry,ref=ghcr.io/jamiepinkham/players:buildcache,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
