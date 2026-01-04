@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Rails command wrapper for Docker
+# Usage: ./bin/rails console
+#        ./bin/rails db:migrate
+#        ./bin/rails routes
+
+set -euo pipefail
+
+# Change to project root
+cd "$(dirname "$0")/.."
+
+docker compose run --rm players bundle exec rails "$@"

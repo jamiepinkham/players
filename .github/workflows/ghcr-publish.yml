@@ -1,0 +1,78 @@
+name: Build & Publish Docker image (all branches)
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata (tags/labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/jamiepinkham/players
+          tags: |
+            type=ref,event=branch
+            type=sha,format=long,prefix=sha-
+            type=raw,value=main,enable=${{ github.ref_name == 'main' }}
+
+      - name: Build and push (Dockerfile)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=ghcr.io/jamiepinkham/players:buildcache
+          cache-to: type=registry,ref=ghcr.io/jamiepinkham/players:buildcache,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Add job summary
+        run: |
+          echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your Docker image has been built and published to GitHub Container Registry!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull the image:**" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/jamiepinkham/players:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run the container:**" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d -p 3000:3000 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e RAILS_ENV=production \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e SECRET_KEY_BASE=your_secret_key \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DATABASE_HOST=your_db_host \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DATABASE_USER=your_db_user \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DATABASE_PASSWORD=your_db_password \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DATABASE_NAME=your_db_name \\" >> $GITHUB_STEP_SUMMARY
+          echo "  ghcr.io/jamiepinkham/players:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**All tags for this build:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

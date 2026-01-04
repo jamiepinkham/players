@@ -1,18 +1,24 @@
 Rails.application.routes.draw do
-  
+
+  # Health check endpoints (before catch-all routes)
+  get '/health', to: 'health#show'
+  get '/healthz', to: 'health#show'
+  get '/health/ready', to: 'health#ready'
+  get '/health/live', to: 'health#live'
+
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   if Rails.env.development?
     mount GraphiQL::Rails::Engine, at: '/graphiql', graphql_path: '/graphql'
   end
   post '/graphql', to: 'graphql#execute'
-  
+
   devise_for :users,
     defaults: { format: :json },
     controllers: {
       sessions: 'sessions',
       passwords: 'passwords',
     }
-  
+
   root 'static#index'
   get '*path', to: 'static#index', constraints: lambda { |req|
     !req.path.match?(/\A\/(assets|images|packs|favicon\.ico|robots\.txt)/)

@@ -2,42 +2,45 @@ services:
   players:
     build:
       context: .
-      dockerfile: Dockerfile
+      target: web
     volumes:
       - ./rails:/app
-      - ./rails/app/assets/builds:/app/app/assets/builds
       - ./docker/db/restore:/app/db/restore
     ports:
       - "3000:3000"
     depends_on:
-      - db
-      # - assets
+      db:
+        condition: service_healthy
+      assets:
+        condition: service_started
     env_file:
       - .env
 
-  # assets:
-  #   platform: linux/amd64
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.assets
-  #   volumes:
-  #     - ./rails:/app
-  #     - ./rails/app/assets/builds:/app/app/assets/builds
-  #   env_file:
-  #     - .env
+  assets:
+    build:
+      context: .
+      target: assets
+    command: ["/usr/local/bin/entrypoint.sh"]
+    environment:
+      WATCH: "1"
+    volumes:
+      - ./rails:/app
+      - /app/node_modules
+    env_file:
+      - .env
 
   db:
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
     image: postgres:13
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 2s
+      timeout: 2s
+      start_period: 30s
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    env_file:
+      - .env
 
 volumes:
   pgdata:
-  # assets:

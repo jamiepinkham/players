@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_10_155856) do
+ActiveRecord::Schema.define(version: 2025_06_09_055515) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "bids", id: :serial, force: :cascade do |t|
@@ -31,8 +32,6 @@ ActiveRecord::Schema.define(version: 2022_03_10_155856) do
     t.index ["first_season_id"], name: "index_bids_on_first_season_id"
     t.index ["free_agency_period_id"], name: "index_bids_on_free_agency_period_id"
     t.index ["last_season_id"], name: "index_bids_on_last_season_id"
-    t.index ["player_id"], name: "index_bids_on_player_id"
-    t.index ["team_id"], name: "index_bids_on_team_id"
   end
 
   create_table "contracts", id: :serial, force: :cascade do |t|
@@ -87,7 +86,7 @@ ActiveRecord::Schema.define(version: 2022_03_10_155856) do
     t.datetime "updated_at", null: false
     t.string "bbrefid"
     t.string "bbref_minors"
-    t.json "bbref_stats"
+    t.jsonb "bbref_stats"
   end
 
   create_table "seasons", id: :serial, force: :cascade do |t|
