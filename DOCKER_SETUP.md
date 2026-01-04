@@ -14,7 +14,28 @@ This project uses docker-compose with environment-specific configurations to avo
 - `.env.prod` - Production environment template
 - `.env` - Active environment variables (created from templates above)
 
-## Environment Setup
+## Quick Deployment (Recommended)
+
+Use the `deploy.sh` script for automated deployments:
+
+```bash
+# Deploy to development
+./deploy.sh dev
+
+# Deploy to QA
+./deploy.sh qa
+
+# Deploy to production (with confirmation prompt)
+./deploy.sh prod
+```
+
+The script will:
+- Stop running containers
+- Pull latest images
+- Start containers
+- Show status and logs
+
+## Manual Environment Setup
 
 ### Development (Local)
 
@@ -32,6 +53,9 @@ This project uses docker-compose with environment-specific configurations to avo
 
    # Or explicitly specify (same result)
    docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+   # Or use the deploy script
+   ./deploy.sh dev
    ```
 
 ### QA Environment
@@ -54,8 +78,13 @@ This project uses docker-compose with environment-specific configurations to avo
    - `DATABASE_PASSWORD` - Use a strong password
    - `SECRET_KEY_BASE` - Use the generated secret from step 2
 
-4. Run with QA configuration:
+4. Deploy:
    ```bash
+   # Using deploy script (recommended)
+   ./deploy.sh qa
+
+   # Or manually
+   docker-compose -f docker-compose.yml -f docker-compose.qa.yml pull
    docker-compose -f docker-compose.yml -f docker-compose.qa.yml up -d
    ```
 
@@ -76,8 +105,13 @@ This project uses docker-compose with environment-specific configurations to avo
    - `DATABASE_PASSWORD` - Use a very strong password
    - `SECRET_KEY_BASE` - Use the generated secret from step 2
 
-4. Run with production configuration:
+4. Deploy (with confirmation prompt):
    ```bash
+   # Using deploy script (recommended)
+   ./deploy.sh prod
+
+   # Or manually
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
    docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
    ```
 
