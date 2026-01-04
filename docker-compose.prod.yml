@@ -1,0 +1,23 @@
+# Production environment overrides
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  players:
+    image: ghcr.io/jamiepinkham/players:main
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+
+  assets:
+    image: ghcr.io/jamiepinkham/players:main
+    restart: unless-stopped
+    environment:
+      WATCH: "0"
+
+  db:
+    restart: unless-stopped
+
+networks:
+  web:
+    external: true
