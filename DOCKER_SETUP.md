@@ -9,7 +9,10 @@ This project uses docker-compose with environment-specific configurations to avo
 - `docker-compose.dev.yml` - Development overrides (explicit alternative)
 - `docker-compose.qa.yml` - QA environment overrides
 - `docker-compose.prod.yml` - Production environment overrides
-- `.env` - Environment variables (create from `.env.example`)
+- `.env.example` - Environment template (for local dev)
+- `.env.qa` - QA environment template
+- `.env.prod` - Production environment template
+- `.env` - Active environment variables (created from templates above)
 
 ## Environment Setup
 
@@ -33,29 +36,47 @@ This project uses docker-compose with environment-specific configurations to avo
 
 ### QA Environment
 
-1. Create `.env` with QA-specific values:
+1. Copy the QA environment template:
    ```bash
-   DATABASE_NAME=players_qa
-   RAILS_ENV=production
-   # ... other QA settings
+   cp .env.qa .env
    ```
 
-2. Run with QA configuration:
+2. Edit `.env` and set secure values:
+   ```bash
+   # Generate a secure secret key base
+   openssl rand -hex 64
+
+   # Or if you have Rails available
+   rails secret
+   ```
+
+3. Update the following in `.env`:
+   - `DATABASE_PASSWORD` - Use a strong password
+   - `SECRET_KEY_BASE` - Use the generated secret from step 2
+
+4. Run with QA configuration:
    ```bash
    docker-compose -f docker-compose.yml -f docker-compose.qa.yml up -d
    ```
 
 ### Production Environment
 
-1. Create `.env` with production values:
+1. Copy the production environment template:
    ```bash
-   DATABASE_NAME=players_production
-   RAILS_ENV=production
-   SECRET_KEY_BASE=<secure-random-key>
-   # ... other production settings
+   cp .env.prod .env
    ```
 
-2. Run with production configuration:
+2. Edit `.env` and set secure values:
+   ```bash
+   # Generate a secure secret key base
+   openssl rand -hex 64
+   ```
+
+3. Update the following in `.env`:
+   - `DATABASE_PASSWORD` - Use a very strong password
+   - `SECRET_KEY_BASE` - Use the generated secret from step 2
+
+4. Run with production configuration:
    ```bash
    docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
    ```

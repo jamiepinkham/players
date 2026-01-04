@@ -14,7 +14,6 @@ services:
 
   assets:
     image: ghcr.io/jamiepinkham/players:main
-    command: ["/usr/local/bin/entrypoint.sh"]
     env_file:
       - .env
 

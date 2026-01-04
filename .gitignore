@@ -30,12 +30,17 @@ rails/node_modules
 # Ignore master key if using credentials
 rails/config/master.key
 
-# dotenv files
+# dotenv files (ignore actual env, but commit templates)
 .env
 .env.production
 .env.staging
 .env.local
 .env.*.local
+
+# Allow templates to be committed
+!.env.example
+!.env.qa
+!.env.prod
 
 # Yarn and lock files
 rails/yarn-error.log
