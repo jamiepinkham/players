@@ -9,6 +9,7 @@ rails/db/*.sqlite3-journal
 rails/public/packs
 rails/public/assets/*
 !rails/public/assets/.keep
+rails/app/assets/builds/
 rails/public/packs-test
 rails/public/system
 rails/public/uploads
