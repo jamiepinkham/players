@@ -27,5 +27,8 @@ COPY rails/ ./
 RUN chown -R appuser:appgroup /app
 USER appuser
 
+ENV DB_USERNAME_LINK bmpl-secrets/prod-db-username
+ENV DB_PW_LINK bmpl-secrets/prod-db-password
+
 EXPOSE 3000
 CMD ["foreman", "start", "-f", "Procfile"]
