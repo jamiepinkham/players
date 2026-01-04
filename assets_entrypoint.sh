@@ -34,5 +34,5 @@ exec "$ESBUILD" app/javascript/application.jsx \
   --loader:.svg=file \
   --loader:.jpg=file \
   --asset-names=images/[name]-[hash] \
-  --public-path=/assets \
+  --public-path=/app/assets \
   --watch=forever

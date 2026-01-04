@@ -104,4 +104,6 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  config.hosts << "bmpl-cloud-run-356060559372.us-central1.run.app"
 end
