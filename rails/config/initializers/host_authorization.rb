@@ -9,7 +9,15 @@
 # =================================================================
 
 Rails.application.configure do
-  if Rails.env.production?
+  # Allow disabling host check for dev/qa environments
+  if ENV['DISABLE_HOST_CHECK'] == 'true'
+    # Disable host authorization entirely (dev/qa only)
+    config.hosts.clear
+    Rails.logger.info "=" * 80
+    Rails.logger.info "Host Authorization: DISABLED"
+    Rails.logger.info "All hosts allowed (DISABLE_HOST_CHECK=true)"
+    Rails.logger.info "=" * 80
+  elsif Rails.env.production?
     # In production, only accept requests from explicitly allowed hosts
     # NO wildcards allowed - each hostname must be explicitly listed
 
