@@ -55,12 +55,19 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Your Docker image has been built and published to GitHub Container Registry!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Pull the image:**" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Pull Commands" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull by branch name:**" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           echo "docker pull ghcr.io/jamiepinkham/players:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Run the container:**" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull by commit SHA (pinned):**" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/jamiepinkham/players:sha-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Run the container" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           echo "docker run -d -p 3000:3000 \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e RAILS_ENV=production \\" >> $GITHUB_STEP_SUMMARY
@@ -72,7 +79,52 @@ jobs:
           echo "  ghcr.io/jamiepinkham/players:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**All tags for this build:**" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏷️ All tags for this build" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find PR for this branch
+          PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number')
+
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Found PR #$PR_NUMBER for branch ${{ github.ref_name }}"
+            gh pr comment "$PR_NUMBER" --body "## 🐳 Docker Image Published
+
+          Your Docker image has been built and published to GitHub Container Registry!
+
+          ### 📦 Pull Commands
+
+          **Pull by branch name:**
+          \`\`\`bash
+          docker pull ghcr.io/jamiepinkham/players:${{ github.ref_name }}
+          \`\`\`
+
+          **Pull by commit SHA (pinned):**
+          \`\`\`bash
+          docker pull ghcr.io/jamiepinkham/players:sha-${{ github.sha }}
+          \`\`\`
+
+          ### 🚀 Run the container
+          \`\`\`bash
+          docker run -d -p 3000:3000 \\
+            -e RAILS_ENV=production \\
+            -e SECRET_KEY_BASE=your_secret_key \\
+            -e DATABASE_HOST=your_db_host \\
+            -e DATABASE_USER=your_db_user \\
+            -e DATABASE_PASSWORD=your_db_password \\
+            -e DATABASE_NAME=your_db_name \\
+            ghcr.io/jamiepinkham/players:${{ github.ref_name }}
+          \`\`\`
+
+          ### 🏷️ All tags for this build
+          \`\`\`
+          ${{ steps.meta.outputs.tags }}
+          \`\`\`"
+          else
+            echo "No open PR found for branch ${{ github.ref_name }}, skipping PR comment"
+          fi
