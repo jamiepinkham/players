@@ -57,15 +57,20 @@ Rails.application.configure do
     # config.active_job.queue_name_prefix = "bmpl_finances_#{Rails.env}"
     config.action_mailer.perform_caching = false
   
-    #TODO: provide via ENV[]
+    # Mailgun SMTP Configuration - Using Environment Variables
     config.action_mailer.smtp_settings = {
-      :user_name => 'apikey',
-      :password => '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',
-      :domain => 'billymartinplayersleague.com',
-      :address => 'smtp.sendgrid.net',
-      :port => 587,
-      :authentication => :plain,
-      :enable_starttls_auto => true
+      address:              ENV['MAILGUN_SMTP_ADDRESS'] || 'smtp.mailgun.org',
+      port:                 ENV['MAILGUN_SMTP_PORT']&.to_i || 587,
+      domain:               ENV['MAILGUN_SMTP_DOMAIN'],
+      user_name:            ENV['MAILGUN_SMTP_USERNAME'],
+      password:             ENV['MAILGUN_SMTP_PASSWORD'],
+      authentication:       (ENV['MAILGUN_SMTP_AUTHENTICATION'] || 'plain').to_sym,
+      enable_starttls_auto: true
+    }
+
+    # Set default from address from environment
+    config.action_mailer.default_options = {
+      from: ENV['MAILER_FROM'] || 'no-reply@billymartinplayersleague.com'
     }
   
     config.navigational_formats = []
