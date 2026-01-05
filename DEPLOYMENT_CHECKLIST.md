@@ -2,6 +2,8 @@
 
 Quick reference for deploying to QA or Production servers.
 
+**Note:** This guide uses `~/edge` as the deployment directory. You can use any directory you prefer (e.g., `/opt/edge`, `/srv/edge`, etc.). Just replace `~/edge` throughout with your chosen path.
+
 ## Prerequisites
 
 - [ ] Docker and docker-compose installed on server
@@ -14,19 +16,19 @@ Quick reference for deploying to QA or Production servers.
 ### For QA Server
 
 ```bash
-scp docker-compose.yml deploy@qa-server:/opt/players/
-scp docker-compose.qa.yml deploy@qa-server:/opt/players/
-scp deploy.sh deploy@qa-server:/opt/players/
-scp .env.qa deploy@qa-server:/opt/players/.env.template
+scp docker-compose.yml deploy@qa-server:~/edge/
+scp docker-compose.qa.yml deploy@qa-server:~/edge/
+scp deploy.sh deploy@qa-server:~/edge/
+scp .env.qa deploy@qa-server:~/edge/.env.template
 ```
 
 ### For Production Server
 
 ```bash
-scp docker-compose.yml deploy@prod-server:/opt/players/
-scp docker-compose.prod.yml deploy@prod-server:/opt/players/
-scp deploy.sh deploy@prod-server:/opt/players/
-scp .env.prod deploy@prod-server:/opt/players/.env.template
+scp docker-compose.yml deploy@prod-server:~/edge/
+scp docker-compose.prod.yml deploy@prod-server:~/edge/
+scp deploy.sh deploy@prod-server:~/edge/
+scp .env.prod deploy@prod-server:~/edge/.env.template
 ```
 
 ## Initial Server Setup
@@ -35,9 +37,8 @@ scp .env.prod deploy@prod-server:/opt/players/.env.template
 
 ```bash
 ssh deploy@server
-sudo mkdir -p /opt/players
-sudo chown $USER:$USER /opt/players
-cd /opt/players
+mkdir -p ~/edge  # or your preferred directory
+cd ~/edge
 ```
 
 ### 2. Configure Environment
