@@ -5,16 +5,21 @@ class AddOwnerToTeams < ActiveRecord::Migration[6.1]
 
     # Migrate existing data from teams_users to teams.owner_id
     # Set the first user from teams_users as the owner
+    # Only set owner_id if the user still exists (avoid orphaned foreign keys)
     execute <<-SQL
       UPDATE teams
       SET owner_id = (
-        SELECT user_id
-        FROM teams_users
-        WHERE teams_users.team_id = teams.id
+        SELECT tu.user_id
+        FROM teams_users tu
+        INNER JOIN users u ON tu.user_id = u.id
+        WHERE tu.team_id = teams.id
         LIMIT 1
       )
       WHERE EXISTS (
-        SELECT 1 FROM teams_users WHERE teams_users.team_id = teams.id
+        SELECT 1
+        FROM teams_users tu
+        INNER JOIN users u ON tu.user_id = u.id
+        WHERE tu.team_id = teams.id
       )
     SQL
 
