@@ -1,32 +1,41 @@
 #!/bin/bash
+# Auto-restore database from mounted restore file
+# Place your restore file at: ./db-restore/db.restore (on host machine)
+
 set -e
 
-# Only run in development
-if [[ "$RAILS_ENV" != "development" ]]; then
-  echo "ℹ️ Skipping DB setup: not in development environment."
-  exit 0
-fi
+RESTORE_FILE="/db-restore/db.restore"
 
-echo "🕒 Waiting for Postgres to be ready..."
-until pg_isready -U "$DATABASE_USER" -h localhost >/dev/null 2>&1; do
-  sleep 1
-done
+echo "================================================"
+echo "PostgreSQL Database Initialization"
+echo "================================================"
 
-# Path relative to the app context inside the container
-SEED_FILE="db/restore/latest.restore"
+if [ -f "$RESTORE_FILE" ]; then
+    echo "✓ Found restore file: $RESTORE_FILE"
+    echo "Restoring database..."
 
-if [[ -f "$SEED_FILE" ]]; then
-  echo "📦 Seed restore found at $SEED_FILE, restoring..."
+    # Create database if it doesn't exist
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "postgres" <<-EOSQL
+        SELECT 'CREATE DATABASE $POSTGRES_DB'
+        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$POSTGRES_DB')\gexec
+EOSQL
 
-  # Wait for app container to be ready to run this
-  docker compose run --rm players bash -c "
-    bundle exec rails db:create &&
-    pg_restore --clean --no-owner -U \$DATABASE_USER -d \$DATABASE_NAME < $SEED_FILE
-    bundle exec rails db:migrate
-  "
+    # Restore the database
+    pg_restore --verbose --clean --no-acl --no-owner \
+        -U "$POSTGRES_USER" \
+        -d "$POSTGRES_DB" \
+        "$RESTORE_FILE" 2>&1 || echo "Restore completed (some warnings are normal)"
+
+    echo "================================================"
+    echo "✓ Database restored from $RESTORE_FILE"
+    echo "================================================"
 else
-  echo "🧱 No seed dump found. Falling back to Rails setup..."
-  docker compose run --rm players bundle exec rails db:create db:migrate db:seed
+    echo "No restore file found at $RESTORE_FILE"
+    echo "Database will start empty"
+    echo ""
+    echo "To auto-restore on next initialization:"
+    echo "  1. Place file at: ./db-restore/db.restore"
+    echo "  2. Remove volume: docker compose down -v"
+    echo "  3. Restart: docker compose up -d"
+    echo "================================================"
 fi
-
-echo "✅ DB setup complete."

@@ -1,0 +1,3 @@
+# This directory is for database restore files
+# Place your restore file here as: db.restore
+# The database will automatically restore on first initialization

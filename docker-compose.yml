@@ -26,6 +26,8 @@ services:
       start_period: 30s
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./db-restore:/db-restore:ro  # Mount host directory for restore files
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
     env_file:
       - .env
     environment:

@@ -63,3 +63,7 @@ docker-compose.override.yml
 
 logs/*
 *.dump
+
+# Database restore files
+db-restore/*
+!db-restore/.gitkeep
