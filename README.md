@@ -262,7 +262,7 @@ curl http://localhost:3000/health/live   # Process alive
 ## 📂 Project Structure
 
 ```
-edge/
+/
 ├── bin/                           # Helper scripts
 │   ├── console                    # Rails console
 │   ├── dev                        # Start development
