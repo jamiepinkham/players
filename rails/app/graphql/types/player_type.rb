@@ -35,13 +35,16 @@ module Types
 
     def contract_minimums
       max_seasons = Season.current.active_free_agency_period.max_contract_length
-      Season.current.first(max_seasons).each_with_index.map { |x, i|
+      current_season = Season.current
+      fa_period = current_season.active_free_agency_period
+
+      current_season.first(max_seasons).each_with_index.map do |last_season, i|
         {
-          season: x,
-          amount: Season.current.active_free_agency_period.minimum_bid_for_player_and_years(object.id, i + 1),
+          season: last_season,
+          amount: fa_period.minimum_bid_for_player_and_season_range(object.id, current_season, last_season),
           duration: i + 1
         }
-      }
+      end
     end
     
 

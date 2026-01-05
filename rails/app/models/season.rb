@@ -27,7 +27,6 @@ class Season < ApplicationRecord
         end
     end
 
-    # Enumerate through all seasons starting from this one going forward
     def each(&block)
         return to_enum(:each) unless block_given?
 
