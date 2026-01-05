@@ -1,5 +1,5 @@
 class Team < ApplicationRecord
-  has_and_belongs_to_many :owners, class_name: 'User'
+  belongs_to :owner, class_name: 'User'
   has_many :contracts, -> { includes :player }
   has_many :bids, -> { includes :player }
 
