@@ -40,10 +40,9 @@
     "rails_admin/@fortawesome/fontawesome-free": "^5.15.0"
   },
   "scripts": {
-    "build": "yarn esbuild app/javascript/application.jsx --bundle --sourcemap --outdir=app/assets/builds --loader:.js=jsx --loader:.jsx=jsx --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --loader:.eot=file --loader:.svg=file --loader:.jpg=file",
-    "build:css": "sass app/assets/stylesheets/application.scss --no-source-map --load-path=node_modules",
-    "watch": "yarn esbuild app/javascript/application.jsx --bundle --sourcemap --outdir=app/assets/builds --loader:.js=jsx --loader:.jsx=jsx --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --loader:.eot=file --loader:.svg=file --loader:.jpg=file --watch",
-    "watch:css": "yarn sass app/assets/stylesheets/application.scss app/assets/builds/application.css --load-path=node_modules --watch",
-    "esbuild": "esbuild --version"
+    "build": "esbuild app/javascript/application.jsx --bundle --sourcemap --outdir=app/assets/builds --loader:.js=jsx --loader:.jsx=jsx --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --loader:.eot=file --loader:.svg=file --loader:.jpg=file",
+    "build:css": "sass app/assets/stylesheets/application.scss app/assets/builds/application.css --no-source-map --load-path=node_modules",
+    "watch": "esbuild app/javascript/application.jsx --bundle --sourcemap --outdir=app/assets/builds --loader:.js=jsx --loader:.jsx=jsx --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --loader:.eot=file --loader:.svg=file --loader:.jpg=file --watch=forever",
+    "watch:css": "sass app/assets/stylesheets/application.scss app/assets/builds/application.css --load-path=node_modules --watch"
   }
 }

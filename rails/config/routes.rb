@@ -12,6 +12,9 @@ Rails.application.routes.draw do
   end
   post '/graphql', to: 'graphql#execute'
 
+  # Admin redirect - creates session from JWT auth
+  get '/admin_login', to: 'admin_redirect#index'
+
   devise_for :users,
     defaults: { format: :json },
     controllers: {

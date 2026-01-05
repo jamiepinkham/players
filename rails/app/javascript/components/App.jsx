@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
+import axios from "axios";
 
 import PrivateRoute from "./PrivateRoute";
 import TeamsList from "./TeamsList";
@@ -36,6 +37,11 @@ export default function App(props) {
     },
     [history]
   );
+
+  const handleAdminClick = useCallback(async () => {
+    // Navigate to admin_login endpoint which will handle session creation and redirect
+    window.location.href = `/admin_login?token=${auth.token}`;
+  }, [auth.token]);
   return (
     <Box>
       <Header background="brand" pad="small">
@@ -83,7 +89,7 @@ export default function App(props) {
                 icon={<UserAdmin />}
                 hoverIndicator
                 label="Admin"
-                href="/admin"
+                onClick={handleAdminClick}
               />
             )}
           </Nav>
