@@ -73,13 +73,7 @@ module Types
     end
 
     def team
-      player_id = object.id
-      contract = Contract.where(player_id: player_id).first
-      if contract
-        contract.team
-      else
-        nil
-      end
+      object.contract&.team
     end
   end
 
