@@ -5,16 +5,18 @@ This guide explains how to deploy the Players app using Portainer behind a Caddy
 ## Quick Reference
 
 **Files you need:**
-- `docker-compose.portainer.yml` - Combined compose file for Portainer (paste into Web editor)
-- `stack.env` - Environment variables reference (copy values into Portainer UI)
+- `docker-compose.portainer.yml` - Combined compose file (paste into Portainer's Web editor)
+- `stack.env.txt` - Environment variables in Portainer format (paste into Portainer's Advanced mode)
+- `stack.env` - Environment variables with documentation (reference guide)
 - `PORTAINER_DEPLOYMENT.md` - This guide
 
 **Deployment flow:**
 1. Create stack in Portainer UI
-2. Paste `docker-compose.portainer.yml` into Web editor
-3. Add environment variables from `stack.env` in Portainer's Environment Variables section
-4. Deploy stack
-5. Configure Caddyfile to proxy to the `players` service
+2. Paste `docker-compose.portainer.yml` contents into Web editor
+3. Scroll down to "Environment variables" section in Portainer
+4. Manually add each variable from `stack.env` (see step 3 below for details)
+5. Deploy stack
+6. Configure Caddyfile to proxy to the `players` service
 
 ## Prerequisites
 
@@ -83,7 +85,26 @@ Use the `docker-compose.portainer.yml` file which combines the base and producti
 
 ### 3. Configure Environment Variables in Portainer UI
 
-In the **Environment variables** section of the stack creation page, add the following variables:
+When creating your stack in Portainer, scroll down to find the **Environment variables** section (below the compose file editor).
+
+You have two input options in Portainer:
+
+#### Option 1: Simple Editor (Recommended)
+Click **Add an environment variable** for each variable and enter:
+- **Name**: Variable name (e.g., `DATABASE_USER`)
+- **Value**: The actual value (e.g., `postgres`)
+
+#### Option 2: Advanced Editor (Easiest)
+1. Click **Advanced mode** toggle
+2. Copy the entire contents of `stack.env.txt`
+3. Paste into the text box
+4. Update placeholder values (DATABASE_PASSWORD, SECRET_KEY_BASE, MAILGUN_SMTP_PASSWORD)
+
+The format is simple `KEY=VALUE`, one per line.
+
+---
+
+**Here are all the variables you need to set:**
 
 #### Required Variables
 
