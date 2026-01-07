@@ -1,13 +1,28 @@
-# Portainer Deployment Guide
+# Portainer Deployment Guide (with Caddy Proxy)
 
-This guide explains how to deploy the Players app using Portainer.
+This guide explains how to deploy the Players app using Portainer behind a Caddy reverse proxy.
 
 ## Prerequisites
 
 - Portainer installed and running
 - Access to Portainer UI
+- Caddy reverse proxy installed and running
 - Docker network named `web` created (or modify docker-compose.prod.yml accordingly)
+- Caddy and your Portainer stack must be on the same `web` network
 - GitHub Container Registry image: `ghcr.io/jamiepinkham/players:main`
+
+## Quick Start Checklist
+
+Before deploying, have these ready:
+
+- [ ] Generate `SECRET_KEY_BASE`: Run `openssl rand -hex 64`
+- [ ] Set a strong `DATABASE_PASSWORD`
+- [ ] Configure Mailgun and get SMTP credentials
+- [ ] Set `DISABLE_FORCE_SSL=true` (Caddy handles SSL)
+- [ ] Set `RAILS_LOG_TO_STDOUT=true` (for container logs)
+- [ ] Create Docker network: `docker network create web`
+- [ ] Update your Caddyfile with domain and proxy config
+- [ ] Point your domain's DNS to your server
 
 ## Deployment Steps
 
@@ -45,6 +60,8 @@ In the **Environment variables** section of the stack creation page, add the fol
 | `MAILGUN_SMTP_DOMAIN` | Your email domain | `billymartinplayersleague.com` |
 | `MAILGUN_SMTP_USERNAME` | Mailgun username | `postmaster@mg.billymartinplayersleague.com` |
 | `MAILGUN_SMTP_PASSWORD` | Mailgun password | Your Mailgun SMTP password |
+| `DISABLE_FORCE_SSL` | Disable Rails SSL forcing | `true` (Caddy handles SSL) |
+| `RAILS_LOG_TO_STDOUT` | Enable stdout logging | `true` (recommended) |
 
 #### Optional Variables
 
@@ -52,10 +69,8 @@ In the **Environment variables** section of the stack creation page, add the fol
 |----------|-------------|---------------|
 | `MAILGUN_SMTP_AUTHENTICATION` | SMTP auth method | `plain` (default) |
 | `MAILER_FROM` | Default email sender | `no-reply@billymartinplayersleague.com` |
-| `RAILS_LOG_TO_STDOUT` | Enable stdout logging | `true` (recommended for containers) |
-| `RAILS_SERVE_STATIC_FILES` | Serve static files from Rails | Leave unset if using nginx/proxy |
-| `DISABLE_FORCE_SSL` | Disable SSL forcing | Only set to `true` if SSL is handled by proxy |
-| `APP_HOST` | Application hostname | Your domain (e.g., `app.example.com`) |
+| `APP_HOST` | Application hostname | Your domain (e.g., `players.example.com`) |
+| `RAILS_SERVE_STATIC_FILES` | Serve static files from Rails | Leave unset (let Caddy serve static files) |
 | `ASSET_HOST` | CDN/asset server URL | Leave unset or set to CDN URL |
 
 ### 4. Generate SECRET_KEY_BASE
@@ -81,13 +96,15 @@ Copy the output and use it as your `SECRET_KEY_BASE` value.
 
 ### 6. Network Configuration
 
-The production compose file expects an external network named `web`. Ensure this network exists:
+The production compose file expects an external network named `web` that Caddy also uses. Ensure this network exists:
 
 ```bash
 docker network create web
 ```
 
-Or modify `docker-compose.prod.yml` to use your existing network name.
+Both your Caddy container and this Portainer stack need to be on the `web` network so Caddy can proxy requests to the `players` service.
+
+If Caddy is using a different network name, update `docker-compose.prod.yml` accordingly.
 
 ### 7. Deploy the Stack
 
@@ -105,11 +122,41 @@ Or modify `docker-compose.prod.yml` to use your existing network name.
    - `db` (PostgreSQL database)
 3. View logs for each service to ensure no errors
 
-### 9. Access the Application
+### 9. Configure Caddy
 
-If you're using Traefik or another reverse proxy on the `web` network, configure it to route traffic to the `players` service.
+Add a reverse proxy configuration to your Caddyfile to route traffic to the players app:
 
-If accessing directly, the app will be available on the port exposed by the `players` service.
+```caddyfile
+players.yourdomain.com {
+    reverse_proxy players:3000
+}
+```
+
+Or if Caddy is not running in Docker:
+
+```caddyfile
+players.yourdomain.com {
+    reverse_proxy 172.17.0.1:3000  # Adjust IP based on your Docker bridge
+}
+```
+
+**Important Notes:**
+- Replace `players.yourdomain.com` with your actual domain
+- The service name `players` should match the service name in your stack
+- If your stack is named `players-app`, the service will be `players-app_players_1` or similar (check container names)
+- Caddy will automatically obtain and renew SSL certificates via Let's Encrypt
+
+### 10. Reload Caddy Configuration
+
+After updating your Caddyfile:
+
+```bash
+# If Caddy is a Docker container
+docker exec -w /etc/caddy caddy_container_name caddy reload
+
+# If Caddy is installed directly
+caddy reload
+```
 
 ## Troubleshooting
 
@@ -133,6 +180,27 @@ Check the logs for the `players` service. Common issues:
 - Check Mailgun dashboard for sending limits/blocks
 - Review application logs for SMTP errors
 
+### Caddy Cannot Connect to App
+
+- Verify both Caddy and the stack are on the same Docker network (`web`)
+- Check the service name matches in Caddyfile (use `docker ps` to verify)
+- Ensure port 3000 is exposed in the compose file
+- Test connectivity: `docker exec caddy_container ping players`
+
+### SSL Certificate Issues
+
+- Ensure your domain DNS A record points to your server's public IP
+- Check Caddy logs: `docker logs caddy_container_name`
+- Verify ports 80 and 443 are open and accessible from the internet
+- Let's Encrypt requires public domain access for certificate issuance
+
+### 502 Bad Gateway
+
+- App container might not be running - check `docker ps`
+- App might be starting up - check logs for database connection issues
+- Wrong port in Caddyfile - Rails runs on port 3000 by default
+- Network connectivity issue between Caddy and app container
+
 ## Updating the Application
 
 To update to a new version:
@@ -153,10 +221,72 @@ To backup the database, see the backup documentation or use:
 docker exec {stackname}_db_1 pg_dump -U postgres players_production > backup.sql
 ```
 
+## Caddy Configuration Examples
+
+### Basic Configuration
+
+```caddyfile
+players.yourdomain.com {
+    reverse_proxy players:3000
+}
+```
+
+### With Portainer Stack Name
+
+If your stack is named `players-app`, the service name will include the stack prefix:
+
+```caddyfile
+players.yourdomain.com {
+    # Format: stackname_servicename_instancenumber
+    reverse_proxy players-app_players_1:3000
+}
+```
+
+Or use Docker DNS to target all replicas:
+
+```caddyfile
+players.yourdomain.com {
+    reverse_proxy players-app_players:3000
+}
+```
+
+### Advanced Configuration with Headers
+
+```caddyfile
+players.yourdomain.com {
+    reverse_proxy players:3000 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For {remote}
+        header_up X-Real-IP {remote}
+    }
+
+    # Optional: serve static files directly from Caddy for better performance
+    # handle_path /assets/* {
+    #     root * /path/to/assets
+    #     file_server
+    # }
+}
+```
+
+### Multiple Domains
+
+```caddyfile
+players.yourdomain.com, www.players.yourdomain.com {
+    # Redirect www to non-www
+    @www host www.players.yourdomain.com
+    handle @www {
+        redir https://players.yourdomain.com{uri} permanent
+    }
+
+    reverse_proxy players:3000
+}
+```
+
 ## Security Notes
 
 1. Use strong, unique passwords for `DATABASE_PASSWORD`
 2. Never commit the actual `stack.env` file with real credentials to version control
 3. Consider using Portainer secrets for sensitive values
-4. Ensure SSL is enabled (set `DISABLE_FORCE_SSL` only if SSL is terminated by your reverse proxy)
+4. Caddy handles SSL automatically via Let's Encrypt - ensure your domain DNS points to your server
 5. Keep the `SECRET_KEY_BASE` secure and never change it after deployment (sessions will be invalidated)
+6. Ensure `DISABLE_FORCE_SSL=true` is set since Caddy terminates SSL
