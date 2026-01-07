@@ -1,6 +1,25 @@
 #!/bin/bash
 set -e
 
+# Signal handling to gracefully shutdown foreman
+# This works around a Ruby 3.1/RubyGems signal handling bug
+_term() {
+  echo "Caught SIGTERM signal, shutting down gracefully..."
+  kill -TERM "$child" 2>/dev/null || true
+  wait "$child"
+  exit 0
+}
+
+_int() {
+  echo "Caught SIGINT signal, shutting down gracefully..."
+  kill -INT "$child" 2>/dev/null || true
+  wait "$child"
+  exit 0
+}
+
+trap _term SIGTERM
+trap _int SIGINT
+
 # Remove pre-existing pids/server.pid if it exists
 if [ -f tmp/pids/server.pid ]; then
   rm -f tmp/pids/server.pid
@@ -20,4 +39,7 @@ yarn build:css
 # bundle exec rails db:migrate
 
 # Start all processes with foreman (Rails + asset watchers)
-exec foreman start
+# Run in background and wait to allow signal trapping
+foreman start &
+child=$!
+wait "$child"
