@@ -35,6 +35,12 @@ mkdir -p app/assets/builds
 yarn build
 yarn build:css
 
+# Precompile Rails assets for production (copies to public/ and creates manifest)
+if [ "$RAILS_ENV" = "production" ]; then
+  echo "Precompiling Rails assets for production..."
+  bundle exec rails assets:precompile
+fi
+
 # Run migrations if needed (uncomment for production deploys)
 # bundle exec rails db:migrate
 

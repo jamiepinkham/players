@@ -32,9 +32,10 @@ This guide explains how to deploy the Players app using Portainer behind a Caddy
 
 The `docker-compose.portainer.yml` file deploys two services:
 
-1. **players** - The main Rails application with asset compilation (accessible via Caddy on port 3000)
+1. **players** - The main Rails application with asset compilation
    - Runs Rails server, JavaScript bundling, and CSS compilation via foreman
    - All three processes managed in one container
+   - Port 3000 published for direct access (can be removed once Caddy is configured)
 2. **db** - PostgreSQL 16 database with persistent storage
 
 All services are configured with:
@@ -219,6 +220,33 @@ docker exec -w /etc/caddy caddy_container_name caddy reload
 # If Caddy is installed directly
 caddy reload
 ```
+
+## Testing Before Caddy Setup
+
+The compose file publishes port 3000 so you can test the app directly:
+
+### Via Local Network
+```bash
+# From any device on your local network
+http://YOUR_SERVER_IP:3000
+```
+
+### Via Tailscale
+```bash
+# From any device on your Tailscale network
+http://YOUR_TAILSCALE_IP:3000
+```
+
+The app is configured with `DISABLE_HOST_CHECK=true` to allow access from any IP during testing.
+
+### Security Note
+
+Once Caddy is configured and working:
+
+1. **Remove port publishing** - Edit the stack in Portainer and remove the `ports:` section
+2. **Tighten host authorization** - Remove `DISABLE_HOST_CHECK=true` or set specific `TRUSTED_HOSTS`
+
+This ensures the app is only accessible through Caddy (with SSL) and not directly via port 3000.
 
 ## Troubleshooting
 
