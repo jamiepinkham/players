@@ -2,6 +2,20 @@
 
 This guide explains how to deploy the Players app using Portainer behind a Caddy reverse proxy.
 
+## Quick Reference
+
+**Files you need:**
+- `docker-compose.portainer.yml` - Combined compose file for Portainer (paste into Web editor)
+- `stack.env` - Environment variables reference (copy values into Portainer UI)
+- `PORTAINER_DEPLOYMENT.md` - This guide
+
+**Deployment flow:**
+1. Create stack in Portainer UI
+2. Paste `docker-compose.portainer.yml` into Web editor
+3. Add environment variables from `stack.env` in Portainer's Environment Variables section
+4. Deploy stack
+5. Configure Caddyfile to proxy to the `players` service
+
 ## Prerequisites
 
 - Portainer installed and running
@@ -10,6 +24,20 @@ This guide explains how to deploy the Players app using Portainer behind a Caddy
 - Docker network named `web` created (or modify docker-compose.prod.yml accordingly)
 - Caddy and your Portainer stack must be on the same `web` network
 - GitHub Container Registry image: `ghcr.io/jamiepinkham/players:main`
+
+## What Gets Deployed
+
+The `docker-compose.portainer.yml` file deploys three services:
+
+1. **players** - The main Rails application (accessible via Caddy on port 3000)
+2. **assets** - Asset compilation/serving service
+3. **db** - PostgreSQL 16 database with persistent storage
+
+All services are configured with:
+- Automatic restart policies
+- Connection to the `web` network (for Caddy)
+- Health checks for the database
+- Persistent volume for database data
 
 ## Quick Start Checklist
 
@@ -35,11 +63,23 @@ Before deploying, have these ready:
 
 ### 2. Set Docker Compose Configuration
 
-If using Web editor, combine these files:
-- `docker-compose.yml` (base configuration)
-- `docker-compose.prod.yml` (production overrides)
+You have two options:
 
-Or configure to use your repository with the compose files.
+#### Option A: Use the Pre-Combined File (Recommended)
+
+Use the `docker-compose.portainer.yml` file which combines the base and production configurations:
+
+1. In Portainer's stack creation page, select **Web editor**
+2. Copy the contents of `docker-compose.portainer.yml` and paste into the editor
+
+#### Option B: Use Git Repository
+
+1. Select **Repository** as the build method
+2. Enter your repository URL
+3. Set repository reference (e.g., `main` or `claude-fixes-my-todo-list`)
+4. Set compose file path: `docker-compose.portainer.yml`
+
+**Note:** The `docker-compose.portainer.yml` file is production-ready and doesn't include development volume mounts or local file dependencies.
 
 ### 3. Configure Environment Variables in Portainer UI
 
