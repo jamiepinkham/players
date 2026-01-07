@@ -51,7 +51,7 @@ module Queries
         type [Types::PlayerType], null: false
         def resolve
             season_id = Season.current.id
-            Player.with_stats_or_current_contract(season_id).includes(contract: [:first_season, :last_season])
+            Player.with_stats_or_current_contract(season_id).includes(contract: [:first_season, :last_season, :team])
         end
     end
 end

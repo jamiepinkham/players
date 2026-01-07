@@ -52,16 +52,30 @@ class FreeAgencyPeriod < ApplicationRecord
     end
   end
 
-  def minimum_bid_for_player_and_years(player_id, years)
-    leading_active_bid = bids.where(is_leading: true).where(player_id: player_id).max_by &:total_amount
-    minimum_contract_amount = minimum_contract_amount_for_years(years)
+  def minimum_bid_for_player_and_season_range(player_id, first_season, last_season)
+    season_count = first_season.count_seasons_to(last_season)
+    leading_active_bid = bids.where(is_leading: true).where(player_id: player_id).max_by(&:total_amount)
+    minimum_contract_amount = minimum_contract_amount_for_season_range(first_season, last_season)
+
     if leading_active_bid
-        minimum_leading_bid_total_amount = (leading_active_bid.total_amount) * 1.2
-        minimum_total_amount = [minimum_leading_bid_total_amount / years, minimum_contract_amount].max
-        return minimum_total_amount
+      minimum_leading_bid_total_amount = leading_active_bid.total_amount * 1.2
+      minimum_total_amount = [minimum_leading_bid_total_amount / season_count, minimum_contract_amount].max
+      return minimum_total_amount
     else
       return minimum_contract_amount
     end
+  end
+
+  # Deprecated: Use minimum_bid_for_player_and_season_range instead
+  def minimum_bid_for_player_and_years(player_id, years)
+    current_season = season
+    last_season = current_season.first(years).last
+    minimum_bid_for_player_and_season_range(player_id, current_season, last_season)
+  end
+
+  def minimum_contract_amount_for_season_range(first_season, last_season)
+    season_count = first_season.count_seasons_to(last_season)
+    minimum_contract_amount_for_years(season_count)
   end
 
   def minimum_contract_amount_for_years(years)

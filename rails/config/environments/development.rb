@@ -35,15 +35,21 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  #TODO: provide via ENV[]
+  # Mailgun SMTP Configuration - Using Environment Variables
+  # For development, you can use MailHog or similar tools (e.g., localhost:1025)
   config.action_mailer.smtp_settings = {
-    :user_name => 'apikey',
-    :password => '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',
-    :domain => 'billymartinplayersleague.com',
-    :address => 'smtp.sendgrid.net',
-    :port => 587,
-    :authentication => :plain,
-    :enable_starttls_auto => true
+    address:              ENV['MAILGUN_SMTP_ADDRESS'] || 'localhost',
+    port:                 ENV['MAILGUN_SMTP_PORT']&.to_i || 1025,
+    domain:               ENV['MAILGUN_SMTP_DOMAIN'] || 'localhost',
+    user_name:            ENV['MAILGUN_SMTP_USERNAME'],
+    password:             ENV['MAILGUN_SMTP_PASSWORD'],
+    authentication:       (ENV['MAILGUN_SMTP_AUTHENTICATION'] || 'plain').to_sym,
+    enable_starttls_auto: false  # Typically disabled for local development
+  }
+
+  # Set default from address from environment
+  config.action_mailer.default_options = {
+    from: ENV['MAILER_FROM'] || 'no-reply@billymartinplayersleague.com'
   }
 
   config.navigational_formats = []

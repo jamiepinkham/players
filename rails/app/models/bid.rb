@@ -10,6 +10,8 @@ class Bid < ApplicationRecord
   validates :player_id, presence: true
   validates :team_id, presence: true
   validates :annual_amount, presence: true, numericality: true
+  validates :first_season_id, presence: true
+  validates :last_season_id, presence: true
   #validate :annual_amount_is_high_enough
   #validate :has_remaining_bids
   #validate :team_has_enough_funds
@@ -25,24 +27,11 @@ class Bid < ApplicationRecord
     free_agency_period.season
   end
 
-  def get_contract_length(start_season, end_season)
-    raise ArgumentError.new(
-      "Expected non-nil start_season"
-    ) if start_season == nil
-    raise ArgumentError.new(
-      "Expected non-nil end_season"
-    ) if start_season == nil
-    if start_season == end_season
-        return 1
-    else
-        return 1 + get_contract_length(start_season.next_season, end_season)
-    end
- end
- 
+  def contract_length
+    first_season.count_seasons_to(last_season)
+  end
+
   def total_amount
-    if self.last_season == nil 
-      return self.number_of_years * self.annual_amount
-    end
-    return get_contract_length(season, last_season) * self.annual_amount
+    contract_length * annual_amount
   end
 end

@@ -15,7 +15,12 @@ if Rails.env.production?
     'DATABASE_HOST',
     'DATABASE_USER',
     'DATABASE_PASSWORD',
-    'DATABASE_NAME'
+    'DATABASE_NAME',
+    'MAILGUN_SMTP_ADDRESS',
+    'MAILGUN_SMTP_PORT',
+    'MAILGUN_SMTP_DOMAIN',
+    'MAILGUN_SMTP_USERNAME',
+    'MAILGUN_SMTP_PASSWORD'
   ].freeze
 
   # Check for missing or empty environment variables
@@ -32,6 +37,8 @@ if Rails.env.production?
     elsif var == 'SECRET_KEY_BASE' && (value.include?('change') || value.include?('example') || value.length < 32)
       invalid_vars << "#{var} (appears to be a placeholder or too short)"
     elsif var.start_with?('DATABASE_') && (value.include?('your_') || value.include?('example'))
+      invalid_vars << "#{var} (appears to be a placeholder)"
+    elsif var.start_with?('MAILGUN_') && (value.include?('your_') || value.include?('example') || value.include?('change'))
       invalid_vars << "#{var} (appears to be a placeholder)"
     end
   end

@@ -1,19 +1,26 @@
 class Season < ApplicationRecord
     include Enumerable
     has_many :free_agency_periods, dependent: :destroy
-    # i did this high
+
+    # Season linking - only need one direction, can traverse both ways
+    belongs_to :previous_season, class_name: 'Season', optional: true
     has_one :next_season, class_name: 'Season', foreign_key: 'previous_season_id'
-    has_one :previous_season, class_name: 'Season', foreign_key: 'next_season_id'
 
     def self.current
-        return Season.where(is_active: true).first
+        Season.where(is_active: true).first
+    end
+
+    # Enumerate through all seasons starting from the current one
+    def self.each_from_current(&block)
+        return [] unless current
+        current.each(&block)
     end
 
     def active_free_agency_period
         free_agency_periods.where(is_active: true).first || free_agency_periods.first_or_create do |fa|
-            fa.start_date = s.start_date
-            fa.end_date = s.end_date
-            fa.season = s
+            fa.start_date = self.start_date
+            fa.end_date = self.end_date
+            fa.season = self
             fa.max_contract_length = 1
             fa.max_bids_for_team = 1
             fa.is_active = true
@@ -21,11 +28,17 @@ class Season < ApplicationRecord
     end
 
     def each(&block)
-        if block_given?
-            block.call(self)
-            self.next_season.each(&block) if self.next_season != nil
-        else
-            to_enum(:each)
+        return to_enum(:each) unless block_given?
+
+        season = self
+        visited = Set.new
+
+        while season && !visited.include?(season.id)
+            visited.add(season.id)
+            block.call(season)
+            season = season.next_season
         end
+
+        self
     end
 end

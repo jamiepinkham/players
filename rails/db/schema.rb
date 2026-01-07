@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_06_09_055515) do
+ActiveRecord::Schema.define(version: 2026_01_05_054259) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -86,7 +86,7 @@ ActiveRecord::Schema.define(version: 2025_06_09_055515) do
     t.datetime "updated_at", null: false
     t.string "bbrefid"
     t.string "bbref_minors"
-    t.jsonb "bbref_stats"
+    t.json "bbref_stats"
   end
 
   create_table "seasons", id: :serial, force: :cascade do |t|
@@ -108,13 +108,8 @@ ActiveRecord::Schema.define(version: 2025_06_09_055515) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "comment"
-  end
-
-  create_table "teams_users", id: false, force: :cascade do |t|
-    t.integer "team_id"
-    t.integer "user_id"
-    t.index ["team_id"], name: "index_teams_users_on_team_id"
-    t.index ["user_id"], name: "index_teams_users_on_user_id"
+    t.bigint "owner_id"
+    t.index ["owner_id"], name: "index_teams_on_owner_id"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -153,4 +148,5 @@ ActiveRecord::Schema.define(version: 2025_06_09_055515) do
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "free_agency_periods", "seasons"
+  add_foreign_key "teams", "users", column: "owner_id"
 end

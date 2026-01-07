@@ -13,16 +13,6 @@ services:
     ports:
       - "3000:3000"
 
-  assets:
-    build:
-      context: .
-      target: assets
-    environment:
-      WATCH: "1"
-    volumes:
-      - ./rails:/app
-      - /app/node_modules
-
   db:
     volumes:
       - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro

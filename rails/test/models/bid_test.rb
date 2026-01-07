@@ -88,4 +88,30 @@ class BidTest < ActiveSupport::TestCase
   #     assert bid.is_leading?
   #   end
   # end
+
+  test "contract_length calculates correctly for single season" do
+    season1 = create(:season)
+    bid = create(:bid, first_season: season1, last_season: season1, annual_amount: 1_000_000)
+
+    assert_equal 1, bid.contract_length
+  end
+
+  test "contract_length calculates correctly for multiple seasons" do
+    season1 = create(:season)
+    season2 = create(:season, previous_season: season1)
+    season3 = create(:season, previous_season: season2)
+
+    bid = create(:bid, first_season: season1, last_season: season3, annual_amount: 1_000_000)
+
+    assert_equal 3, bid.contract_length
+  end
+
+  test "total_amount calculates correctly using season ranges" do
+    season1 = create(:season)
+    season2 = create(:season, previous_season: season1)
+
+    bid = create(:bid, first_season: season1, last_season: season2, annual_amount: 1_000_000)
+
+    assert_equal 2_000_000, bid.total_amount
+  end
 end

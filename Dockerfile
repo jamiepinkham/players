@@ -1,8 +1,7 @@
-## Assets Stage
-FROM node:18-slim AS assets
+## Main Rails app
+FROM ruby:3.1.2 AS web
 
-# Install system dependencies (curl for Dart Sass)
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
 
 # Install Dart Sass based on architecture
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -13,42 +12,6 @@ RUN ARCH=$(dpkg --print-architecture) && \
       curl -L https://github.com/sass/dart-sass/releases/download/1.70.0/dart-sass-1.70.0-linux-arm64.tar.gz \
         | tar -xz -C /opt && ln -s /opt/dart-sass/sass /usr/local/bin/sass; \
     fi
-
-# Create a non-root user
-RUN groupadd --system appgroup && useradd --system --gid appgroup --create-home appuser
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files and install deps as root
-COPY rails/package.json rails/yarn.lock ./
-RUN yarn install
-
-# Copy rest of the app
-COPY rails/ ./
-
-# Adjust permissions so non-root user can access everything
-RUN chown -R appuser:appgroup /app
-
-# Make sure yarn binaries are available in PATH
-ENV PATH="./node_modules/.bin:$PATH"
-
-# Copy script as root
-COPY assets_entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Set ownership and permissions: only appuser can read/execute
-RUN chown appuser:appgroup /usr/local/bin/entrypoint.sh && \
-    chmod 500 /usr/local/bin/entrypoint.sh
-
-USER appuser
-
-# Use JSON form of CMD for proper signal handling
-CMD ["/usr/local/bin/entrypoint.sh"]
-
-## Main Rails app
-FROM ruby:3.1.2 AS web
-
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
 
 # Install Node.js so ExecJS works
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \

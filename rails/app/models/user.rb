@@ -8,17 +8,17 @@ class User < ApplicationRecord
          :validatable,
          :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
-  has_and_belongs_to_many :teams
+  has_many :teams, foreign_key: 'owner_id'
 
   def team
     self.teams.first
   end
 
   def owns_team?(team)
-    self.teams.include?(team)
+    team.owner_id == self.id
   end
 
   def jwt_payload
-    {'adm' => self.is_admin?.to_s, 'tm' => self.team.id }
+    {'adm' => self.is_admin?.to_s, 'tm' => self.team&.id }
   end
 end

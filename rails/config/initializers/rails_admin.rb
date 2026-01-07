@@ -4,12 +4,17 @@ RailsAdmin.config do |config|
   ### Popular gems integration
 
   ## == Devise ==
-  # config.authenticate_with do
-  #   warden.authenticate! scope: :user
-  # end
-  # config.current_user_method(&:current_user)
+  config.authenticate_with do
+    # Authenticate user, will redirect to login if not signed in
+    warden.authenticate! scope: :user
+  end
+  config.current_user_method(&:current_user)
   config.authorize_with do
-    redirect_to main_app.root_path unless current_user.try(:is_admin?)
+    # Check if user is admin, redirect to root if not
+    unless current_user&.is_admin?
+      flash[:error] = 'You must be an administrator to access this section.'
+      redirect_to main_app.root_path
+    end
   end
 
   ## == CancanCan ==
@@ -153,13 +158,13 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :budget
-      field :owners
+      field :owner
     end
     edit do
       field :name
       field :budget
       field :stadium
-      field :owners
+      field :owner
       field :contracts
       field :bids
     end

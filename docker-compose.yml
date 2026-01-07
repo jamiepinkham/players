@@ -7,15 +7,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      assets:
-        condition: service_started
     env_file:
       - .env
-
-  assets:
-    image: ghcr.io/jamiepinkham/players:main
-    env_file:
-      - .env
+    entrypoint: /usr/local/bin/web-entrypoint.sh
+    volumes:
+      # Mount local code changes into the container
+      - ./rails/app:/app/app
+      - ./rails/config:/app/config
+      - ./rails/db:/app/db
+      - ./rails/lib:/app/lib
+      - ./web-entrypoint.sh:/usr/local/bin/web-entrypoint.sh:ro
+      - ./rails/Procfile:/app/Procfile:ro
 
   db:
     image: postgres:16

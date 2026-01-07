@@ -10,6 +10,19 @@ class Mutations::CreateBidMutation < Mutations::BaseMutation
     field :errors, [String], null: false
 
     def resolve(team_id:, player_id:, annual_amount:, final_season_id:)
+        current_user = context[:current_user]
+
+        # Check if user has a team
+        unless current_user&.team
+            raise GraphQL::ExecutionError, "You must be part of a team to place bids"
+        end
+
+        # Check if user owns the team they're bidding for
+        team = Team.find_by(id: team_id)
+        unless team && current_user.owns_team?(team)
+            raise GraphQL::ExecutionError, "You can only place bids for your own team"
+        end
+
         season = Season.current
         if season.nil?
             raise GraphQL::ExecutionError, "No active season"

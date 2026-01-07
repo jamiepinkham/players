@@ -1,14 +1,24 @@
 class Team < ApplicationRecord
-  has_and_belongs_to_many :owners, class_name: 'User'
+  belongs_to :owner, class_name: 'User'
   has_many :contracts, -> { includes :player }
   has_many :bids, -> { includes :player }
 
   def current_payroll
-    current_contracts.filter { |c| c.active }.collect{|c| c.amount}.inject(:+) || 0
+    current_season = Season.current
+    return 0 unless current_season
+
+    contracts
+      .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
+      .where(active: true)
+      .sum(:amount)
   end
 
   def current_contracts
-    contracts.filter { |c| c.last_season.end_date > Season.current.start_date }
+    current_season = Season.current
+    return Contract.none unless current_season
+
+    contracts
+      .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
   end
 
   def available_cash
@@ -16,11 +26,22 @@ class Team < ApplicationRecord
   end
 
   def total_players
-    current_contracts.count
+    current_season = Season.current
+    return 0 unless current_season
+
+    contracts
+      .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
+      .count
   end
 
   def unsalaried_players
-    current_contracts.filter { |c| !c.active }.count
+    current_season = Season.current
+    return 0 unless current_season
+
+    contracts
+      .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
+      .where(active: false)
+      .count
   end
 
   def available_bids
