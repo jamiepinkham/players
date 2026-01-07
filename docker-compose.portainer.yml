@@ -15,15 +15,30 @@ services:
     networks:
       - default
       - web
-    # Environment variables are set in Portainer UI
-    # No volumes needed - image contains all application code
-
-  assets:
-    image: ghcr.io/jamiepinkham/players:main
-    restart: unless-stopped
     environment:
-      WATCH: "0"
-    # Environment variables inherited from stack environment
+      # Database Configuration
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_HOST: ${DATABASE_HOST}
+      # Rails Configuration
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      RAILS_ENV: ${RAILS_ENV}
+      # Mailgun Configuration
+      MAILGUN_SMTP_ADDRESS: ${MAILGUN_SMTP_ADDRESS}
+      MAILGUN_SMTP_PORT: ${MAILGUN_SMTP_PORT}
+      MAILGUN_SMTP_DOMAIN: ${MAILGUN_SMTP_DOMAIN}
+      MAILGUN_SMTP_USERNAME: ${MAILGUN_SMTP_USERNAME}
+      MAILGUN_SMTP_PASSWORD: ${MAILGUN_SMTP_PASSWORD}
+      MAILGUN_SMTP_AUTHENTICATION: ${MAILGUN_SMTP_AUTHENTICATION:-plain}
+      MAILER_FROM: ${MAILER_FROM}
+      # Proxy Configuration
+      DISABLE_FORCE_SSL: ${DISABLE_FORCE_SSL:-true}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT:-true}
+      # Optional
+      APP_HOST: ${APP_HOST:-}
+      ASSET_HOST: ${ASSET_HOST:-}
+      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES:-}
 
   db:
     image: postgres:16

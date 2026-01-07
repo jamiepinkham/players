@@ -133,9 +133,36 @@ docker compose build --no-cache     # Force clean build
 
 ## 🚀 Deployment
 
-### Multi-Environment Setup
+### Deployment Options
 
-The project supports three environments:
+The project supports multiple deployment methods:
+
+1. **Portainer (Recommended for Production)** - Docker stack deployment behind Caddy proxy
+2. **Direct Docker Compose** - Traditional server deployment with docker-compose
+3. **Local Development** - Hot-reload development environment
+
+### Portainer Deployment (Recommended)
+
+For production deployment with Portainer and Caddy reverse proxy:
+
+📖 **See [PORTAINER_DEPLOYMENT.md](PORTAINER_DEPLOYMENT.md) for complete guide**
+
+**Quick Steps:**
+1. Copy `docker-compose.portainer.yml` to Portainer Web editor
+2. Paste `stack.env.txt` into Portainer's Environment Variables (Advanced mode)
+3. Update passwords and secrets
+4. Deploy stack
+5. Configure Caddyfile to proxy to the `players` service
+
+**Key differences from docker-compose:**
+- Uses `docker-compose.portainer.yml` (not `docker-compose.yml`)
+- Environment variables set in Portainer UI (not `.env` file)
+- Designed for production behind Caddy proxy
+- No local volume mounts (uses pre-built images)
+
+### Multi-Environment Setup (Docker Compose)
+
+For direct server deployment without Portainer:
 
 - **Development** - Local with hot-reload
 - **QA** - Testing with production settings

@@ -5,18 +5,19 @@ This guide explains how to deploy the Players app using Portainer behind a Caddy
 ## Quick Reference
 
 **Files you need:**
-- `docker-compose.portainer.yml` - Combined compose file (paste into Portainer's Web editor)
-- `stack.env.txt` - Environment variables in Portainer format (paste into Portainer's Advanced mode)
-- `stack.env` - Environment variables with documentation (reference guide)
-- `PORTAINER_DEPLOYMENT.md` - This guide
+- `docker-compose.portainer.yml` - Complete compose file for Portainer
+- `stack.env.txt` - Copy-paste ready environment variables for Portainer UI
 
 **Deployment flow:**
 1. Create stack in Portainer UI
 2. Paste `docker-compose.portainer.yml` contents into Web editor
-3. Scroll down to "Environment variables" section in Portainer
-4. Manually add each variable from `stack.env` (see step 3 below for details)
-5. Deploy stack
-6. Configure Caddyfile to proxy to the `players` service
+3. Scroll down to "Environment variables" section
+4. Click "Advanced mode" and paste `stack.env.txt` contents
+5. Update placeholder values (passwords, keys, etc.)
+6. Deploy stack
+7. Configure Caddyfile to proxy to the `players` service
+
+**Note:** The `docker-compose.portainer.yml` file is specifically for Portainer. For local development, use `docker-compose.yml` instead (see main README.md).
 
 ## Prerequisites
 
@@ -29,11 +30,12 @@ This guide explains how to deploy the Players app using Portainer behind a Caddy
 
 ## What Gets Deployed
 
-The `docker-compose.portainer.yml` file deploys three services:
+The `docker-compose.portainer.yml` file deploys two services:
 
-1. **players** - The main Rails application (accessible via Caddy on port 3000)
-2. **assets** - Asset compilation/serving service
-3. **db** - PostgreSQL 16 database with persistent storage
+1. **players** - The main Rails application with asset compilation (accessible via Caddy on port 3000)
+   - Runs Rails server, JavaScript bundling, and CSS compilation via foreman
+   - All three processes managed in one container
+2. **db** - PostgreSQL 16 database with persistent storage
 
 All services are configured with:
 - Automatic restart policies
@@ -178,8 +180,7 @@ If Caddy is using a different network name, update `docker-compose.prod.yml` acc
 
 1. Go to **Stacks** > **players-app** (or your stack name)
 2. Check that all services are running:
-   - `players` (Rails app)
-   - `assets` (Asset compilation/serving)
+   - `players` (Rails app with asset compilation)
    - `db` (PostgreSQL database)
 3. View logs for each service to ensure no errors
 
