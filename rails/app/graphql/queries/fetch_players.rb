@@ -20,8 +20,8 @@ module Queries
                 group(:id). \
                 having('count(active.id) = 0'). \
                 lookup_by_position(position)
-            
-            unsigned_players = Player.includes(:leading_bid).where(id: unsigned_player_ids)
+
+            unsigned_players = Player.includes(:leading_bid, contract: [:last_season, :team]).where(id: unsigned_player_ids)
             return unsigned_players # | expiring_players
         end
     end
