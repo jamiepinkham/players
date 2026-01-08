@@ -6,8 +6,8 @@
 
     <title><%= content_for?(:title) ? yield(:title) : "BMPL" %></title>
     <%= csrf_meta_tags %>
-    <link rel="stylesheet" href="/assets/application.css">
-    <script src="/assets/application.js" defer></script>
+    <%= stylesheet_link_tag "application" %>
+    <%= javascript_include_tag "application", defer: true %>
   </head>
 
   <body>

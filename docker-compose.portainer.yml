@@ -47,7 +47,11 @@ services:
     image: postgres:16
     restart: unless-stopped
     healthcheck:
+<<<<<<< HEAD
       test: ["CMD-SHELL", "pg_isready -U $${DATABASE_USER} -d $${DATABASE_NAME}"]
+=======
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+>>>>>>> cd4e3d94 (fix javascript tags)
       interval: 2s
       timeout: 2s
       start_period: 30s
