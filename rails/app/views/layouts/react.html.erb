@@ -14,6 +14,6 @@
 
   <body>
   <div id="app-root"></div>
-    <script src="/assets/application.js?v=<%= Time.now.to_i %>" defer></script>
+    <%= javascript_include_tag "application", defer: true %>
   </body>
 </html>
