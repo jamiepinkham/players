@@ -118,6 +118,61 @@ namespace :dev do
     end
   end
 
+  desc "Fix contracts with nil first_season by setting to inaugural season"
+  task fix_nil_first_seasons: :environment do
+    puts "\n🔧 Fixing contracts with nil first_season..."
+
+    # Find the inaugural season (the one with no previous season)
+    inaugural_season = Season.where(previous_season_id: nil).order(:created_at).first
+
+    unless inaugural_season
+      puts "❌ Error: No inaugural season found (no season with previous_season_id = nil)"
+      exit 1
+    end
+
+    puts "📅 Using inaugural season: #{inaugural_season.name} (ID: #{inaugural_season.id})"
+
+    # Find all contracts with nil first_season
+    contracts_to_fix = Contract.where(first_season_id: nil).includes(:player, :team)
+
+    if contracts_to_fix.empty?
+      puts "✅ No contracts need fixing - all have first_season set"
+      next
+    end
+
+    puts "\n📋 Found #{contracts_to_fix.count} contracts to fix:"
+    puts "-" * 80
+
+    fixed = 0
+    errors = 0
+
+    contracts_to_fix.each do |contract|
+      begin
+        contract.update_column(:first_season_id, inaugural_season.id)
+        player_name = contract.player&.name || "Unknown Player"
+        team_name = contract.team&.name || "Unknown Team"
+        puts "✓ #{player_name.ljust(30)} | #{team_name.ljust(25)} → #{inaugural_season.name}"
+        fixed += 1
+      rescue => e
+        puts "✗ Failed to fix contract ID #{contract.id}: #{e.message}"
+        errors += 1
+      end
+    end
+
+    puts "-" * 80
+    puts "\n✅ Fix complete!"
+    puts "   Fixed: #{fixed} contracts"
+    puts "   Errors: #{errors} contracts" if errors > 0
+
+    # Verify the fix
+    remaining = Contract.where(first_season_id: nil).count
+    if remaining > 0
+      puts "\n⚠️  Warning: #{remaining} contracts still have nil first_season"
+    else
+      puts "\n✅ All contracts now have first_season set!"
+    end
+  end
+
   desc "Age all contracts to make them trade eligible (> 3 months old)"
   task age_contracts: :environment do
     if Rails.env.production?
