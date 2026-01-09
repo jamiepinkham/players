@@ -28,10 +28,12 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = true
+
+  # Don't care if the mailer can't send in development.
+  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.delivery_method = :test  # Store emails in memory instead of sending
+  config.action_mailer.perform_deliveries = false  # Don't attempt to send emails
 
   config.action_mailer.perform_caching = false
 
