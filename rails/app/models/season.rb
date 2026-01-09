@@ -41,4 +41,23 @@ class Season < ApplicationRecord
 
         self
     end
+
+    # Count the number of seasons from this season to the target season (inclusive)
+    def count_seasons_to(target_season)
+        return 0 if target_season.nil?
+        return 1 if self.id == target_season.id
+
+        count = 0
+        season = self
+        visited = Set.new
+
+        while season && !visited.include?(season.id)
+            visited.add(season.id)
+            count += 1
+            break if season.id == target_season.id
+            season = season.next_season
+        end
+
+        count
+    end
 end
