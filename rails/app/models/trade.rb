@@ -19,7 +19,7 @@ class Trade < ApplicationRecord
     }, _prefix: true
 
     def pending?
-        return status == "pending"
+        status_pending?
     end
 
     def accept!
