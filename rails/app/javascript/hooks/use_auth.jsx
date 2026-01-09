@@ -70,6 +70,31 @@ function useProvideAuth() {
       });
   };
 
+  const changeUsername = (username) => {
+    let config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    return axios
+      .put(
+        "/users/username",
+        {
+          username: username,
+        },
+        config
+      )
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        if (error.response && error.response.data) {
+          throw new Error(error.response.data.error || "Failed to update username");
+        }
+        throw error;
+      });
+  };
+
   const sendResetInstructions = (email) => {
     return axios
       .post("/users/password", {
@@ -107,5 +132,6 @@ function useProvideAuth() {
     sendResetInstructions,
     setPassword,
     changePassword,
+    changeUsername,
   };
 }
