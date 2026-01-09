@@ -1,0 +1,213 @@
+import React, { useState, useMemo } from "react";
+import { useMutation } from "graphql-hooks";
+import { Grid, Box, Text, Heading, Select } from "grommet";
+import SelectableContractList from "./SelectableContractList";
+import TradeSummary from "./TradeSummary";
+import CurrencyInput from "../../CurrencyInput";
+
+const CREATE_TRADE_MUTATION = `
+mutation CreateTrade($input: CreateTradeMutationInput!) {
+  createTrade(input:$input) {
+    trade {
+      id
+    }
+  }
+}`;
+
+function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
+  // State management - store FULL contract objects, not just IDs
+  const [fromContracts, setFromContracts] = useState([]);
+  const [toContracts, setToContracts] = useState([]);
+  const [toTeam, setToTeam] = useState(null);
+  const [fromCash, setFromCash] = useState(0);
+  const [toCash, setToCash] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [createTradeMutation] = useMutation(CREATE_TRADE_MUTATION);
+
+  // Find current user's team
+  const fromTeam = teams.find(t => t.id == currentTeamId);
+
+  // Available teams for trade partner selection (exclude current team)
+  const availableTeams = teams.filter(t => t.id != currentTeamId);
+
+  // Toggle handlers - store full contract objects
+  const handleFromToggle = (contract, checked) => {
+    if (checked) {
+      setFromContracts([...fromContracts, contract]);
+    } else {
+      setFromContracts(fromContracts.filter(c => c.id !== contract.id));
+    }
+  };
+
+  const handleToToggle = (contract, checked) => {
+    if (checked) {
+      setToContracts([...toContracts, contract]);
+    } else {
+      setToContracts(toContracts.filter(c => c.id !== contract.id));
+    }
+  };
+
+  // Validation logic
+  const validation = useMemo(() => {
+    const errors = [];
+
+    // Must select a partner team
+    if (!toTeam) {
+      errors.push('Please select a trade partner');
+    }
+
+    // No self-trades (backend also validates this)
+    if (toTeam && fromTeam && toTeam.id === fromTeam.id) {
+      errors.push('Cannot trade with yourself');
+    }
+
+    // Must include at least one asset (contract or cash)
+    const hasFromAssets = fromContracts.length > 0 || fromCash > 0;
+    const hasToAssets = toContracts.length > 0 || toCash > 0;
+
+    if (!hasFromAssets && !hasToAssets) {
+      errors.push('Trade must include at least one player or cash');
+    }
+
+    // Check eligibility - filter out ineligible contracts
+    const ineligibleFrom = fromContracts.filter(c => !c.player.isTradeEligible);
+    const ineligibleTo = toContracts.filter(c => !c.player.isTradeEligible);
+
+    if (ineligibleFrom.length > 0) {
+      errors.push(`Ineligible players: ${ineligibleFrom.map(c => c.player.name).join(', ')}`);
+    }
+    if (ineligibleTo.length > 0) {
+      errors.push(`Ineligible players: ${ineligibleTo.map(c => c.player.name).join(', ')}`);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }, [fromContracts, toContracts, fromCash, toCash, toTeam, fromTeam]);
+
+  // Submit handler
+  const handleSubmit = async () => {
+    if (!validation.isValid) return;
+
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        toTeamId: toTeam.id,
+        fromTeamId: fromTeam.id,
+        toContractIds: toContracts.map(c => c.id),    // extract IDs for backend
+        fromContractIds: fromContracts.map(c => c.id), // extract IDs for backend
+        toCash: toCash,
+        fromCash: fromCash,
+      };
+
+      await createTradeMutation({ variables: { input: payload } });
+      onTradeSubmitted();
+    } catch (error) {
+      console.error('Trade submission error:', error);
+      alert(`Error submitting trade: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reset selections when team changes
+  const handleTeamChange = (option) => {
+    setToTeam(option);
+    setToContracts([]);
+    setToCash(0);
+  };
+
+  return (
+    <Grid
+      rows={['auto', 'flex']}
+      columns={['1/3', '1/3', '1/3']}
+      gap='medium'
+      areas={[
+        { name: 'leftPanel', start: [0, 0], end: [0, 1] },
+        { name: 'centerPanel', start: [1, 0], end: [1, 1] },
+        { name: 'rightPanel', start: [2, 0], end: [2, 1] },
+      ]}
+      fill
+    >
+      {/* Left Panel - Your Team */}
+      <Box gridArea='leftPanel' gap='small'>
+        <Box pad='small' background='light-2' round='small'>
+          <Heading level={4} margin='none'>{fromTeam?.name || 'Your Team'}</Heading>
+          <Text size='small'>Budget: ${fromTeam?.budget?.toLocaleString() || '0'}</Text>
+        </Box>
+
+        <SelectableContractList
+          team={fromTeam}
+          selectedContracts={fromContracts}
+          onToggle={handleFromToggle}
+        />
+
+        <Box pad='small' background='light-2' round='small'>
+          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
+          <CurrencyInput
+            value={fromCash}
+            onChange={(event) => {
+              setFromCash(parseInt(event.target.value) || 0);
+            }}
+            placeholder='Enter amount'
+          />
+        </Box>
+      </Box>
+
+      {/* Center Panel - Trade Summary */}
+      <Box gridArea='centerPanel'>
+        <TradeSummary
+          fromTeam={fromTeam}
+          fromContracts={fromContracts}
+          fromCash={fromCash}
+          toTeam={toTeam}
+          toContracts={toContracts}
+          toCash={toCash}
+          validation={validation}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      </Box>
+
+      {/* Right Panel - Partner Team */}
+      <Box gridArea='rightPanel' gap='small'>
+        <Box pad='small' background='light-2' round='small'>
+          <Heading level={4} margin='none'>Trade Partner</Heading>
+          <Select
+            options={availableTeams}
+            labelKey='name'
+            valueKey={{ key: 'id', reduce: true }}
+            value={toTeam?.id}
+            onChange={({ option }) => handleTeamChange(option)}
+            placeholder='Select team...'
+          />
+        </Box>
+
+        {toTeam && (
+          <>
+            <SelectableContractList
+              team={toTeam}
+              selectedContracts={toContracts}
+              onToggle={handleToToggle}
+            />
+
+            <Box pad='small' background='light-2' round='small'>
+              <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
+              <CurrencyInput
+                value={toCash}
+                onChange={(event) => {
+                  setToCash(parseInt(event.target.value) || 0);
+                }}
+                placeholder='Enter amount'
+              />
+            </Box>
+          </>
+        )}
+      </Box>
+    </Grid>
+  );
+}
+
+export default SplitScreenTradeBuilder;
