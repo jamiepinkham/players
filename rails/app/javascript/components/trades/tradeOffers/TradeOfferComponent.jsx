@@ -70,10 +70,10 @@ function TradeOfferComponent() {
   async function submitTrade() {
     let payload = {
       "toTeamId": team.id,
-      "toContractIds": toContracts.map(item => item.id),
+      "toContractIds": toContracts,
       "toCash": toCash,
       "fromTeamId": teamId,
-      "fromContractIds": fromContracts.map(item => item.id),
+      "fromContractIds": fromContracts,
       "fromCash": fromCash
     }
     console.log(payload);

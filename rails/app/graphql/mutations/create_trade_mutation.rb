@@ -25,6 +25,11 @@ class Mutations::CreateTradeMutation < Mutations::BaseMutation
             raise GraphQL::ExecutionError, "You can only propose trades from your own team"
         end
 
+        # Prevent self-trades
+        if from_team_id == to_team_id
+            raise GraphQL::ExecutionError, "Cannot trade with yourself"
+        end
+
         t = Trade.new
         t.contract_ids = to_contract_ids + from_contract_ids
         t.to_team_id = to_team_id
