@@ -102,7 +102,13 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
         fromCash: fromCash,
       };
 
-      await createTradeMutation({ variables: { input: payload } });
+      const result = await createTradeMutation({ variables: { input: payload } });
+
+      // Check for GraphQL errors
+      if (result.error) {
+        throw new Error(result.error.graphQLErrors?.[0]?.message || result.error.message);
+      }
+
       onTradeSubmitted();
     } catch (error) {
       console.error('Trade submission error:', error);
