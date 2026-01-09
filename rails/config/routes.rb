@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   root 'static#index'
   get '*path', to: 'static#index', constraints: lambda { |req|
-    !req.path.match?(/\A\/(assets|images|packs|favicon\.ico|robots\.txt)/)
+    !req.path.match?(/\A\/(assets|images|packs|favicon\.ico|robots\.txt)/) &&
+    !req.path.match?(/\.(jpg|jpeg|png|gif|svg|ico|css|js|woff|woff2|ttf|eot|map)\z/)
   }
 end
