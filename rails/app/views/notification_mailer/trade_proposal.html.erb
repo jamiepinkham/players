@@ -26,4 +26,4 @@
     <p><%= @trade.note %></p>
 <% end %>
 
-View your trades here: <%= ENV['BASE_URL'] + '/trade' %> 
+View your trades here: <%= (ENV['BASE_URL'] || 'http://localhost:3000') + '/trade' %> 
