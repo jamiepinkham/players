@@ -37,37 +37,23 @@ namespace :dev do
     puts "Total: #{User.count} users"
   end
 
-  desc "Assign each user as owner of a team (for testing)"
-  task assign_team_owners: :environment do
-    if Rails.env.production?
-      puts "❌ Cannot run this task in production!"
-      exit 1
-    end
-
-    users = User.all
-    teams = Team.all
-
-    if users.count != teams.count
-      puts "⚠️  Warning: #{users.count} users but #{teams.count} teams"
-      puts "This task works best when user count matches team count"
-    end
-
-    users.each_with_index do |user, index|
-      team = teams[index % teams.count]
-
-      if team.owner_id.present? && team.owner_id != user.id
-        puts "⚠️  Team '#{team.name}' already owned by user ID #{team.owner_id}"
+  desc "Show current team ownership (DO NOT USE assign_team_owners - it overwrites correct data!)"
+  task show_team_owners: :environment do
+    puts "\n📋 Current Team Ownership:"
+    puts "-" * 80
+    Team.includes(:owner).order(:name).all.each do |team|
+      if team.owner
+        puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (#{team.owner.email})"
+      else
+        puts "#{team.name.ljust(35)} → ⚠️  NO OWNER ASSIGNED"
       end
-
-      team.update(owner_id: user.id)
-      puts "✓ Assigned #{user.email} (#{user.name}) as owner of '#{team.name}'"
     end
+    puts "-" * 80
+    puts "Total: #{Team.count} teams"
 
-    puts "\n✅ Team ownership assigned"
-    puts "\nTeam ownership summary:"
-    Team.includes(:owner).all.each do |team|
-      owner_name = team.owner ? "#{team.owner.name} (#{team.owner.email})" : "NO OWNER"
-      puts "  #{team.name.ljust(30)} → #{owner_name}"
+    unowned_teams = Team.where(owner_id: nil).count
+    if unowned_teams > 0
+      puts "\n⚠️  Warning: #{unowned_teams} teams have no owner"
     end
   end
 

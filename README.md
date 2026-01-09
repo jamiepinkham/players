@@ -269,26 +269,25 @@ This task:
 - Makes all contracts eligible for trading
 - Shows eligibility status for each contract
 
-#### Assign Team Ownership
+#### Verify Team Ownership
 
-Users must be set as the owner of a team to propose trades:
+Users must be set as the owner of a team to propose trades. Check current ownership:
 
 ```bash
-# Assign each user as owner of a team
-docker compose exec players bundle exec rake dev:assign_team_owners
+# View which user owns which team
+docker compose exec players bundle exec rake dev:show_team_owners
 
-# Verify ownership
+# List users and their teams
 docker compose exec players bundle exec rake dev:list_users
 ```
 
-This task assigns each user as `owner_id` on a team, which is required for the trade system.
+**Note:** Team ownership is typically set during database setup/import. If you need to change ownership, do it through the Rails admin panel or database directly.
 
 #### Trade Testing Workflow
 
 1. **Prepare test data:**
    ```bash
    docker compose exec players bundle exec rake dev:reset_passwords
-   docker compose exec players bundle exec rake dev:assign_team_owners
    docker compose exec players bundle exec rake dev:age_contracts
    ```
 
