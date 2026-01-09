@@ -57,11 +57,6 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
-    # Optional: Mount restore directory if you need to restore from backup
-    # Uncomment the line below and create the directory on your host
-    # volumes:
-    #   - pgdata:/var/lib/postgresql/data
-    #   - ./db-restore:/db-restore:ro
 
 volumes:
   pgdata:

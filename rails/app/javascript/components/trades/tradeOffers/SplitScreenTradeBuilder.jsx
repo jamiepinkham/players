@@ -127,15 +127,15 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
 
   return (
     <Grid
-      rows={['auto', 'flex']}
+      rows={['auto', 'auto']}
       columns={['1/2', '1/2']}
       gap='medium'
+      pad='medium'
       areas={[
         { name: 'summaryPanel', start: [0, 0], end: [1, 0] },
         { name: 'leftPanel', start: [0, 1], end: [0, 1] },
         { name: 'rightPanel', start: [1, 1], end: [1, 1] },
       ]}
-      fill
     >
       {/* Summary Panel - Top */}
       <Box gridArea='summaryPanel'>
@@ -154,18 +154,14 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
 
       {/* Left Panel - Your Team */}
       <Box gridArea='leftPanel' gap='small'>
-        <Box pad='small' background='light-2' round='small'>
-          <Heading level={4} margin='none'>{fromTeam?.name || 'Your Team'}</Heading>
-          <Text size='small'>Budget: ${fromTeam?.budget?.toLocaleString() || '0'}</Text>
+        {/* Team Header */}
+        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Your Team:</Text>
+          <Text>{fromTeam?.name || 'Your Team'} - Budget: ${fromTeam?.budget?.toLocaleString() || '0'}</Text>
         </Box>
 
-        <SelectableContractList
-          team={fromTeam}
-          selectedContracts={fromContracts}
-          onToggle={handleFromToggle}
-        />
-
-        <Box pad='small' background='light-2' round='small'>
+        {/* Cash Input */}
+        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
           <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
           <CurrencyInput
             value={fromCash}
@@ -175,35 +171,37 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
             placeholder='Enter amount'
           />
         </Box>
+
+        {/* Player Roster */}
+        <Box>
+          <SelectableContractList
+            team={fromTeam}
+            selectedContracts={fromContracts}
+            onToggle={handleFromToggle}
+          />
+        </Box>
       </Box>
 
       {/* Right Panel - Partner Team */}
       <Box gridArea='rightPanel' gap='small'>
-        <Box pad='small' background='light-2' round='small'>
+        {/* Team Selector with Team Info */}
+        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Trade Partner:</Text>
           <Select
             options={availableTeams}
-            labelKey='name'
+            labelKey={(option) => `${option.name} - Budget: $${option.budget?.toLocaleString() || '0'}`}
             valueKey={{ key: 'id', reduce: true }}
-            valueLabel={
-              <Box pad='small' background='light-2' round='small'>
-                <Heading level={4} margin='none'>{toTeam?.name || 'Select Team'}</Heading>
-                <Text size='small'>Budget: ${toTeam?.budget?.toLocaleString() || '0'}</Text>
-              </Box>
-            }
+            value={toTeam?.id}
             onChange={({ option }) => handleTeamChange(option)}
             placeholder='Select team...'
           />
         </Box>
 
-        {toTeam && (
+        {toTeam ? (
           <>
-            <SelectableContractList
-              team={toTeam}
-              selectedContracts={toContracts}
-              onToggle={handleToToggle}
-            />
 
-            <Box pad='small' background='light-2' round='small'>
+            {/* Cash Input */}
+            <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
               <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
               <CurrencyInput
                 value={toCash}
@@ -213,7 +211,21 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
                 placeholder='Enter amount'
               />
             </Box>
+
+            {/* Player Roster */}
+            <Box>
+              <SelectableContractList
+                team={toTeam}
+                selectedContracts={toContracts}
+                onToggle={handleToToggle}
+              />
+            </Box>
           </>
+        ) : (
+          /* Placeholder when no team selected */
+          <Box align='center' justify='center' pad='large'>
+            <Text color='text-weak'>Select a trade partner to continue</Text>
+          </Box>
         )}
       </Box>
     </Grid>

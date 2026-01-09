@@ -49,6 +49,7 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
     <DataTable
       primaryKey='id'
       background={['light-1', 'light-2']}
+      size='medium'
       data={
         data.team.currentContracts.sort((lhs, rhs) => {
           if (lhs.player.name.toUpperCase() > rhs.player.name.toUpperCase()) {
