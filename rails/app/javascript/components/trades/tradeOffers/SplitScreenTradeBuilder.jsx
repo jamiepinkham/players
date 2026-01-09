@@ -180,12 +180,16 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
       {/* Right Panel - Partner Team */}
       <Box gridArea='rightPanel' gap='small'>
         <Box pad='small' background='light-2' round='small'>
-          <Heading level={4} margin='none'>Trade Partner</Heading>
           <Select
             options={availableTeams}
             labelKey='name'
             valueKey={{ key: 'id', reduce: true }}
-            value={toTeam?.id}
+            valueLabel={
+              <Box pad='small' background='light-2' round='small'>
+                <Heading level={4} margin='none'>{toTeam?.name || 'Select Team'}</Heading>
+                <Text size='small'>Budget: ${toTeam?.budget?.toLocaleString() || '0'}</Text>
+              </Box>
+            }
             onChange={({ option }) => handleTeamChange(option)}
             placeholder='Select team...'
           />
