@@ -233,6 +233,63 @@ docker compose exec players bundle exec rails routes
 docker compose exec players bundle exec rails db:seed
 ```
 
+### Testing Trades Locally
+
+The trade system includes eligibility rules that must be satisfied for testing. Use these development rake tasks to prepare your local environment:
+
+#### Reset User Passwords
+
+Reset all user passwords to easily log in as different teams:
+
+```bash
+# Set all passwords to 'password'
+docker compose exec players bundle exec rake dev:reset_passwords
+
+# Use custom password
+docker compose exec players bundle exec rake dev:reset_passwords PASSWORD=test123
+
+# List all users and their teams
+docker compose exec players bundle exec rake dev:list_users
+```
+
+#### Make Contracts Trade Eligible
+
+Contracts must be older than 3 months to be trade eligible. Age your test contracts:
+
+```bash
+# Age all contracts to 4 months old (default)
+docker compose exec players bundle exec rake dev:age_contracts
+
+# Age contracts to specific age
+docker compose exec players bundle exec rake dev:age_contracts MONTHS=6
+```
+
+This task:
+- Sets `created_at` dates to 4+ months ago (configurable)
+- Makes all contracts eligible for trading
+- Shows eligibility status for each contract
+
+#### Trade Testing Workflow
+
+1. **Prepare test data:**
+   ```bash
+   docker compose exec players bundle exec rake dev:reset_passwords
+   docker compose exec players bundle exec rake dev:age_contracts
+   ```
+
+2. **Test as different teams:**
+   - Log in as team 1, propose a trade
+   - Log out and log in as team 2 to accept/reject
+   - UI prevents selecting ineligible players (disabled checkboxes)
+   - Server validates the 3-month rule and displays errors
+
+3. **Trade eligibility indicators:**
+   - Green "Yes" = Player can be traded
+   - Red "No" = Player ineligible (checkbox disabled)
+   - Ineligible players cannot be selected in the UI
+
+**Note:** The 3-month contract age rule remains active in all environments. These dev tools simply prepare your test data to satisfy the requirement.
+
 ### Viewing Logs
 
 ```bash
