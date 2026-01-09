@@ -9,8 +9,8 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    # Permit login, username, and email (for backwards compatibility) for sign in
-    devise_parameter_sanitizer.permit(:sign_in, keys: [:login, :username, :email])
+    # Permit login and username for sign in
+    devise_parameter_sanitizer.permit(:sign_in, keys: [:login, :username])
 
     # Permit username for sign up and account update
     devise_parameter_sanitizer.permit(:sign_up, keys: [:username, :name])
