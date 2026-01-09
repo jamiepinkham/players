@@ -26,14 +26,49 @@ namespace :dev do
   desc "List all users with their teams"
   task list_users: :environment do
     puts "\n📋 Users in database:"
-    puts "-" * 60
+    puts "-" * 70
     User.includes(:teams).all.each do |user|
-      team_name = user.team&.name || 'No team'
+      team_name = user.team&.name || 'No team (NOT OWNER OF ANY TEAM)'
       admin = user.is_admin? ? '[ADMIN]' : ''
-      puts "#{user.email.ljust(30)} | #{user.name.ljust(20)} | #{team_name} #{admin}"
+      owner_id = user.team&.owner_id == user.id ? '✓ Owner' : '✗ Not Owner'
+      puts "#{user.email.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{owner_id} #{admin}"
     end
-    puts "-" * 60
+    puts "-" * 70
     puts "Total: #{User.count} users"
+  end
+
+  desc "Assign each user as owner of a team (for testing)"
+  task assign_team_owners: :environment do
+    if Rails.env.production?
+      puts "❌ Cannot run this task in production!"
+      exit 1
+    end
+
+    users = User.all
+    teams = Team.all
+
+    if users.count != teams.count
+      puts "⚠️  Warning: #{users.count} users but #{teams.count} teams"
+      puts "This task works best when user count matches team count"
+    end
+
+    users.each_with_index do |user, index|
+      team = teams[index % teams.count]
+
+      if team.owner_id.present? && team.owner_id != user.id
+        puts "⚠️  Team '#{team.name}' already owned by user ID #{team.owner_id}"
+      end
+
+      team.update(owner_id: user.id)
+      puts "✓ Assigned #{user.email} (#{user.name}) as owner of '#{team.name}'"
+    end
+
+    puts "\n✅ Team ownership assigned"
+    puts "\nTeam ownership summary:"
+    Team.includes(:owner).all.each do |team|
+      owner_name = team.owner ? "#{team.owner.name} (#{team.owner.email})" : "NO OWNER"
+      puts "  #{team.name.ljust(30)} → #{owner_name}"
+    end
   end
 
   desc "Age all contracts to make them trade eligible (> 3 months old)"
