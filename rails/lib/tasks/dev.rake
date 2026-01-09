@@ -12,14 +12,14 @@ namespace :dev do
       user.password = password
       user.password_confirmation = password
       user.save(validate: false)
-      puts "✓ Updated password for: #{user.email} (#{user.name})"
+      puts "✓ Updated password for: #{user.username} (#{user.name})"
     end
 
     puts "\n✅ All #{User.count} users now have password: '#{password}'"
     puts "\nUsers:"
     User.includes(:teams).all.each do |user|
       team_name = user.team&.name || 'No team'
-      puts "  - #{user.email} (#{user.name}) - #{team_name}"
+      puts "  - #{user.username} (#{user.name}) - #{team_name}"
     end
   end
 
@@ -31,19 +31,28 @@ namespace :dev do
       team_name = user.team&.name || 'No team (NOT OWNER OF ANY TEAM)'
       admin = user.is_admin? ? '[ADMIN]' : ''
       owner_id = user.team&.owner_id == user.id ? '✓ Owner' : '✗ Not Owner'
-      puts "#{user.email.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{owner_id} #{admin}"
+      puts "#{user.username.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{owner_id} #{admin}"
     end
     puts "-" * 70
     puts "Total: #{User.count} users"
   end
 
-  desc "Show current team ownership (DO NOT USE assign_team_owners - it overwrites correct data!)"
+  desc "Show current team ownership and notification emails"
   task show_team_owners: :environment do
     puts "\n📋 Current Team Ownership:"
     puts "-" * 80
-    Team.includes(:owner).order(:name).all.each do |team|
+    Team.includes(:owner, :team_emails).order(:name).all.each do |team|
       if team.owner
-        puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (#{team.owner.email})"
+        puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (@#{team.owner.username})"
+        if team.team_emails.any?
+          team.team_emails.each do |team_email|
+            primary = team_email.primary? ? " [PRIMARY]" : ""
+            notif = team_email.receive_trade_notifications? ? " [TRADE NOTIF]" : ""
+            puts "   └─ #{team_email.email}#{primary}#{notif}"
+          end
+        else
+          puts "   └─ ⚠️  No notification emails configured"
+        end
       else
         puts "#{team.name.ljust(35)} → ⚠️  NO OWNER ASSIGNED"
       end
