@@ -165,8 +165,35 @@ RailsAdmin.config do |config|
       field :budget
       field :stadium
       field :owner
+      field :team_emails do
+        label "Notification Emails"
+        help "Add email addresses for trade notifications"
+      end
       field :contracts
       field :bids
+    end
+  end
+
+  config.model 'TeamEmail' do
+    list do
+      field :team
+      field :email
+      field :primary
+      field :receive_trade_notifications
+      field :created_at
+    end
+    edit do
+      field :team
+      field :email do
+        help "Email address for notifications"
+      end
+      field :primary do
+        help "Mark as the primary contact email"
+      end
+      field :receive_trade_notifications do
+        label "Receive Trade Notifications"
+        help "Should this email receive trade proposal notifications?"
+      end
     end
   end
 
@@ -191,17 +218,21 @@ RailsAdmin.config do |config|
     end
   end
 
-  config.model 'User' do 
+  config.model 'User' do
     list do
       field :name
-      field :email
+      field :username
       field :teams
       field :is_admin
     end
     edit do
       field :name
-      field :email
-      field :password
+      field :username do
+        help "Username for authentication (3-50 characters, letters, numbers, underscores, periods)"
+      end
+      field :password do
+        help "Leave blank to keep current password"
+      end
       field :teams
       field :is_admin
     end
