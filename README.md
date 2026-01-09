@@ -1,682 +1,500 @@
-# Billy Martin Players League
+# Players
 
-A Rails application for managing the Billy Martin Players League, featuring player statistics, contracts, and league management.
+A fantasy sports league management application built with Rails and GraphQL. This application manages players, teams, contracts, trades, and free agency periods for the Billy Martin Players League.
 
-## 📋 Table of Contents
+## Tech Stack
 
-- [Quick Start](#-quick-start)
-- [Local Development](#-local-development)
-- [Deployment](#-deployment)
-- [Helper Scripts](#-helper-scripts)
-- [Project Structure](#-project-structure)
-- [Environment Configuration](#-environment-configuration)
-- [Docker Commands](#-docker-commands)
-- [Troubleshooting](#-troubleshooting)
+- **Backend**: Ruby 3.1.2, Rails 6.1
+- **Database**: PostgreSQL 16
+- **API**: GraphQL with GraphiQL (development)
+- **Authentication**: Devise with JWT tokens
+- **Admin**: RailsAdmin
+- **Frontend**: React with esbuild
+- **Deployment**: Docker + Portainer
+- **CI/CD**: GitHub Actions → GitHub Container Registry
 
----
+## Project Structure
 
-## 🚀 Quick Start
+```
+.
+├── rails/                  # Rails application
+│   ├── app/
+│   │   ├── models/        # Player, Team, Season, Contract, Trade, Bid, etc.
+│   │   ├── graphql/       # GraphQL schema and types
+│   │   ├── controllers/   # API and admin controllers
+│   │   └── javascript/    # React frontend code
+│   ├── config/            # Rails configuration
+│   ├── db/                # Database migrations and schema
+│   ├── Gemfile            # Ruby dependencies
+│   ├── package.json       # JavaScript dependencies
+│   └── Procfile           # Process manager (Rails + asset watchers)
+├── docker-compose.yml          # Local development setup
+├── docker-compose.portainer.yml # Production deployment config
+├── Dockerfile             # Multi-stage Docker build
+├── web-entrypoint.sh      # Container startup script
+├── db-restore/            # Auto-restore database backups
+└── .github/workflows/     # CI/CD pipelines
+```
+
+## Getting Started
 
 ### Prerequisites
 
-- **Docker Desktop** - [Download](https://www.docker.com/products/docker-desktop)
-- **Minimum Requirements**: 4GB RAM, 5GB disk space
+- Docker and Docker Compose
+- Git
 
-### First Time Setup
+### Local Development Setup
 
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd players
+   ```
+
+2. **Create environment file**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Configure environment variables**
+
+   Edit `.env` and update these values:
+   ```bash
+   # Database
+   DATABASE_USER=postgres
+   DATABASE_PASSWORD=your_secure_password
+   DATABASE_NAME=players_development
+   DATABASE_HOST=db
+
+   # Rails
+   SECRET_KEY_BASE=$(openssl rand -hex 64)
+   RAILS_ENV=development
+
+   # Development flags
+   DISABLE_HOST_CHECK=true
+   DISABLE_FORCE_SSL=true
+   ```
+
+4. **Start the application**
+   ```bash
+   docker compose up
+   ```
+
+   The application will:
+   - Install Ruby gems and JavaScript dependencies
+   - Build assets initially
+   - Start Rails server on port 3000
+   - Start asset watchers for auto-rebuild
+
+5. **Access the application**
+   - Main app: http://localhost:3000
+   - GraphiQL: http://localhost:3000/graphiql (development only)
+   - Admin: http://localhost:3000/admin
+   - Health check: http://localhost:3000/health
+
+## Development Workflow
+
+### Making Code Changes
+
+The development setup uses volume mounts and asset watchers to provide a seamless development experience:
+
+#### Rails/Ruby Changes (No Restart Needed)
+
+Changes to these files are automatically reflected:
 ```bash
-# Clone the repository
-git clone <repository-url> edge
-cd edge
+# Edit any Ruby code
+rails/app/models/player.rb
+rails/app/controllers/graphql_controller.rb
+rails/config/routes.rb
+rails/lib/**/*.rb
 
-# Run the setup script
-./bin/dev-setup
+# Changes are immediately available - just refresh your browser
 ```
 
-The setup script will:
-1. ✅ Verify Docker is running
-2. ✅ Create `.env` from template
-3. ✅ Build Docker images
-4. ✅ Start database
-5. ✅ Restore database from backup (if available)
-6. ✅ Install dependencies
+Rails development mode automatically reloads code on each request.
 
-### Start Development
+#### JavaScript Changes (Auto-Rebuild)
 
+Changes to JavaScript/CSS are automatically rebuilt by watchers:
 ```bash
-./bin/dev
+# Edit any JavaScript/CSS
+rails/app/javascript/components/Player.jsx
+rails/app/assets/stylesheets/application.scss
+
+# The Procfile watchers (yarn watch, yarn watch:css) automatically rebuild
+# Just refresh your browser to see changes
 ```
 
-Application runs at **http://localhost:3000**
+**How it works:**
+- `yarn watch` monitors JS files and rebuilds with esbuild
+- `yarn watch:css` monitors CSS/SCSS files and rebuilds
+- Both run continuously in the container via Foreman
 
----
-
-## 💻 Local Development
-
-### Helper Scripts
-
-All helper scripts are in the `bin/` directory:
-
-#### Core Scripts
-
-**`./bin/dev-setup`** - Complete first-time setup
-- Checks Docker installation
-- Creates `.env` file
-- Builds images
-- Starts database
-- Restores database
-- Installs dependencies
-
-**`./bin/dev`** - Start development server
-- Starts all services (web, assets, database)
-- Watches for file changes
-- Press Ctrl+C to stop
-
-**`./bin/console`** - Open Rails console
-- Interactive Ruby console
-- Full access to Rails environment and models
-
-**`./bin/rails <command>`** - Run Rails commands
+**Check build output:**
 ```bash
-./bin/rails db:migrate          # Run migrations
-./bin/rails routes              # Show routes
-./bin/rails db:seed             # Seed database
-./bin/rails generate model User # Generate model
-```
-
-#### Database Scripts
-
-**`./bin/restore`** - Restore database from backup
-- Looks for `docker/db/restore/latest.restore`
-- Drops and recreates database
-- Restores data from dump file
-- Runs migrations
-
-**`./bin/setup`** - Fresh database setup
-- Creates database
-- Runs migrations
-- Seeds database
-
-#### Testing
-
-**`./bin/test`** - Run test suite
-```bash
-./bin/test                           # All tests
-./bin/test test/models/user_test.rb  # Specific file
-```
-
-### Common Development Tasks
-
-```bash
-# View logs
-docker compose logs -f              # All services
-docker compose logs -f players      # Just Rails
-docker compose logs -f assets       # Just assets
-
-# Restart services
-docker compose restart
-docker compose restart players      # Just Rails
-
-# Stop everything
-docker compose down
-
-# Clean restart (removes volumes/database)
-docker compose down -v
-./bin/dev-setup
-
-# Rebuild images
-docker compose build
-docker compose build --no-cache     # Force clean build
-```
-
----
-
-## 🚀 Deployment
-
-### Deployment Options
-
-The project supports multiple deployment methods:
-
-1. **Portainer (Recommended for Production)** - Docker stack deployment behind Caddy proxy
-2. **Direct Docker Compose** - Traditional server deployment with docker-compose
-3. **Local Development** - Hot-reload development environment
-
-### Portainer Deployment (Recommended)
-
-For production deployment with Portainer and Caddy reverse proxy:
-
-📖 **See [PORTAINER_DEPLOYMENT.md](PORTAINER_DEPLOYMENT.md) for complete guide**
-
-**Quick Steps:**
-1. Copy `docker-compose.portainer.yml` to Portainer Web editor
-2. Paste `stack.env.txt` into Portainer's Environment Variables (Advanced mode)
-3. Update passwords and secrets
-4. Deploy stack
-5. Configure Caddyfile to proxy to the `players` service
-
-**Key differences from docker-compose:**
-- Uses `docker-compose.portainer.yml` (not `docker-compose.yml`)
-- Environment variables set in Portainer UI (not `.env` file)
-- Designed for production behind Caddy proxy
-- No local volume mounts (uses pre-built images)
-
-### Multi-Environment Setup (Docker Compose)
-
-For direct server deployment without Portainer:
-
-- **Development** - Local with hot-reload
-- **QA** - Testing with production settings
-- **Production** - Full production configuration
-
-### Quick Deploy
-
-Use the deployment script:
-
-```bash
-./deploy.sh qa      # Deploy to QA
-./deploy.sh prod    # Deploy to production (asks confirmation)
-```
-
-### Files Required on Servers
-
-Servers only need these files (no source code):
-
-**QA Server:**
-```
-<deployment-directory>/
-├── docker-compose.yml
-├── docker-compose.qa.yml
-├── deploy.sh
-└── .env
-```
-
-**Production Server:**
-```
-<deployment-directory>/
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── deploy.sh
-└── .env
-```
-
-Choose any directory you prefer (e.g., `/opt/edge/`, `/home/deploy/edge/`, `/srv/edge/`)
-
-### Server Setup Steps
-
-**1. Create deployment directory on server:**
-```bash
-ssh deploy@server
-mkdir -p ~/edge  # or any directory you prefer
-cd ~/edge
-```
-
-**2. Copy files to server:**
-```bash
-# From your local machine
-# Replace ~/edge with your chosen directory
-
-# QA
-scp docker-compose.yml deploy@qa-server:~/edge/
-scp docker-compose.qa.yml deploy@qa-server:~/edge/
-scp deploy.sh deploy@qa-server:~/edge/
-scp .env.qa deploy@qa-server:~/edge/.env.template
-
-# Production
-scp docker-compose.yml deploy@prod-server:~/edge/
-scp docker-compose.prod.yml deploy@prod-server:~/edge/
-scp deploy.sh deploy@prod-server:~/edge/
-scp .env.prod deploy@prod-server:~/edge/.env.template
-```
-
-**3. Configure on server:**
-```bash
-ssh deploy@server
-cd ~/edge  # or your chosen directory
-
-# Create .env from template
-cp .env.template .env
-
-# Generate secrets
-openssl rand -hex 64
-
-# Edit with secure values
-nano .env
-
-# Make deploy script executable
-chmod +x deploy.sh
-```
-
-**4. Login to GitHub Container Registry:**
-```bash
-echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u USERNAME --password-stdin
-```
-
-**5. Deploy:**
-```bash
-./deploy.sh qa    # or prod
-```
-
-### Building and Publishing Images
-
-Build locally and push to GitHub Container Registry:
-
-```bash
-# Build
-docker build -t ghcr.io/jamiepinkham/players:main .
-
-# Login (requires write:packages scope)
-echo "YOUR_TOKEN" | docker login ghcr.io -u jamiepinkham --password-stdin
-
-# Push
-docker push ghcr.io/jamiepinkham/players:main
-
-# Update servers (use your actual deployment directory)
-ssh deploy@qa-server "cd ~/edge && ./deploy.sh qa"
-```
-
-### Health Checks
-
-Verify deployment:
-
-```bash
-curl http://localhost:3000/health        # Basic health
-curl http://localhost:3000/health/ready  # Database connection
-curl http://localhost:3000/health/live   # Process alive
-```
-
----
-
-## 📂 Project Structure
-
-```
-/
-├── bin/                           # Helper scripts
-│   ├── console                    # Rails console
-│   ├── dev                        # Start development
-│   ├── dev-setup                  # First-time setup
-│   ├── rails                      # Rails command wrapper
-│   ├── restore                    # Restore database
-│   ├── setup                      # Fresh database setup
-│   └── test                       # Run tests
-│
-├── rails/                         # Rails application
-│   ├── app/                       # Application code
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── views/
-│   │   └── ...
-│   ├── config/                    # Configuration
-│   ├── db/                        # Migrations & schema
-│   └── test/                      # Test suite
-│
-├── docker/                        # Docker configuration
-│   ├── db/restore/                # Database backups
-│   │   └── latest.restore         # Latest DB dump
-│   └── postgres/                  # PostgreSQL init scripts
-│
-├── .github/workflows/             # CI/CD
-│   └── ghcr-publish.yml           # Publish to GHCR
-│
-├── Dockerfile                     # Multi-stage image (assets + web)
-├── docker-compose.yml             # Base configuration
-├── docker-compose.override.yml    # Dev overrides (auto-loaded)
-├── docker-compose.dev.yml         # Dev overrides (explicit)
-├── docker-compose.qa.yml          # QA environment
-├── docker-compose.prod.yml        # Production environment
-│
-├── deploy.sh                      # Deployment script
-├── assets_entrypoint.sh           # Assets container entrypoint
-├── web-entrypoint.sh              # Web container entrypoint
-│
-├── .env.example                   # Dev template
-├── .env.qa                        # QA template
-├── .env.prod                      # Production template
-├── .env                           # Active config (gitignored)
-│
-├── DOCKER_SETUP.md                # Detailed deployment docs
-├── DEPLOYMENT_CHECKLIST.md        # Quick deployment guide
-└── README.md                      # This file
-```
-
----
-
-## ⚙️ Environment Configuration
-
-### Environment Templates
-
-- `.env.example` - Development defaults
-- `.env.qa` - QA configuration template
-- `.env.prod` - Production configuration template
-
-### Development Environment
-
-```bash
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_NAME=players_development
-DATABASE_HOST=db
-SECRET_KEY_BASE=123ChangeMe
-RAILS_ENV=development
-
-# Development settings
-DISABLE_HOST_CHECK=true
-DISABLE_FORCE_SSL=true
-```
-
-### QA Environment
-
-```bash
-DATABASE_USER=postgres
-DATABASE_PASSWORD=<secure-password>
-DATABASE_NAME=players_qa
-DATABASE_HOST=db
-SECRET_KEY_BASE=<generated-64-char-hex>
-RAILS_ENV=production
-
-# QA testing settings
-DISABLE_HOST_CHECK=true      # Accept any IP/hostname
-DISABLE_FORCE_SSL=true       # Allow HTTP
-```
-
-### Production Environment
-
-```bash
-DATABASE_USER=postgres
-DATABASE_PASSWORD=<very-secure-password>
-DATABASE_NAME=players_production
-DATABASE_HOST=db
-SECRET_KEY_BASE=<generated-64-char-hex>
-RAILS_ENV=production
-
-# Production security
-APP_HOST=yourdomain.com
-# Or for multiple hosts:
-TRUSTED_HOSTS=yourdomain.com,www.yourdomain.com
-```
-
-**Generate secrets:**
-```bash
-openssl rand -hex 64
-```
-
----
-
-## 🐳 Docker Commands
-
-### Service Management
-
-```bash
-# Start all services
-docker compose up
-
-# Start in background
-docker compose up -d
-
-# Stop all services
-docker compose down
-
-# Stop and remove volumes (deletes database)
-docker compose down -v
-
-# Restart services
-docker compose restart
-docker compose restart players      # Single service
-```
-
-### Logs
-
-```bash
-# View logs
-docker compose logs
-
-# Follow logs (real-time)
-docker compose logs -f
-
-# Specific service
+# View live logs to see rebuild messages
 docker compose logs -f players
-docker compose logs -f assets
-docker compose logs -f db
-
-# Last N lines
-docker compose logs --tail=50
 ```
 
-### Container Status
+#### Adding Ruby Dependencies
+
+When you need to add or update Ruby gems:
 
 ```bash
-# List running containers
-docker compose ps
+# 1. Edit rails/Gemfile locally
+vim rails/Gemfile
 
-# Detailed status
-docker compose ps -a
+# 2. Install inside container
+docker compose exec players bundle install
 
-# Check health
-docker compose ps --format "table {{.Name}}\t{{.Status}}"
+# 3. Restart the container to load new gems
+docker compose restart players
 ```
 
-### Cleanup
-
+**Alternative: Rebuild container**
 ```bash
-# Remove stopped containers
-docker compose rm
-
-# Remove all project images
-docker rmi $(docker images -q players*)
-
-# Clean up Docker system
-docker system prune -a
-
-# Check disk usage
-docker system df
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Docker Not Running
-
-**Error:** `Cannot connect to the Docker daemon`
-
-**Solution:**
-1. Start Docker Desktop
-2. Wait for it to fully start (whale icon)
-3. Try again
-
-### Port Already in Use
-
-**Error:** `port is already allocated`
-
-**Solution:**
-```bash
-# Find what's using port 3000
-lsof -i :3000
-
-# Kill the process or stop conflicting service
+# If bundle install fails or you want a clean state
 docker compose down
+docker compose up --build
 ```
 
-### Database Connection Failed
+#### Adding JavaScript Dependencies
 
-**Error:** `could not connect to server`
-
-**Solution:**
-```bash
-# Restart database
-docker compose restart db
-
-# Check database logs
-docker compose logs db
-
-# Verify database is healthy
-docker compose ps db
-
-# Complete database reset
-docker compose down -v
-./bin/restore
-```
-
-### Assets Not Loading
-
-**Error:** CSS/JS not loading or 404 errors
-
-**Solution:**
-```bash
-# Restart asset service
-docker compose restart assets
-
-# Check asset logs
-docker compose logs assets
-
-# Rebuild assets
-docker compose run --rm assets yarn build
-```
-
-### Permission Errors
-
-**Error:** `Permission denied`
-
-**Solution:**
-```bash
-# Fix file ownership
-sudo chown -R $USER:$USER .
-
-# Restart containers
-docker compose restart
-```
-
-### Out of Disk Space
-
-**Error:** `no space left on device`
-
-**Solution:**
-```bash
-# Clean Docker
-docker system prune -a --volumes
-
-# Remove old images
-docker image prune -a
-
-# Check usage
-docker system df
-df -h
-```
-
-### 403 Forbidden on Server
-
-**Error:** `HTTP 403 Forbidden` when accessing via IP
-
-**Solution:**
-
-Add your IP to `.env`:
-```bash
-DISABLE_HOST_CHECK=true      # QA only
-# or
-TRUSTED_HOSTS=100.127.123.80,yourdomain.com
-```
-
-Restart:
-```bash
-docker compose restart
-```
-
-### SSL Redirect on QA
-
-**Error:** HTTP redirects to HTTPS in QA environment
-
-**Solution:**
-
-Add to `.env`:
-```bash
-DISABLE_FORCE_SSL=true
-```
-
-Restart:
-```bash
-docker compose restart
-```
-
-Clear browser cache or use incognito mode.
-
----
-
-## 📚 Additional Documentation
-
-- **[DOCKER_SETUP.md](DOCKER_SETUP.md)** - Detailed Docker configuration and deployment guide
-- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment checklist
-
----
-
-## 🎯 Quick Reference
-
-### Local Development
+When you need to add or update npm packages:
 
 ```bash
-./bin/dev-setup      # First time setup
-./bin/dev            # Start development
-./bin/console        # Rails console
-./bin/rails <cmd>    # Rails commands
-./bin/test           # Run tests
-./bin/restore        # Reset database
+# 1. Edit rails/package.json locally (or use yarn add)
+docker compose exec players yarn add react-router-dom
+
+# 2. Restart to ensure everything loads correctly
+docker compose restart players
 ```
 
-### Deployment
+**Note:** The `rails/node_modules` directory exists only inside the container and is not mounted to your local machine.
+
+#### Database Migrations
 
 ```bash
-./deploy.sh qa       # Deploy to QA
-./deploy.sh prod     # Deploy to production
+# Create a new migration
+docker compose exec players bundle exec rails generate migration AddFieldToPlayers
 
-# Build and push
-docker build -t ghcr.io/jamiepinkham/players:main .
-docker push ghcr.io/jamiepinkham/players:main
+# Run migrations
+docker compose exec players bundle exec rails db:migrate
+
+# Rollback
+docker compose exec players bundle exec rails db:rollback
 ```
 
-### Health Checks
+#### When to Restart the Container
+
+**Restart needed:**
+- ✅ After `bundle install` (new Ruby gems)
+- ✅ After `yarn add/remove` (new JavaScript packages)
+- ✅ Changes to `Gemfile` or `package.json`
+- ✅ Changes to `config/initializers/*`
+- ✅ Changes to `Procfile`
+
+**No restart needed:**
+- ✅ Ruby code changes (models, controllers, views, lib)
+- ✅ JavaScript/CSS changes (auto-rebuild via watchers)
+- ✅ Database migrations (just run `db:migrate`)
+- ✅ Route changes
 
 ```bash
-curl http://localhost:3000/health
-curl http://localhost:3000/health/ready
-curl http://localhost:3000/health/live
+# Quick restart (preserves database)
+docker compose restart players
+
+# Full restart (if having issues)
+docker compose down
+docker compose up
 ```
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| Docker not running | Start Docker Desktop |
-| Port in use | `lsof -i :3000`, kill process |
-| Database error | `docker compose restart db` |
-| Assets not loading | `docker compose restart assets` |
-| Permission error | `sudo chown -R $USER:$USER .` |
-| Out of space | `docker system prune -a` |
-| 403 Forbidden | Add `DISABLE_HOST_CHECK=true` |
-| SSL redirect | Add `DISABLE_FORCE_SSL=true` |
-
----
-
-## 🤝 Contributing
-
-### CI/CD Pipeline
-
-The project uses GitHub Actions:
-- **ghcr-publish.yml** - Publishes Docker images to GitHub Container Registry
 
 ### Running Tests
 
 ```bash
-./bin/test                           # All tests
-./bin/test test/models/user_test.rb  # Specific file
+# Run all tests
+docker compose exec players bundle exec rails test
+
+# Run specific test file
+docker compose exec players bundle exec rails test test/models/player_test.rb
+
+# Run with verbose output
+docker compose exec players bundle exec rails test -v
 ```
 
-### Pull Request Guidelines
+### Rails Console
 
-- ✅ Ensure tests pass
-- ✅ Follow existing code style
-- ✅ Update documentation if needed
-- ✅ Use clear commit messages
+```bash
+# Open Rails console
+docker compose exec players bundle exec rails console
 
----
+# Run Rails commands
+docker compose exec players bundle exec rails routes
+docker compose exec players bundle exec rails db:seed
+```
 
-## 📄 License
+### Viewing Logs
 
-[Your License Here]
+```bash
+# Follow all logs
+docker compose logs -f
+
+# Only Rails logs
+docker compose logs -f players
+
+# Only database logs
+docker compose logs -f db
+```
+
+## Database Management
+
+### Auto-Restore from Backup
+
+See [db-restore/README.md](db-restore/README.md) for automatic database restoration on first startup.
+
+Quick example:
+```bash
+# Place backup file
+cp your-backup.dump db-restore/db.restore
+
+# Reset and restore
+docker compose down -v
+docker compose up
+```
+
+### Manual Database Operations
+
+```bash
+# Access PostgreSQL directly
+docker compose exec db psql -U postgres -d players_development
+
+# Create a backup
+docker compose exec db pg_dump -Fc --no-acl --no-owner \
+  -U postgres -d players_development > backup.dump
+
+# Reset database (WARNING: destroys data)
+docker compose down -v
+docker compose up
+```
+
+## Deployment
+
+### CI/CD Pipeline
+
+On every push to any branch, GitHub Actions:
+1. Builds a Docker image for both amd64 and arm64
+2. Publishes to GitHub Container Registry (GHCR)
+3. Tags with:
+   - Branch name: `ghcr.io/jamiepinkham/players:branch-name`
+   - Commit SHA: `ghcr.io/jamiepinkham/players:sha-abc123...`
+   - `main` tag for main branch: `ghcr.io/jamiepinkham/players:main`
+
+### Portainer Deployment
+
+The application is deployed to production using Portainer with `docker-compose.portainer.yml`.
+
+**Key differences from development:**
+- Uses prebuilt image from GHCR (no local code mounts)
+- Connects to external `web` network (for reverse proxy)
+- Runs with production environment variables
+- Includes restart policies
+- No asset watchers (assets precompiled in image)
+
+**To deploy/update:**
+1. Push to main branch (triggers image build)
+2. In Portainer, update the stack with new image
+3. Portainer pulls latest `:main` tag and restarts
+
+### Environment Variables for Production
+
+Configure these in Portainer's environment section:
+
+```bash
+# Database
+DATABASE_USER=postgres
+DATABASE_PASSWORD=<secure-password>
+DATABASE_NAME=players_production
+DATABASE_HOST=db
+
+# Rails
+SECRET_KEY_BASE=<generate-with-rails-secret>
+RAILS_ENV=production
+
+# Email (Mailgun)
+MAILGUN_SMTP_ADDRESS=smtp.mailgun.org
+MAILGUN_SMTP_PORT=587
+MAILGUN_SMTP_DOMAIN=billymartinplayersleague.com
+MAILGUN_SMTP_USERNAME=postmaster@mg.billymartinplayersleague.com
+MAILGUN_SMTP_PASSWORD=<mailgun-password>
+MAILER_FROM=no-reply@billymartinplayersleague.com
+
+# Proxy settings
+DISABLE_FORCE_SSL=true
+RAILS_LOG_TO_STDOUT=true
+RAILS_SERVE_STATIC_FILES=true
+DISABLE_HOST_CHECK=true
+
+# Optional
+APP_HOST=billymartinplayersleague.com
+ASSET_HOST=https://billymartinplayersleague.com
+```
+
+## API
+
+### GraphQL
+
+The application provides a GraphQL API at `/graphql`.
+
+**Development:** Use GraphiQL at http://localhost:3000/graphiql
+
+**Key Types:**
+- `Player` - Player information and statistics
+- `Team` - Team management
+- `Season` - Season configuration
+- `Contract` - Player contracts
+- `Trade` - Trade transactions
+- `Bid` - Free agency bids
+- `FreeAgencyPeriod` - Free agency periods
+
+### Authentication
+
+Uses Devise with JWT tokens:
+
+```bash
+# Sign in (returns JWT in Authorization header)
+POST /users/sign_in
+{
+  "user": {
+    "email": "user@example.com",
+    "password": "password"
+  }
+}
+
+# Include JWT in subsequent requests
+Authorization: Bearer <token>
+```
+
+### Health Checks
+
+- `/health` - Basic health check
+- `/health/ready` - Readiness probe
+- `/health/live` - Liveness probe
+
+## Data Models
+
+Core models in the application:
+
+- **Player** - Individual players with stats and info
+- **Team** - Teams that own players
+- **Season** - League seasons with configuration
+- **Contract** - Player contracts with teams
+- **Trade** - Trade transactions between teams
+- **Bid** - Free agency bid system
+- **FreeAgencyPeriod** - Time periods for free agency
+- **User** - Authentication and authorization
+
+## Admin Panel
+
+RailsAdmin is available at `/admin` for administrative tasks:
+- Manage players, teams, seasons
+- View contracts and trades
+- Configure free agency periods
+- User management
+
+Access requires admin authentication.
+
+## Troubleshooting
+
+### Container won't start
+
+```bash
+# Check logs
+docker compose logs players
+
+# Rebuild if Dockerfile changed
+docker compose down
+docker compose build
+docker compose up
+```
+
+### Database connection issues
+
+```bash
+# Check database is healthy
+docker compose ps
+
+# View database logs
+docker compose logs db
+
+# Ensure DATABASE_HOST=db in .env
+```
+
+### Assets not loading or not rebuilding
+
+```bash
+# Check if watchers are running
+docker compose logs players | grep -i "yarn watch"
+
+# Manually rebuild assets
+docker compose exec players yarn build
+docker compose exec players yarn build:css
+
+# Restart watchers
+docker compose restart players
+```
+
+### Changes not appearing
+
+```bash
+# For Ruby changes: Rails should auto-reload, check logs for errors
+docker compose logs -f players
+
+# For JS/CSS changes: Check if watchers are running
+docker compose exec players ps aux | grep yarn
+
+# If still stuck, restart
+docker compose restart players
+```
+
+### Port 3000 already in use
+
+```bash
+# Find and kill process
+lsof -ti:3000 | xargs kill -9
+
+# Or change port in docker-compose.yml
+ports:
+  - "3001:3000"
+```
+
+### Permission issues
+
+```bash
+# If you get permission errors with files
+# The container runs as non-root user 'appuser'
+# But volume mounts use your host user permissions
+
+# Fix ownership (run on host)
+sudo chown -R $USER:$USER rails/
+```
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes (code auto-reloads for development)
+3. Test locally with `docker compose up`
+4. Push to trigger CI/CD build
+5. Create a pull request
+
+The CI/CD pipeline will automatically:
+- Build your Docker image
+- Publish to GHCR with your branch name
+- Comment on the PR with pull instructions
+
+## License
+
+[Add license information]
+
+## Contact
+
+[Add contact information or maintainer details]
