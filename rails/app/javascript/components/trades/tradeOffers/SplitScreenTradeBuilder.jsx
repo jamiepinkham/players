@@ -121,16 +121,31 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
 
   return (
     <Grid
-      rows={['flex', 'auto']}
+      rows={['auto', 'flex']}
       columns={['1/2', '1/2']}
       gap='medium'
       areas={[
-        { name: 'leftPanel', start: [0, 0], end: [0, 0] },
-        { name: 'rightPanel', start: [1, 0], end: [1, 0] },
-        { name: 'summaryPanel', start: [0, 1], end: [1, 1] },
+        { name: 'summaryPanel', start: [0, 0], end: [1, 0] },
+        { name: 'leftPanel', start: [0, 1], end: [0, 1] },
+        { name: 'rightPanel', start: [1, 1], end: [1, 1] },
       ]}
       fill
     >
+      {/* Summary Panel - Top */}
+      <Box gridArea='summaryPanel'>
+        <TradeSummary
+          fromTeam={fromTeam}
+          fromContracts={fromContracts}
+          fromCash={fromCash}
+          toTeam={toTeam}
+          toContracts={toContracts}
+          toCash={toCash}
+          validation={validation}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      </Box>
+
       {/* Left Panel - Your Team */}
       <Box gridArea='leftPanel' gap='small'>
         <Box pad='small' background='light-2' round='small'>
@@ -190,21 +205,6 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
             </Box>
           </>
         )}
-      </Box>
-
-      {/* Summary Panel - Bottom */}
-      <Box gridArea='summaryPanel'>
-        <TradeSummary
-          fromTeam={fromTeam}
-          fromContracts={fromContracts}
-          fromCash={fromCash}
-          toTeam={toTeam}
-          toContracts={toContracts}
-          toCash={toCash}
-          validation={validation}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
       </Box>
     </Grid>
   );
