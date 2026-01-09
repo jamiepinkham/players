@@ -35,6 +35,14 @@ mkdir -p app/assets/builds
 yarn build
 yarn build:css
 
+# Copy esbuild-hashed image files to public/ so they're accessible directly
+echo "Copying esbuild image assets to public/..."
+mkdir -p public
+cp app/assets/builds/*.jpg public/ 2>/dev/null || true
+cp app/assets/builds/*.png public/ 2>/dev/null || true
+cp app/assets/builds/*.gif public/ 2>/dev/null || true
+cp app/assets/builds/*.svg public/ 2>/dev/null || true
+
 # Precompile Rails assets for production (copies to public/ and creates manifest)
 if [ "$RAILS_ENV" = "production" ]; then
   echo "Precompiling Rails assets for production..."
