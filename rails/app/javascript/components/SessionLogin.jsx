@@ -25,12 +25,12 @@ console.log(sliding);
 function SessionLogin() {
   const auth = useAuth();
   const [hasError, setHasError] = useState(false);
-  const [value, setValue] = useState({ email: "", password: "" });
+  const [value, setValue] = useState({ login: "", password: "" });
   const location = useLocation();
   const history = useHistory();
   const { from } = location.state || { from: { pathname: "/teams" } };
-  function login(email, password) {
-    auth.signIn(email, password).then((token) => {
+  function login(username, password) {
+    auth.signIn(username, password).then((token) => {
       if (token) {
         history.replace(from);
       } else {
@@ -59,18 +59,18 @@ function SessionLogin() {
             <Form
               value={value}
               onChange={(nextValue) => setValue(nextValue)}
-              onReset={() => setValue({ email: "", password: "" })}
+              onReset={() => setValue({ login: "", password: "" })}
               onSubmit={({ value }) => {
-                login(value.email, value.password);
+                login(value.login, value.password);
               }}
             >
-              <FormField name="email-input-id" htmlFor="email-input-id">
+              <FormField name="login-input-id" htmlFor="login-input-id">
                 <TextInput
-                  id="email"
-                  name="email"
+                  id="login"
+                  name="login"
                   icon={<MailOption />}
-                  placeholder="email"
-                  value={value.email}
+                  placeholder="username"
+                  value={value.login}
                 />
               </FormField>
               <FormField name="password-input-id" htmlFor="password-input-id">
@@ -103,7 +103,7 @@ function SessionLogin() {
                   type="submit"
                   primary
                   label="Submit"
-                  disabled={!value.email || !value.password ? true : false}
+                  disabled={!value.login || !value.password ? true : false}
                 />
               </Box>
             </Form>

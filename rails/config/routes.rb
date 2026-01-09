@@ -22,6 +22,9 @@ Rails.application.routes.draw do
       passwords: 'passwords',
     }
 
+  # Custom user endpoints
+  put '/users/username', to: 'usernames#update'
+
   root 'static#index'
   get '*path', to: 'static#index', constraints: lambda { |req|
     !req.path.match?(/\A\/(assets|images|packs|favicon\.ico|robots\.txt)/) &&

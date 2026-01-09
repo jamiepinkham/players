@@ -2,6 +2,17 @@ class Team < ApplicationRecord
   belongs_to :owner, class_name: 'User'
   has_many :contracts, -> { includes :player }
   has_many :bids, -> { includes :player }
+  has_many :team_emails, dependent: :destroy
+
+  # Get all email addresses for trade notifications
+  def notification_emails
+    team_emails.for_trade_notifications.pluck(:email)
+  end
+
+  # Get primary email or first available email
+  def primary_email
+    team_emails.primary.first&.email || team_emails.first&.email
+  end
 
   def current_payroll
     current_season = Season.current

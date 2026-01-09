@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_05_054259) do
+ActiveRecord::Schema.define(version: 2026_01_09_193509) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -101,6 +101,17 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.boolean "is_finished", default: false
   end
 
+  create_table "team_emails", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.string "email", null: false
+    t.boolean "primary", default: false, null: false
+    t.boolean "receive_trade_notifications", default: true, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["team_id", "email"], name: "index_team_emails_on_team_id_and_email", unique: true
+    t.index ["team_id"], name: "index_team_emails_on_team_id"
+  end
+
   create_table "teams", id: :serial, force: :cascade do |t|
     t.string "name"
     t.decimal "budget"
@@ -124,7 +135,7 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
-    t.string "email", default: "", null: false
+    t.string "username", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -139,8 +150,8 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.string "name"
     t.integer "team_id"
     t.boolean "is_admin", default: false, null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "bids", "free_agency_periods"
@@ -148,5 +159,6 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "free_agency_periods", "seasons"
+  add_foreign_key "team_emails", "teams"
   add_foreign_key "teams", "users", column: "owner_id"
 end

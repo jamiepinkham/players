@@ -5,7 +5,7 @@ class AdminRedirectController < ApplicationController
   def index
     # User is authenticated via JWT, now create a session for RailsAdmin
     if @current_user&.is_admin?
-      Rails.logger.info "AdminRedirect: User #{@current_user.id} (#{@current_user.email}) is admin, creating session"
+      Rails.logger.info "AdminRedirect: User #{@current_user.id} (#{@current_user.username}) is admin, creating session"
 
       # Sign in the user to create a session cookie
       # bypass: true avoids triggering JWT token generation
@@ -60,7 +60,7 @@ class AdminRedirectController < ApplicationController
         return
       end
 
-      Rails.logger.info "AdminRedirect: User found: #{@current_user.email}, is_admin: #{@current_user.is_admin?}"
+      Rails.logger.info "AdminRedirect: User found: #{@current_user.username}, is_admin: #{@current_user.is_admin?}"
     rescue JWT::DecodeError, JWT::ExpiredSignature => e
       Rails.logger.error "AdminRedirect: JWT decode error: #{e.message}"
       render html: "<h1>Invalid Token</h1><p>Token error: #{e.message}</p>".html_safe, status: :unauthorized
