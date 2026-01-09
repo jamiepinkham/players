@@ -66,6 +66,63 @@ namespace :dev do
     end
   end
 
+  desc "Migrate team owner usernames to team_emails table"
+  task migrate_team_emails: :environment do
+    if Rails.env.production?
+      puts "❌ Cannot run this task in production!"
+      exit 1
+    end
+
+    puts "\n📧 Migrating team owner emails to team_emails table..."
+
+    migrated = 0
+    skipped = 0
+
+    Team.includes(:owner, :team_emails).all.each do |team|
+      if team.owner.blank?
+        puts "⚠️  Skipping #{team.name} - no owner assigned"
+        skipped += 1
+        next
+      end
+
+      # Check if email already exists for this team
+      if team.team_emails.where(email: team.owner.username).exists?
+        puts "⏭️  Skipping #{team.name} - email already exists"
+        skipped += 1
+        next
+      end
+
+      # Create team email from owner's username (which is actually an email)
+      team_email = team.team_emails.create!(
+        email: team.owner.username,
+        primary: true,
+        receive_trade_notifications: true
+      )
+
+      puts "✓ Created email for #{team.name}: #{team_email.email} [PRIMARY] [TRADE NOTIF]"
+      migrated += 1
+    end
+
+    puts "\n✅ Migration complete!"
+    puts "   Migrated: #{migrated} teams"
+    puts "   Skipped: #{skipped} teams"
+
+    puts "\n📋 Current team emails:"
+    Team.includes(:owner, :team_emails).order(:name).each do |team|
+      if team.team_emails.any?
+        puts "#{team.name.ljust(35)} → #{team.team_emails.count} email(s)"
+        team.team_emails.each do |email|
+          flags = []
+          flags << "PRIMARY" if email.primary?
+          flags << "TRADE NOTIF" if email.receive_trade_notifications?
+          puts "   └─ #{email.email} [#{flags.join(', ')}]"
+        end
+      else
+        puts "#{team.name.ljust(35)} → ⚠️  No emails"
+      end
+    end
+  end
+
   desc "Age all contracts to make them trade eligible (> 3 months old)"
   task age_contracts: :environment do
     if Rails.env.production?
