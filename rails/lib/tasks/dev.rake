@@ -68,11 +68,6 @@ namespace :dev do
 
   desc "Migrate team owner usernames to team_emails table"
   task migrate_team_emails: :environment do
-    if Rails.env.production?
-      puts "❌ Cannot run this task in production!"
-      exit 1
-    end
-
     puts "\n📧 Migrating team owner emails to team_emails table..."
 
     migrated = 0
