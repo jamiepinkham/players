@@ -4,7 +4,10 @@ class SessionsController < Devise::SessionsController
     def create
         # Handle JSON API requests
         if request.format.json?
-            user = User.find_by_email(params[:user][:email])
+            # Support both 'email' (legacy) and 'login' parameters for backwards compatibility
+            login_value = params[:user][:login] || params[:user][:email]
+            user = User.find_for_database_authentication(login: login_value)
+
             if user && user.valid_password?(params[:user][:password])
                 self.resource = warden.authenticate!(auth_options)
                 sign_in(resource_name, resource)
