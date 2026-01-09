@@ -37,10 +37,14 @@ rails/config/master.key
 .env.local
 .env.*.local
 
+# Portainer stack environment files (ignore actual values, commit template)
+stack.env
+
 # Allow templates to be committed
 !.env.example
 !.env.qa
 !.env.prod
+!stack.env.txt
 
 # Yarn and lock files
 rails/yarn-error.log

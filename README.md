@@ -279,6 +279,12 @@ docker compose up
 
 ## Deployment
 
+### Overview
+
+The deployment process consists of two parts:
+1. **CI/CD Pipeline** - Automatically builds and publishes Docker images to GitHub Container Registry
+2. **Portainer Deployment** - Deploys the built image to production using Portainer
+
 ### CI/CD Pipeline
 
 On every push to any branch, GitHub Actions:
@@ -300,44 +306,104 @@ The application is deployed to production using Portainer with `docker-compose.p
 - Includes restart policies
 - No asset watchers (assets precompiled in image)
 
-**To deploy/update:**
-1. Push to main branch (triggers image build)
-2. In Portainer, update the stack with new image
-3. Portainer pulls latest `:main` tag and restarts
+#### Initial Deployment
 
-### Environment Variables for Production
+**Step 1: Prepare Environment Variables**
 
-Configure these in Portainer's environment section:
+The `stack.env.txt` file contains all required environment variables with placeholder values.
 
 ```bash
-# Database
-DATABASE_USER=postgres
-DATABASE_PASSWORD=<secure-password>
-DATABASE_NAME=players_production
-DATABASE_HOST=db
+# View the template
+cat stack.env.txt
 
-# Rails
-SECRET_KEY_BASE=<generate-with-rails-secret>
-RAILS_ENV=production
-
-# Email (Mailgun)
-MAILGUN_SMTP_ADDRESS=smtp.mailgun.org
-MAILGUN_SMTP_PORT=587
-MAILGUN_SMTP_DOMAIN=billymartinplayersleague.com
-MAILGUN_SMTP_USERNAME=postmaster@mg.billymartinplayersleague.com
-MAILGUN_SMTP_PASSWORD=<mailgun-password>
-MAILER_FROM=no-reply@billymartinplayersleague.com
-
-# Proxy settings
-DISABLE_FORCE_SSL=true
-RAILS_LOG_TO_STDOUT=true
-RAILS_SERVE_STATIC_FILES=true
-DISABLE_HOST_CHECK=true
-
-# Optional
-APP_HOST=billymartinplayersleague.com
-ASSET_HOST=https://billymartinplayersleague.com
+# IMPORTANT: Update these placeholder values:
+# - DATABASE_PASSWORD: Use a secure password
+# - SECRET_KEY_BASE: Generate with: openssl rand -hex 64
+# - MAILGUN_SMTP_PASSWORD: Your Mailgun SMTP password
 ```
+
+**Step 2: Create Stack in Portainer**
+
+1. Log into Portainer
+2. Navigate to **Stacks** → **Add stack**
+3. Name: `players` (or your preferred name)
+
+**Step 3: Add Docker Compose Configuration**
+
+In the **Web editor** section:
+1. Copy the entire contents of `docker-compose.portainer.yml`
+2. Paste into the editor
+
+**Step 4: Add Environment Variables**
+
+1. Scroll down to **Environment variables** section
+2. Toggle **Advanced mode** (switch at top right)
+3. Copy the entire contents of `stack.env.txt`
+4. Paste into the text area
+5. **Update all placeholder values:**
+   ```
+   DATABASE_PASSWORD=CHANGE_ME_SECURE_PASSWORD_HERE  → your_secure_password
+   SECRET_KEY_BASE=GENERATE_SECURE_KEY...            → (run: openssl rand -hex 64)
+   MAILGUN_SMTP_PASSWORD=YOUR_MAILGUN_SMTP...        → your_mailgun_password
+   ```
+
+**Step 5: Deploy**
+
+1. Click **Deploy the stack**
+2. Portainer will:
+   - Pull the Docker image from GHCR
+   - Create the database container
+   - Start the application
+3. Monitor logs in Portainer to verify successful startup
+
+**Step 6: Verify Deployment**
+
+```bash
+# Check health endpoint (replace with your domain)
+curl https://yourdomain.com/health
+
+# Expected response:
+{"status":"ok"}
+```
+
+#### Updating Existing Deployment
+
+When you push code changes to the main branch:
+
+1. **GitHub Actions automatically builds and publishes** a new image
+2. **In Portainer:**
+   - Go to **Stacks** → `players`
+   - Click **Update the stack**
+   - Enable **Re-pull image and redeploy**
+   - Click **Update**
+3. Portainer pulls the latest `:main` tag and restarts
+
+**Quick update via Portainer UI:**
+```
+Stacks → players → Editor (or Update) → ☑ Re-pull image → Update
+```
+
+#### Environment Variables Reference
+
+See `stack.env.txt` for the complete list. Key variables:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_PASSWORD` | PostgreSQL password | ✅ Yes |
+| `SECRET_KEY_BASE` | Rails secret key (generate with `openssl rand -hex 64`) | ✅ Yes |
+| `MAILGUN_SMTP_PASSWORD` | Mailgun SMTP password | ✅ Yes (if using email) |
+| `RAILS_ENV` | Rails environment (`production`) | ✅ Yes |
+| `DISABLE_FORCE_SSL` | Set to `true` if using reverse proxy SSL | ✅ Yes (with proxy) |
+| `APP_HOST` | Your domain name | Optional |
+| `ASSET_HOST` | CDN URL for assets | Optional |
+
+#### Security Note
+
+**Environment file differences:**
+- `stack.env.txt` - Template with placeholders, safe to commit to git ✅
+- `stack.env` - Your actual values with secrets, **NEVER commit** ❌ (gitignored)
+
+The `.gitignore` is configured to prevent `stack.env` from being committed while allowing `stack.env.txt` to be versioned.
 
 ## API
 
