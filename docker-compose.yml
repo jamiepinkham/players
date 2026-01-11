@@ -3,7 +3,9 @@
 
 services:
   players:
-    image: ghcr.io/jamiepinkham/players:main
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       db:
         condition: service_healthy
