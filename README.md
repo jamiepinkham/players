@@ -70,6 +70,10 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
    SECRET_KEY_BASE=$(openssl rand -hex 64)
    RAILS_ENV=development
 
+   # JWT Authentication (optional - falls back to SECRET_KEY_BASE if not set)
+   DEVISE_SECRET_KEY=$(openssl rand -hex 64)
+   DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 64)
+
    # Development flags
    DISABLE_HOST_CHECK=true
    DISABLE_FORCE_SSL=true
@@ -390,6 +394,8 @@ cat stack.env.txt
 # IMPORTANT: Update these placeholder values:
 # - DATABASE_PASSWORD: Use a secure password
 # - SECRET_KEY_BASE: Generate with: openssl rand -hex 64
+# - DEVISE_SECRET_KEY: Generate with: openssl rand -hex 64
+# - DEVISE_JWT_SECRET_KEY: Generate with: openssl rand -hex 64
 # - MAILGUN_SMTP_PASSWORD: Your Mailgun SMTP password
 ```
 
@@ -413,9 +419,11 @@ In the **Web editor** section:
 4. Paste into the text area
 5. **Update all placeholder values:**
    ```
-   DATABASE_PASSWORD=CHANGE_ME_SECURE_PASSWORD_HERE  → your_secure_password
-   SECRET_KEY_BASE=GENERATE_SECURE_KEY...            → (run: openssl rand -hex 64)
-   MAILGUN_SMTP_PASSWORD=YOUR_MAILGUN_SMTP...        → your_mailgun_password
+   DATABASE_PASSWORD=CHANGE_ME_SECURE_PASSWORD_HERE     → your_secure_password
+   SECRET_KEY_BASE=GENERATE_SECURE_KEY...               → (run: openssl rand -hex 64)
+   DEVISE_SECRET_KEY=GENERATE_SECURE_KEY...             → (run: openssl rand -hex 64)
+   DEVISE_JWT_SECRET_KEY=GENERATE_SECURE_KEY...         → (run: openssl rand -hex 64)
+   MAILGUN_SMTP_PASSWORD=YOUR_MAILGUN_SMTP...           → your_mailgun_password
    ```
 
 **Step 5: Deploy**
@@ -462,11 +470,15 @@ See `stack.env.txt` for the complete list. Key variables:
 |----------|-------------|----------|
 | `DATABASE_PASSWORD` | PostgreSQL password | ✅ Yes |
 | `SECRET_KEY_BASE` | Rails secret key (generate with `openssl rand -hex 64`) | ✅ Yes |
+| `DEVISE_SECRET_KEY` | Devise authentication secret key (generate with `openssl rand -hex 64`) | Recommended |
+| `DEVISE_JWT_SECRET_KEY` | JWT token secret key (generate with `openssl rand -hex 64`) | Recommended |
 | `MAILGUN_SMTP_PASSWORD` | Mailgun SMTP password | ✅ Yes (if using email) |
 | `RAILS_ENV` | Rails environment (`production`) | ✅ Yes |
 | `DISABLE_FORCE_SSL` | Set to `true` if using reverse proxy SSL | ✅ Yes (with proxy) |
 | `APP_HOST` | Your domain name | Optional |
 | `ASSET_HOST` | CDN URL for assets | Optional |
+
+**Note on JWT keys:** If `DEVISE_SECRET_KEY` or `DEVISE_JWT_SECRET_KEY` are not set, the application will fall back to using `SECRET_KEY_BASE`. For production deployments, it's recommended to set unique values for each to enhance security.
 
 #### Security Note
 

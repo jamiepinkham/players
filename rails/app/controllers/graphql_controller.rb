@@ -25,7 +25,8 @@ class GraphqlController < ApplicationController
     if request.headers['Authorization'].present?
       begin
         jwt = request.headers['Authorization'].split(' ')[1]
-        jwt_payloads = JWT.decode(jwt, 'faba5c848cf90f9bd2d09dd996c76f0912cc775b1d1e460413fd235a0d7cd411f2f07352acd38408df14c7967fa3d893b8ac8d9b15b4f0860359b63847419c04')
+        jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
+        jwt_payloads = JWT.decode(jwt, jwt_secret)
         jwt_payload = jwt_payloads.first
         @current_user ||= User.find_by(id: jwt_payload['sub'])
       rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError => e

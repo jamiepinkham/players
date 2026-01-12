@@ -41,7 +41,7 @@ class AdminRedirectController < ApplicationController
     begin
       # Decode JWT token (using the same secret as Devise JWT)
       # The secret is configured in config/initializers/devise.rb
-      jwt_secret = 'faba5c848cf90f9bd2d09dd996c76f0912cc775b1d1e460413fd235a0d7cd411f2f07352acd38408df14c7967fa3d893b8ac8d9b15b4f0860359b63847419c04'
+      jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
       jwt_payload = JWT.decode(
         token,
         jwt_secret,
