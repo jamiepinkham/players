@@ -22,11 +22,11 @@ function useProvideAuth() {
   const isAdmin = token ? jwt_decode(token).adm == "true" : false;
   const isSignedIn = token ? (jwt_decode(token) ? true : false) : false;
   const teamId = token ? jwt_decode(token).tm : undefined;
-  const signIn = (login, password) => {
+  const signIn = (username, password) => {
     return axios
       .post("/users/sign_in", {
         user: {
-          login,
+          username,
           password,
         },
       })

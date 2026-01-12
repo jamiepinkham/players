@@ -25,7 +25,7 @@ console.log(sliding);
 function SessionLogin() {
   const auth = useAuth();
   const [hasError, setHasError] = useState(false);
-  const [value, setValue] = useState({ login: "", password: "" });
+  const [value, setValue] = useState({ username: "", password: "" });
   const location = useLocation();
   const history = useHistory();
   const { from } = location.state || { from: { pathname: "/teams" } };
@@ -59,18 +59,18 @@ function SessionLogin() {
             <Form
               value={value}
               onChange={(nextValue) => setValue(nextValue)}
-              onReset={() => setValue({ login: "", password: "" })}
+              onReset={() => setValue({ username: "", password: "" })}
               onSubmit={({ value }) => {
-                login(value.login, value.password);
+                login(value.username, value.password);
               }}
             >
-              <FormField name="login-input-id" htmlFor="login-input-id">
+              <FormField name="username-input-id" htmlFor="username-input-id">
                 <TextInput
-                  id="login"
-                  name="login"
+                  id="username"
+                  name="username"
                   icon={<MailOption />}
                   placeholder="username"
-                  value={value.login}
+                  value={value.username}
                 />
               </FormField>
               <FormField name="password-input-id" htmlFor="password-input-id">
@@ -103,7 +103,7 @@ function SessionLogin() {
                   type="submit"
                   primary
                   label="Submit"
-                  disabled={!value.login || !value.password ? true : false}
+                  disabled={!value.username || !value.password ? true : false}
                 />
               </Box>
             </Form>

@@ -9,8 +9,6 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
   # Use username for authentication instead of email
-  attr_writer :login
-
   has_many :teams, foreign_key: 'owner_id'
 
   validates :username,
@@ -19,16 +17,11 @@ class User < ApplicationRecord
     format: { with: /\A[a-zA-Z0-9_\.]+\z/, message: "can only contain letters, numbers, underscores and periods" },
     length: { minimum: 3, maximum: 50 }
 
-  # Virtual attribute for authentication
-  def login
-    @login || self.username
-  end
-
   # Override Devise method to find user by username instead of email
   def self.find_for_database_authentication(warden_conditions)
     conditions = warden_conditions.dup
-    if (login = conditions.delete(:login))
-      where(conditions.to_h).where(["lower(username) = :value", { value: login.downcase }]).first
+    if (username = conditions.delete(:username))
+      where(conditions.to_h).where(["lower(username) = :value", { value: username.downcase }]).first
     elsif conditions.has_key?(:username)
       where(conditions.to_h).first
     end
