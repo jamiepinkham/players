@@ -49,16 +49,8 @@ class PasswordsController < Devise::PasswordsController
 
   private
   def process_token
-    if request.headers['Authorization'].present?
-      begin
-        jwt = request.headers['Authorization'].split(' ')[1].remove('"')
-        jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
-        jwt_payloads = JWT.decode(jwt, jwt_secret)
-        jwt_payload = jwt_payloads.first
-        @current_user_id = jwt_payload['sub']
-      rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError
-        head :unauthorized
-      end
-    end
+    # Use shared JWT authentication from ApplicationController
+    user = current_user_from_jwt
+    @current_user_id = user&.id
   end
 end

@@ -3,6 +3,7 @@ class GraphqlController < ApplicationController
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
   # protect_from_forgery with: :null_session
+  skip_before_action :verify_authenticity_token
 
   def execute
     variables = prepare_variables(params[:variables])
@@ -20,21 +21,6 @@ class GraphqlController < ApplicationController
   end
 
   private
-
-  def current_user_from_jwt
-    if request.headers['Authorization'].present?
-      begin
-        jwt = request.headers['Authorization'].split(' ')[1]
-        jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
-        jwt_payloads = JWT.decode(jwt, jwt_secret)
-        jwt_payload = jwt_payloads.first
-        @current_user ||= User.find_by(id: jwt_payload['sub'])
-      rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError => e
-        Rails.logger.warn "JWT authentication failed: #{e.message}"
-        nil
-      end
-    end
-  end
 
   # Handle variables in form data, JSON body, or a blank value
   def prepare_variables(variables_param)

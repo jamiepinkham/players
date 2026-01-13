@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/use_auth";
 import { useHistory } from "react-router";
 import { useQuery } from "graphql-hooks";
 
-import { Accordion, AccordionPanel, Box, Button, Spinner } from "grommet";
+import { Accordion, AccordionPanel, Box, Button, Heading, Spinner, Text } from "grommet";
 
 import ResetPasswordForm from "./ResetPasswordForm";
 import UpdateUsernameForm from "./UpdateUsernameForm";
@@ -25,29 +25,47 @@ export default function Profile() {
 
   if (loading) return <Spinner size="medium" alignSelf="center" />;
 
+  const user = data?.currentUser;
+
   return (
-    <Box direction="column">
+    <Box direction="column" gap="medium" pad={{ vertical: "medium" }}>
+      <Heading level={2} margin={{ top: "none", bottom: "small" }}>
+        Profile
+      </Heading>
+
+      <Box background="light-2" pad="medium" round="small" gap="xsmall">
+        {user?.name && (
+          <Text size="large" weight="bold">
+            {user.name}
+          </Text>
+        )}
+        <Box direction="row" gap="xsmall">
+          <Text weight="bold">Username:</Text>
+          <Text>{user?.username}</Text>
+        </Box>
+      </Box>
+
       <Accordion pad="xsmall" multiple={true}>
-        <AccordionPanel label="Edit Username">
-          <UpdateUsernameForm auth={auth} currentUsername={data?.currentUser?.username} />
+        <AccordionPanel label={`Change Username${user?.username ? ` (current: ${user.username})` : ''}`}>
+          <UpdateUsernameForm auth={auth} currentUsername={user?.username} />
         </AccordionPanel>
-        <AccordionPanel label="Edit Password">
+        <AccordionPanel label="Change Password">
           <ResetPasswordForm auth={auth} />
         </AccordionPanel>
-        <AccordionPanel label="Sign Out">
-          <Box pad="small" align="end">
-            <Button
-              href="/sign_in"
-              label="Sign Out"
-              onClick={() => {
-                auth.signOut().then(() => {
-                  history.push("/");
-                });
-              }}
-            />
-          </Box>
-        </AccordionPanel>
       </Accordion>
+
+      <Box pad={{ top: "medium" }} border={{ side: "top", color: "light-4" }}>
+        <Button
+          href="/sign_in"
+          label="Sign Out"
+          onClick={() => {
+            auth.signOut().then(() => {
+              history.push("/");
+            });
+          }}
+          alignSelf="start"
+        />
+      </Box>
     </Box>
   );
 }

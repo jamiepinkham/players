@@ -1,13 +1,10 @@
 class UsernamesController < ApplicationController
   respond_to :json
-  before_action :authenticate_user_from_jwt
+  before_action :authenticate_user_from_jwt!
 
   # PUT /users/username
   def update
-    unless @current_user
-      render json: { error: "Unauthorized" }, status: :unauthorized
-      return
-    end
+    @current_user = current_user_from_jwt
 
     new_username = params[:username]
 
@@ -34,24 +31,6 @@ class UsernamesController < ApplicationController
       render json: { success: true, username: @current_user.username }
     else
       render json: { error: @current_user.errors.full_messages.join(", ") }, status: :unprocessable_entity
-    end
-  end
-
-  private
-
-  def authenticate_user_from_jwt
-    if request.headers['Authorization'].present?
-      begin
-        jwt = request.headers['Authorization'].split(' ')[1]
-        jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
-        jwt_payloads = JWT.decode(jwt, jwt_secret)
-        jwt_payload = jwt_payloads.first
-        @current_user = User.find_by(id: jwt_payload['sub'])
-      rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError
-        render json: { error: "Invalid or expired token" }, status: :unauthorized
-      end
-    else
-      render json: { error: "Authorization header missing" }, status: :unauthorized
     end
   end
 end

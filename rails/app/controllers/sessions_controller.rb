@@ -1,5 +1,6 @@
 class SessionsController < Devise::SessionsController
     respond_to :json, :html
+    skip_before_action :verify_authenticity_token, if: :json_request?
 
     def create
         # Handle JSON API requests
@@ -38,6 +39,10 @@ class SessionsController < Devise::SessionsController
         else
             super
         end
+    end
+
+    def json_request?
+        request.format.json?
     end
 end
 
