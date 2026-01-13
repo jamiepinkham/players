@@ -98,7 +98,7 @@ function useProvideAuth() {
   const sendResetInstructions = (username) => {
     return axios
       .post("/users/password", {
-        user: { username: username },
+        user: { email: username },
       })
       .then((response) => {
         return response.data;
