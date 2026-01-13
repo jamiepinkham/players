@@ -1,5 +1,5 @@
 class Team < ApplicationRecord
-  belongs_to :owner, class_name: 'User'
+  has_one :user
   has_many :contracts, -> { includes :player }
   has_many :bids, -> { includes :player }
   has_many :team_emails, dependent: :destroy
@@ -12,6 +12,11 @@ class Team < ApplicationRecord
   # Get primary email or first available email
   def primary_email
     team_emails.primary.first&.email || team_emails.first&.email
+  end
+
+  # Backward compatibility alias
+  def owner
+    user
   end
 
   def current_payroll

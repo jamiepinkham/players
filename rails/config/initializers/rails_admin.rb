@@ -222,7 +222,7 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :username
-      field :teams
+      field :team
       field :is_admin
     end
     edit do
@@ -233,7 +233,7 @@ RailsAdmin.config do |config|
       field :password do
         help "Leave blank to keep current password"
       end
-      field :teams
+      field :team
       field :is_admin
     end
   end

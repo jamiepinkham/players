@@ -17,7 +17,7 @@ namespace :dev do
 
     puts "\n✅ All #{User.count} users now have password: '#{password}'"
     puts "\nUsers:"
-    User.includes(:teams).all.each do |user|
+    User.includes(:team).all.each do |user|
       team_name = user.team&.name || 'No team'
       puts "  - #{user.username} (#{user.name}) - #{team_name}"
     end
@@ -27,11 +27,10 @@ namespace :dev do
   task list_users: :environment do
     puts "\n📋 Users in database:"
     puts "-" * 70
-    User.includes(:teams).all.each do |user|
+    User.includes(:team).all.each do |user|
       team_name = user.team&.name || 'No team (NOT OWNER OF ANY TEAM)'
       admin = user.is_admin? ? '[ADMIN]' : ''
-      owner_id = user.team&.owner_id == user.id ? '✓ Owner' : '✗ Not Owner'
-      puts "#{user.username.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{owner_id} #{admin}"
+      puts "#{user.username.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{admin}"
     end
     puts "-" * 70
     puts "Total: #{User.count} users"
