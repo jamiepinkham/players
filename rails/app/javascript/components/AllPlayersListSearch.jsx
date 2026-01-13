@@ -95,7 +95,6 @@ const PlayerCard = React.memo(({ player, isExpanded, onToggle }) => {
 
       <Collapsible open={isExpanded}>
         <Box pad={{ top: 'small', left: 'small' }} background="light-2">
-          d
           {hasStats ? (
             <DataTable
               columns={
