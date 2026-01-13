@@ -16,7 +16,7 @@ import {
 
 import { Login, MailOption } from "grommet-icons";
 
-export default function EmailResetForm() {
+export default function ForgotPasswordForm() {
   let [value, setValue] = useState({ username: "" });
   let [error, setError] = useState(false);
   let history = useHistory();
