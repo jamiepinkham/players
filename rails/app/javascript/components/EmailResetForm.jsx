@@ -17,13 +17,13 @@ import {
 import { Login, MailOption } from "grommet-icons";
 
 export default function EmailResetForm() {
-  let [value, setValue] = useState({ email: "" });
+  let [value, setValue] = useState({ username: "" });
   let [error, setError] = useState(false);
   let history = useHistory();
   let auth = useAuth();
   let callback = useCallback(
     (value) => {
-      auth.sendResetInstructions(value.email).then((response) => {
+      auth.sendResetInstructions(value.username).then((response) => {
         if (response == null) {
           setError(true);
         } else {
@@ -37,7 +37,7 @@ export default function EmailResetForm() {
   return (
     <Box align="center">
       <Card pad="medium">
-        <CardHeader pad="medium">Enter sign-in email address</CardHeader>
+        <CardHeader pad="medium">Enter your username</CardHeader>
         <CardBody>
           <Form
             value={value}
@@ -47,13 +47,13 @@ export default function EmailResetForm() {
               callback(value);
             }}
           >
-            <FormField name="email-input-id" htmlFor="email-input-id">
+            <FormField name="username-input-id" htmlFor="username-input-id">
               <TextInput
-                id="email"
-                name="email"
+                id="username"
+                name="username"
                 icon={<MailOption />}
-                placeholder="email"
-                value={value.email}
+                placeholder="username"
+                value={value.username}
               />
             </FormField>
             <Box direction="column" gap="small" justify="center">

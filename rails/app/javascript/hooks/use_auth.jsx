@@ -95,10 +95,10 @@ function useProvideAuth() {
       });
   };
 
-  const sendResetInstructions = (email) => {
+  const sendResetInstructions = (username) => {
     return axios
       .post("/users/password", {
-        user: { email: email },
+        user: { username: username },
       })
       .then((response) => {
         return response.data;
