@@ -25,11 +25,6 @@ class Mutations::CreateTradeMutation < Mutations::BaseMutation
             raise GraphQL::ExecutionError, "You can only propose trades from your own team"
         end
 
-        # Prevent self-trades
-        if from_team_id == to_team_id
-            raise GraphQL::ExecutionError, "Cannot trade with yourself"
-        end
-
         # Ensure trade has assets from at least one side
         if to_contract_ids.empty? && from_contract_ids.empty? && from_cash.to_i == 0 && to_cash.to_i == 0
             raise GraphQL::ExecutionError, "Trade must include at least some contracts or cash"
