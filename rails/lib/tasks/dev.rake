@@ -17,7 +17,7 @@ namespace :dev do
 
     puts "\n✅ All #{User.count} users now have password: '#{password}'"
     puts "\nUsers:"
-    User.includes(:teams).all.each do |user|
+    User.includes(:team).all.each do |user|
       team_name = user.team&.name || 'No team'
       puts "  - #{user.username} (#{user.name}) - #{team_name}"
     end
@@ -27,11 +27,10 @@ namespace :dev do
   task list_users: :environment do
     puts "\n📋 Users in database:"
     puts "-" * 70
-    User.includes(:teams).all.each do |user|
+    User.includes(:team).all.each do |user|
       team_name = user.team&.name || 'No team (NOT OWNER OF ANY TEAM)'
       admin = user.is_admin? ? '[ADMIN]' : ''
-      owner_id = user.team&.owner_id == user.id ? '✓ Owner' : '✗ Not Owner'
-      puts "#{user.username.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{owner_id} #{admin}"
+      puts "#{user.username.ljust(30)} | #{user.name.ljust(20)} | #{team_name.ljust(25)} #{admin}"
     end
     puts "-" * 70
     puts "Total: #{User.count} users"
@@ -41,9 +40,9 @@ namespace :dev do
   task show_team_owners: :environment do
     puts "\n📋 Current Team Ownership:"
     puts "-" * 80
-    Team.includes(:owner, :team_emails).order(:name).all.each do |team|
-      if team.owner
-        puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (@#{team.owner.username})"
+    Team.includes(:user, :team_emails).order(:name).all.each do |team|
+      if team.user
+        puts "#{team.name.ljust(35)} → #{team.user.name.ljust(25)} (@#{team.user.username})"
         if team.team_emails.any?
           team.team_emails.each do |team_email|
             primary = team_email.primary? ? " [PRIMARY]" : ""
@@ -60,7 +59,7 @@ namespace :dev do
     puts "-" * 80
     puts "Total: #{Team.count} teams"
 
-    unowned_teams = Team.where(owner_id: nil).count
+    unowned_teams = Team.left_joins(:user).where(users: { id: nil }).count
     if unowned_teams > 0
       puts "\n⚠️  Warning: #{unowned_teams} teams have no owner"
     end
@@ -73,15 +72,15 @@ namespace :dev do
     migrated = 0
     skipped = 0
 
-    Team.includes(:owner, :team_emails).all.each do |team|
-      if team.owner.blank?
+    Team.includes(:user, :team_emails).all.each do |team|
+      if team.user.blank?
         puts "⚠️  Skipping #{team.name} - no owner assigned"
         skipped += 1
         next
       end
 
       # Check if email already exists for this team
-      if team.team_emails.where(email: team.owner.username).exists?
+      if team.team_emails.where(email: team.user.username).exists?
         puts "⏭️  Skipping #{team.name} - email already exists"
         skipped += 1
         next
@@ -89,7 +88,7 @@ namespace :dev do
 
       # Create team email from owner's username (which is actually an email)
       team_email = team.team_emails.create!(
-        email: team.owner.username,
+        email: team.user.username,
         primary: true,
         receive_trade_notifications: true
       )
@@ -103,7 +102,7 @@ namespace :dev do
     puts "   Skipped: #{skipped} teams"
 
     puts "\n📋 Current team emails:"
-    Team.includes(:owner, :team_emails).order(:name).each do |team|
+    Team.includes(:user, :team_emails).order(:name).each do |team|
       if team.team_emails.any?
         puts "#{team.name.ljust(35)} → #{team.team_emails.count} email(s)"
         team.team_emails.each do |email|

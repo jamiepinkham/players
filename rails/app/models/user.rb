@@ -9,7 +9,7 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
   # Use username for authentication instead of email
-  has_many :teams, foreign_key: 'owner_id'
+  belongs_to :team, optional: true
 
   validates :username,
     presence: true,
@@ -40,12 +40,8 @@ class User < ApplicationRecord
     false
   end
 
-  def team
-    self.teams.first
-  end
-
   def owns_team?(team)
-    team.owner_id == self.id
+    self.team_id == team&.id
   end
 
   def jwt_payload

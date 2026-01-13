@@ -5,7 +5,7 @@ module Queries
         def resolve
             Team.all
                 .includes(:contracts)
-                .includes(:owner)
+                .includes(:user)
                 .order(created_at: :desc)
         end
     end
@@ -15,7 +15,7 @@ module Queries
 
         def resolve(id:)
             Team.includes(:contracts)
-                .includes(:owner)
+                .includes(:user)
                 .find(id)
 
         end

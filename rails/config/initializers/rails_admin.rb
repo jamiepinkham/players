@@ -158,13 +158,17 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :budget
-      field :owner
+      field :user do
+        label "Owner"
+      end
     end
     edit do
       field :name
       field :budget
       field :stadium
-      field :owner
+      field :user do
+        label "Owner"
+      end
       field :team_emails do
         label "Notification Emails"
         help "Add email addresses for trade notifications"
@@ -222,7 +226,7 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :username
-      field :teams
+      field :team
       field :is_admin
     end
     edit do
@@ -233,7 +237,7 @@ RailsAdmin.config do |config|
       field :password do
         help "Leave blank to keep current password"
       end
-      field :teams
+      field :team
       field :is_admin
     end
   end
