@@ -1,6 +1,7 @@
 class PasswordsController < Devise::PasswordsController
   respond_to :json
   skip_before_action :require_no_authentication, only: [:create]
+  skip_before_action :verify_authenticity_token, only: [:create]
   before_action :process_token, only: [:update]
 
   # PUT /resource/password
