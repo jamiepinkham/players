@@ -14,11 +14,6 @@ class Team < ApplicationRecord
     team_emails.primary.first&.email || team_emails.first&.email
   end
 
-  # Backward compatibility alias
-  def owner
-    user
-  end
-
   def current_payroll
     current_season = Season.current
     return 0 unless current_season

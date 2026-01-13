@@ -41,8 +41,8 @@ namespace :dev do
     puts "\n📋 Current Team Ownership:"
     puts "-" * 80
     Team.includes(:user, :team_emails).order(:name).all.each do |team|
-      if team.owner
-        puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (@#{team.owner.username})"
+      if team.user
+        puts "#{team.name.ljust(35)} → #{team.user.name.ljust(25)} (@#{team.user.username})"
         if team.team_emails.any?
           team.team_emails.each do |team_email|
             primary = team_email.primary? ? " [PRIMARY]" : ""
@@ -73,14 +73,14 @@ namespace :dev do
     skipped = 0
 
     Team.includes(:user, :team_emails).all.each do |team|
-      if team.owner.blank?
+      if team.user.blank?
         puts "⚠️  Skipping #{team.name} - no owner assigned"
         skipped += 1
         next
       end
 
       # Check if email already exists for this team
-      if team.team_emails.where(email: team.owner.username).exists?
+      if team.team_emails.where(email: team.user.username).exists?
         puts "⏭️  Skipping #{team.name} - email already exists"
         skipped += 1
         next
@@ -88,7 +88,7 @@ namespace :dev do
 
       # Create team email from owner's username (which is actually an email)
       team_email = team.team_emails.create!(
-        email: team.owner.username,
+        email: team.user.username,
         primary: true,
         receive_trade_notifications: true
       )
