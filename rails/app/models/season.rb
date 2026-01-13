@@ -12,7 +12,9 @@ class Season < ApplicationRecord
 
     # Enumerate through all seasons starting from the current one
     def self.each_from_current(&block)
-        return [] unless current
+        return to_enum(:each_from_current) unless block_given?
+        return unless current
+
         current.each(&block)
     end
 
