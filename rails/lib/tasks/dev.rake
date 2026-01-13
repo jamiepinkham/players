@@ -40,7 +40,7 @@ namespace :dev do
   task show_team_owners: :environment do
     puts "\n📋 Current Team Ownership:"
     puts "-" * 80
-    Team.includes(:owner, :team_emails).order(:name).all.each do |team|
+    Team.includes(:user, :team_emails).order(:name).all.each do |team|
       if team.owner
         puts "#{team.name.ljust(35)} → #{team.owner.name.ljust(25)} (@#{team.owner.username})"
         if team.team_emails.any?
@@ -59,7 +59,7 @@ namespace :dev do
     puts "-" * 80
     puts "Total: #{Team.count} teams"
 
-    unowned_teams = Team.where(owner_id: nil).count
+    unowned_teams = Team.left_joins(:user).where(users: { id: nil }).count
     if unowned_teams > 0
       puts "\n⚠️  Warning: #{unowned_teams} teams have no owner"
     end
@@ -72,7 +72,7 @@ namespace :dev do
     migrated = 0
     skipped = 0
 
-    Team.includes(:owner, :team_emails).all.each do |team|
+    Team.includes(:user, :team_emails).all.each do |team|
       if team.owner.blank?
         puts "⚠️  Skipping #{team.name} - no owner assigned"
         skipped += 1
@@ -102,7 +102,7 @@ namespace :dev do
     puts "   Skipped: #{skipped} teams"
 
     puts "\n📋 Current team emails:"
-    Team.includes(:owner, :team_emails).order(:name).each do |team|
+    Team.includes(:user, :team_emails).order(:name).each do |team|
       if team.team_emails.any?
         puts "#{team.name.ljust(35)} → #{team.team_emails.count} email(s)"
         team.team_emails.each do |email|
