@@ -62,11 +62,10 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
       errors.push('Cannot trade with yourself');
     }
 
-    // Must include at least one asset (contract or cash)
-    const hasFromAssets = fromContracts.length > 0 || fromCash > 0;
-    const hasToAssets = toContracts.length > 0 || toCash > 0;
+    // Must include at least one asset (contract or cash) from either side
+    const hasAnyAssets = fromContracts.length > 0 || toContracts.length > 0 || fromCash > 0 || toCash > 0;
 
-    if (!hasFromAssets || !hasToAssets) {
+    if (!hasAnyAssets) {
       errors.push('Trade must include at least one player or cash');
     }
 
