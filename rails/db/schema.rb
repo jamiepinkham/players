@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_09_193509) do
+ActiveRecord::Schema.define(version: 2026_01_13_041433) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -119,8 +119,6 @@ ActiveRecord::Schema.define(version: 2026_01_09_193509) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "comment"
-    t.bigint "owner_id"
-    t.index ["owner_id"], name: "index_teams_on_owner_id"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -151,6 +149,7 @@ ActiveRecord::Schema.define(version: 2026_01_09_193509) do
     t.integer "team_id"
     t.boolean "is_admin", default: false, null: false
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["team_id"], name: "index_users_on_team_id"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
@@ -160,5 +159,5 @@ ActiveRecord::Schema.define(version: 2026_01_09_193509) do
   add_foreign_key "contracts", "teams"
   add_foreign_key "free_agency_periods", "seasons"
   add_foreign_key "team_emails", "teams"
-  add_foreign_key "teams", "users", column: "owner_id"
+  add_foreign_key "users", "teams", on_delete: :nullify
 end
