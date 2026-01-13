@@ -66,7 +66,7 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
     const hasFromAssets = fromContracts.length > 0 || fromCash > 0;
     const hasToAssets = toContracts.length > 0 || toCash > 0;
 
-    if (!hasFromAssets && !hasToAssets) {
+    if (!hasFromAssets || !hasToAssets) {
       errors.push('Trade must include at least one player or cash');
     }
 
