@@ -14,8 +14,17 @@ class User < ApplicationRecord
   validates :username,
     presence: true,
     uniqueness: { case_sensitive: false },
-    format: { with: /\A[a-zA-Z0-9_\.]+\z/, message: "can only contain letters, numbers, underscores and periods" },
+    format: {
+      with: /\A[a-zA-Z0-9_\.]+\z/,
+      message: "can only contain letters, numbers, underscores and periods",
+      unless: :skip_username_validation?
+    },
     length: { minimum: 3, maximum: 50 }
+
+  # Skip username format validation during password reset
+  def skip_username_validation?
+    encrypted_password_changed? && !new_record?
+  end
 
   # Override Devise method to find user by username instead of email
   def self.find_for_database_authentication(warden_conditions)

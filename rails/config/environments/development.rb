@@ -30,10 +30,11 @@ Rails.application.configure do
 
 
 
-  # Don't care if the mailer can't send in development.
-  config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.delivery_method = :test  # Store emails in memory instead of sending
-  config.action_mailer.perform_deliveries = false  # Don't attempt to send emails
+  # Enable email delivery in development - save to file
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :file
+  config.action_mailer.file_settings = { location: Rails.root.join('tmp/mails') }
+  config.action_mailer.perform_deliveries = true
 
   config.action_mailer.perform_caching = false
 
