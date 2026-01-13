@@ -27,6 +27,16 @@ class User < ApplicationRecord
     end
   end
 
+  # Alias username as email for Devise compatibility
+  # Devise's :recoverable module expects an email method
+  def email
+    username
+  end
+
+  def email=(value)
+    self.username = value
+  end
+
   # Disable email validation from Devise
   def email_required?
     false
