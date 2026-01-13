@@ -34,7 +34,7 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
 function SelectableContractList({ team, selectedContracts = [], onToggle }) {
   if (!team) return null;
 
-  const { data = { team: null }, loading, error } = useQuery(
+  const { data, loading, error } = useQuery(
     TEAM_CONTRACTS_QUERY,
     {
       variables: {
@@ -45,7 +45,7 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
 
   if (loading) return <Spinner size="medium" alignSelf="center" />;
   if (error) return <Text color="status-critical">Error loading contracts: {error.message}</Text>;
-  if (!data.team) return <Spinner size="medium" alignSelf="center" />;
+  if (!data?.team) return <Text color="status-critical">Team not found</Text>;
 
   return (
     <DataTable
