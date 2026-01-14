@@ -73,19 +73,39 @@ export default function PendingTrades() {
     if (!data || !data.trades) return <Spinner size="medium" alignSelf="center" />;
     if (data.trades.length == 0) return (<Box margin="medium"><Text>No pending trades</Text></Box>)
     async function onAcceptTrade(tradeId) {
-        const payload = {
-            "id": tradeId,
-        };
-        await acceptTradeMutation({ variables: { "input": payload } });
-        refetch();
+        try {
+            const payload = {
+                "id": tradeId,
+            };
+            const result = await acceptTradeMutation({ variables: { "input": payload } });
+
+            if (result.error) {
+                throw new Error(result.error.graphQLErrors?.[0]?.message || result.error.message);
+            }
+
+            refetch();
+        } catch (error) {
+            console.error('Accept trade error:', error);
+            alert(`Error accepting trade: ${error.message}`);
+        }
     }
 
     async function onRejectTrade(tradeId) {
-        const payload = {
-            "id": tradeId,
-        };
-        await rejectTradeMutation({ variables: { "input": payload } });
-        refetch();
+        try {
+            const payload = {
+                "id": tradeId,
+            };
+            const result = await rejectTradeMutation({ variables: { "input": payload } });
+
+            if (result.error) {
+                throw new Error(result.error.graphQLErrors?.[0]?.message || result.error.message);
+            }
+
+            refetch();
+        } catch (error) {
+            console.error('Reject trade error:', error);
+            alert(`Error rejecting trade: ${error.message}`);
+        }
     }
     return (
         <List gap="small" alignSelf="stretch" children={(item, index) => {

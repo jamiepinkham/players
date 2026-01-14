@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_05_054259) do
+ActiveRecord::Schema.define(version: 2026_01_13_050000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -47,9 +47,12 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.integer "bid_id"
     t.integer "first_season_id"
     t.integer "last_season_id"
+    t.index ["active"], name: "index_contracts_on_active"
     t.index ["bid_id"], name: "index_contracts_on_bid_id"
+    t.index ["first_season_id", "last_season_id"], name: "index_contracts_on_first_season_id_and_last_season_id"
     t.index ["first_season_id"], name: "index_contracts_on_first_season_id"
     t.index ["last_season_id"], name: "index_contracts_on_last_season_id"
+    t.index ["player_id", "active"], name: "index_contracts_on_player_id_and_active"
     t.index ["player_id"], name: "index_contracts_on_player_id"
     t.index ["team_id"], name: "index_contracts_on_team_id"
   end
@@ -87,6 +90,9 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.string "bbrefid"
     t.string "bbref_minors"
     t.json "bbref_stats"
+    t.index ["bbrefid"], name: "index_players_on_bbrefid"
+    t.index ["name"], name: "index_players_on_name"
+    t.index ["position"], name: "index_players_on_position"
   end
 
   create_table "seasons", id: :serial, force: :cascade do |t|
@@ -101,6 +107,17 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.boolean "is_finished", default: false
   end
 
+  create_table "team_emails", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.string "email", null: false
+    t.boolean "primary", default: false, null: false
+    t.boolean "receive_trade_notifications", default: true, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["team_id", "email"], name: "index_team_emails_on_team_id_and_email", unique: true
+    t.index ["team_id"], name: "index_team_emails_on_team_id"
+  end
+
   create_table "teams", id: :serial, force: :cascade do |t|
     t.string "name"
     t.decimal "budget"
@@ -108,8 +125,6 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "comment"
-    t.bigint "owner_id"
-    t.index ["owner_id"], name: "index_teams_on_owner_id"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -124,7 +139,7 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
-    t.string "email", default: "", null: false
+    t.string "username", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -139,8 +154,9 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
     t.string "name"
     t.integer "team_id"
     t.boolean "is_admin", default: false, null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["team_id"], name: "index_users_on_team_id"
+    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "bids", "free_agency_periods"
@@ -148,5 +164,6 @@ ActiveRecord::Schema.define(version: 2026_01_05_054259) do
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "free_agency_periods", "seasons"
-  add_foreign_key "teams", "users", column: "owner_id"
+  add_foreign_key "team_emails", "teams"
+  add_foreign_key "users", "teams", on_delete: :nullify
 end

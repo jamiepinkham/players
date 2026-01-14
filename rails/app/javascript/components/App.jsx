@@ -8,7 +8,7 @@ import TeamsList from "./TeamsList";
 import Profile from "./Profile";
 import Bidding from "./Bidding";
 import SessionLogin from "./SessionLogin";
-import EmailResetForm from "./EmailResetForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 import ChangePassword from "./ChangePassword";
 import TeamComponent from "./TeamComponent";
 import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
@@ -100,7 +100,7 @@ export default function App(props) {
           <Switch>
             <Route exact path="/" component={SessionLogin} />
             <Route exact path="/sign_in" component={SessionLogin} />
-            <Route exact path="/forgot" component={EmailResetForm} />
+            <Route exact path="/forgot" component={ForgotPasswordForm} />
             <Route path="/reset/:token" component={ChangePassword} />
             <Route path="/player_search" component={AllPlayersListSearch} />
             <Route exact path="/teams" component={TeamsList} />

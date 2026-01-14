@@ -6,6 +6,7 @@ class Trade < ApplicationRecord
     validate :valid_trade_date
     # validate :valid_cash_amounts
     validate :valid_contracts
+    validate :no_self_trading
 
     scope :pending, -> { where(status: :pending) }
     scope :accepted, -> { where(status: :accepted) }
@@ -19,7 +20,7 @@ class Trade < ApplicationRecord
     }, _prefix: true
 
     def pending?
-        return status == "pending"
+        status_pending?
     end
 
     def accept!
@@ -77,6 +78,12 @@ class Trade < ApplicationRecord
             if contract.created_at > Time.now - 3.months
                 errors.add(:contracts, "Cannot trade a contract signed in the last 3 months - #{contract.player.name}")
             end
+        end
+    end
+
+    def no_self_trading
+        if from_team_id == to_team_id
+            errors.add(:base, "Cannot trade with yourself")
         end
     end
 end

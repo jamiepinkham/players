@@ -22,11 +22,11 @@ function useProvideAuth() {
   const isAdmin = token ? jwt_decode(token).adm == "true" : false;
   const isSignedIn = token ? (jwt_decode(token) ? true : false) : false;
   const teamId = token ? jwt_decode(token).tm : undefined;
-  const signIn = (email, password) => {
+  const signIn = (username, password) => {
     return axios
       .post("/users/sign_in", {
         user: {
-          email,
+          username,
           password,
         },
       })
@@ -70,10 +70,35 @@ function useProvideAuth() {
       });
   };
 
-  const sendResetInstructions = (email) => {
+  const changeUsername = (username) => {
+    let config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    return axios
+      .put(
+        "/users/username",
+        {
+          username: username,
+        },
+        config
+      )
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        if (error.response && error.response.data) {
+          throw new Error(error.response.data.error || "Failed to update username");
+        }
+        throw error;
+      });
+  };
+
+  const sendResetInstructions = (username) => {
     return axios
       .post("/users/password", {
-        user: { email: email },
+        user: { username: username },
       })
       .then((response) => {
         return response.data;
@@ -107,5 +132,6 @@ function useProvideAuth() {
     sendResetInstructions,
     setPassword,
     changePassword,
+    changeUsername,
   };
 }

@@ -70,6 +70,10 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
    SECRET_KEY_BASE=$(openssl rand -hex 64)
    RAILS_ENV=development
 
+   # JWT Authentication (optional - falls back to SECRET_KEY_BASE if not set)
+   DEVISE_SECRET_KEY=$(openssl rand -hex 64)
+   DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 64)
+
    # Development flags
    DISABLE_HOST_CHECK=true
    DISABLE_FORCE_SSL=true
@@ -233,6 +237,77 @@ docker compose exec players bundle exec rails routes
 docker compose exec players bundle exec rails db:seed
 ```
 
+### Testing Trades Locally
+
+The trade system includes eligibility rules that must be satisfied for testing. Use these development rake tasks to prepare your local environment:
+
+#### Reset User Passwords
+
+Reset all user passwords to easily log in as different teams:
+
+```bash
+# Set all passwords to 'password'
+docker compose exec players bundle exec rake dev:reset_passwords
+
+# Use custom password
+docker compose exec players bundle exec rake dev:reset_passwords PASSWORD=test123
+
+# List all users and their teams
+docker compose exec players bundle exec rake dev:list_users
+```
+
+#### Make Contracts Trade Eligible
+
+Contracts must be older than 3 months to be trade eligible. Age your test contracts:
+
+```bash
+# Age all contracts to 4 months old (default)
+docker compose exec players bundle exec rake dev:age_contracts
+
+# Age contracts to specific age
+docker compose exec players bundle exec rake dev:age_contracts MONTHS=6
+```
+
+This task:
+- Sets `created_at` dates to 4+ months ago (configurable)
+- Makes all contracts eligible for trading
+- Shows eligibility status for each contract
+
+#### Verify Team Ownership
+
+Users must be set as the owner of a team to propose trades. Check current ownership:
+
+```bash
+# View which user owns which team
+docker compose exec players bundle exec rake dev:show_team_owners
+
+# List users and their teams
+docker compose exec players bundle exec rake dev:list_users
+```
+
+**Note:** Team ownership is typically set during database setup/import. If you need to change ownership, do it through the Rails admin panel or database directly.
+
+#### Trade Testing Workflow
+
+1. **Prepare test data:**
+   ```bash
+   docker compose exec players bundle exec rake dev:reset_passwords
+   docker compose exec players bundle exec rake dev:age_contracts
+   ```
+
+2. **Test as different teams:**
+   - Log in as team 1, propose a trade
+   - Log out and log in as team 2 to accept/reject
+   - UI prevents selecting ineligible players (disabled checkboxes)
+   - Server validates the 3-month rule and displays errors
+
+3. **Trade eligibility indicators:**
+   - Green "Yes" = Player can be traded
+   - Red "No" = Player ineligible (checkbox disabled)
+   - Ineligible players cannot be selected in the UI
+
+**Note:** The 3-month contract age rule remains active in all environments. These dev tools simply prepare your test data to satisfy the requirement.
+
 ### Viewing Logs
 
 ```bash
@@ -319,6 +394,8 @@ cat stack.env.txt
 # IMPORTANT: Update these placeholder values:
 # - DATABASE_PASSWORD: Use a secure password
 # - SECRET_KEY_BASE: Generate with: openssl rand -hex 64
+# - DEVISE_SECRET_KEY: Generate with: openssl rand -hex 64
+# - DEVISE_JWT_SECRET_KEY: Generate with: openssl rand -hex 64
 # - MAILGUN_SMTP_PASSWORD: Your Mailgun SMTP password
 ```
 
@@ -342,9 +419,11 @@ In the **Web editor** section:
 4. Paste into the text area
 5. **Update all placeholder values:**
    ```
-   DATABASE_PASSWORD=CHANGE_ME_SECURE_PASSWORD_HERE  → your_secure_password
-   SECRET_KEY_BASE=GENERATE_SECURE_KEY...            → (run: openssl rand -hex 64)
-   MAILGUN_SMTP_PASSWORD=YOUR_MAILGUN_SMTP...        → your_mailgun_password
+   DATABASE_PASSWORD=CHANGE_ME_SECURE_PASSWORD_HERE     → your_secure_password
+   SECRET_KEY_BASE=GENERATE_SECURE_KEY...               → (run: openssl rand -hex 64)
+   DEVISE_SECRET_KEY=GENERATE_SECURE_KEY...             → (run: openssl rand -hex 64)
+   DEVISE_JWT_SECRET_KEY=GENERATE_SECURE_KEY...         → (run: openssl rand -hex 64)
+   MAILGUN_SMTP_PASSWORD=YOUR_MAILGUN_SMTP...           → your_mailgun_password
    ```
 
 **Step 5: Deploy**
@@ -391,11 +470,15 @@ See `stack.env.txt` for the complete list. Key variables:
 |----------|-------------|----------|
 | `DATABASE_PASSWORD` | PostgreSQL password | ✅ Yes |
 | `SECRET_KEY_BASE` | Rails secret key (generate with `openssl rand -hex 64`) | ✅ Yes |
+| `DEVISE_SECRET_KEY` | Devise authentication secret key (generate with `openssl rand -hex 64`) | Recommended |
+| `DEVISE_JWT_SECRET_KEY` | JWT token secret key (generate with `openssl rand -hex 64`) | Recommended |
 | `MAILGUN_SMTP_PASSWORD` | Mailgun SMTP password | ✅ Yes (if using email) |
 | `RAILS_ENV` | Rails environment (`production`) | ✅ Yes |
 | `DISABLE_FORCE_SSL` | Set to `true` if using reverse proxy SSL | ✅ Yes (with proxy) |
 | `APP_HOST` | Your domain name | Optional |
 | `ASSET_HOST` | CDN URL for assets | Optional |
+
+**Note on JWT keys:** If `DEVISE_SECRET_KEY` or `DEVISE_JWT_SECRET_KEY` are not set, the application will fall back to using `SECRET_KEY_BASE`. For production deployments, it's recommended to set unique values for each to enhance security.
 
 #### Security Note
 

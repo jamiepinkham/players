@@ -39,7 +39,12 @@ const GlobalStyle = createGlobalStyle`
 
 import App from "./components/App";
 
-const client = new GraphQLClient({ url: "/graphql" });
+// Initialize GraphQL client with JWT token from localStorage if it exists
+const localToken = localStorage.getItem("bmpl-token");
+const client = new GraphQLClient({
+  url: "/graphql",
+  headers: localToken ? { Authorization: `Bearer ${localToken}` } : {}
+});
 
 function AppShell() {
   return (

@@ -73,10 +73,21 @@ jobs:
           echo "docker run -d -p 3000:3000 \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e RAILS_ENV=production \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e SECRET_KEY_BASE=your_secret_key \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DEVISE_SECRET_KEY=your_devise_secret_key \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DEVISE_JWT_SECRET_KEY=your_jwt_secret_key \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e DATABASE_HOST=your_db_host \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e DATABASE_USER=your_db_user \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e DATABASE_PASSWORD=your_db_password \\" >> $GITHUB_STEP_SUMMARY
           echo "  -e DATABASE_NAME=your_db_name \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_ADDRESS=smtp.mailgun.org \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_PORT=587 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_DOMAIN=your_domain.com \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_USERNAME=postmaster@mg.your_domain.com \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_PASSWORD=your_mailgun_password \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILGUN_SMTP_AUTHENTICATION=plain \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e MAILER_FROM=no-reply@your_domain.com \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e RAILS_LOG_TO_STDOUT=true \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e RAILS_SERVE_STATIC_FILES=true \\" >> $GITHUB_STEP_SUMMARY
           echo "  ghcr.io/jamiepinkham/players:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -115,10 +126,21 @@ jobs:
           docker run -d -p 3000:3000 \\
             -e RAILS_ENV=production \\
             -e SECRET_KEY_BASE=your_secret_key \\
+            -e DEVISE_SECRET_KEY=your_devise_secret_key \\
+            -e DEVISE_JWT_SECRET_KEY=your_jwt_secret_key \\
             -e DATABASE_HOST=your_db_host \\
             -e DATABASE_USER=your_db_user \\
             -e DATABASE_PASSWORD=your_db_password \\
             -e DATABASE_NAME=your_db_name \\
+            -e MAILGUN_SMTP_ADDRESS=smtp.mailgun.org \\
+            -e MAILGUN_SMTP_PORT=587 \\
+            -e MAILGUN_SMTP_DOMAIN=your_domain.com \\
+            -e MAILGUN_SMTP_USERNAME=postmaster@mg.your_domain.com \\
+            -e MAILGUN_SMTP_PASSWORD=your_mailgun_password \\
+            -e MAILGUN_SMTP_AUTHENTICATION=plain \\
+            -e MAILER_FROM=no-reply@your_domain.com \\
+            -e RAILS_LOG_TO_STDOUT=true \\
+            -e RAILS_SERVE_STATIC_FILES=true \\
             ghcr.io/jamiepinkham/players:${{ github.ref_name }}
           \`\`\`
 

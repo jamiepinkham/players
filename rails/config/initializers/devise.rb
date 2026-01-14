@@ -17,7 +17,7 @@ Devise.setup do |config|
   # Configure the class responsible to send e-mails.
   config.mailer = 'UserMailer'
 
-  config.secret_key = '27d2cc7ff63a44d659eff3791dada00a04cf5615e1b1bec1edb1bc3e5390828d1b7cd28705db2f8c8d20c44a6cab153d7d716847e416e031b5b8058a1fb520e7'
+  config.secret_key = ENV['DEVISE_SECRET_KEY'] || Rails.application.secret_key_base
 
   # ==> ORM configuration
   # Load and configure the ORM. Supports :active_record (default) and
@@ -33,7 +33,7 @@ Devise.setup do |config|
   # session. If you need permissions, you should implement that in a before filter.
   # You can also supply a hash where the value is a boolean determining whether
   # or not authentication should be aborted when the value is not present.
-  # config.authentication_keys = [:email]
+  config.authentication_keys = [:username]
 
   # Configure parameters from the request object used for authentication. Each entry
   # given should be a request method and it will automatically be passed to the
@@ -45,12 +45,12 @@ Devise.setup do |config|
   # Configure which authentication keys should be case-insensitive.
   # These keys will be downcased upon creating or modifying a user and when used
   # to authenticate or find a user. Default is :email.
-  config.case_insensitive_keys = [:email]
+  config.case_insensitive_keys = [:username]
 
   # Configure which authentication keys should have whitespace stripped.
   # These keys will have whitespace before and after removed upon creating or
   # modifying a user and when used to authenticate or find a user. Default is :email.
-  config.strip_whitespace_keys = [:email]
+  config.strip_whitespace_keys = [:username]
 
   # Tell if authentication through request.params is enabled. True by default.
   # It can be set to an array that will enable params authentication only for the
@@ -185,7 +185,7 @@ Devise.setup do |config|
   # ==> Configuration for :recoverable
   #
   # Defines which key will be used when recovering the password for an account
-  # config.reset_password_keys = [:email]
+  config.reset_password_keys = [:username]
 
   # Time interval you can reset your password with a reset password key.
   # Don't put a too small interval or your users won't have the time to
@@ -262,9 +262,8 @@ Devise.setup do |config|
   # so you need to do it manually. For the users scope, it would be:
   # config.omniauth_path_prefix = '/my_engine/users/auth'
 
-    #TODO: provide via ENV
     config.jwt do |jwt|
-      jwt.secret = 'faba5c848cf90f9bd2d09dd996c76f0912cc775b1d1e460413fd235a0d7cd411f2f07352acd38408df14c7967fa3d893b8ac8d9b15b4f0860359b63847419c04'
+      jwt.secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
 
       jwt.dispatch_requests = [
         ['POST', %r{^/users/sign_in$}]

@@ -25,12 +25,12 @@ console.log(sliding);
 function SessionLogin() {
   const auth = useAuth();
   const [hasError, setHasError] = useState(false);
-  const [value, setValue] = useState({ email: "", password: "" });
+  const [value, setValue] = useState({ username: "", password: "" });
   const location = useLocation();
   const history = useHistory();
   const { from } = location.state || { from: { pathname: "/teams" } };
-  function login(email, password) {
-    auth.signIn(email, password).then((token) => {
+  function login(username, password) {
+    auth.signIn(username, password).then((token) => {
       if (token) {
         history.replace(from);
       } else {
@@ -59,18 +59,18 @@ function SessionLogin() {
             <Form
               value={value}
               onChange={(nextValue) => setValue(nextValue)}
-              onReset={() => setValue({ email: "", password: "" })}
+              onReset={() => setValue({ username: "", password: "" })}
               onSubmit={({ value }) => {
-                login(value.email, value.password);
+                login(value.username, value.password);
               }}
             >
-              <FormField name="email-input-id" htmlFor="email-input-id">
+              <FormField name="username-input-id" htmlFor="username-input-id">
                 <TextInput
-                  id="email"
-                  name="email"
+                  id="username"
+                  name="username"
                   icon={<MailOption />}
-                  placeholder="email"
-                  value={value.email}
+                  placeholder="username"
+                  value={value.username}
                 />
               </FormField>
               <FormField name="password-input-id" htmlFor="password-input-id">
@@ -103,7 +103,7 @@ function SessionLogin() {
                   type="submit"
                   primary
                   label="Submit"
-                  disabled={!value.email || !value.password ? true : false}
+                  disabled={!value.username || !value.password ? true : false}
                 />
               </Box>
             </Form>

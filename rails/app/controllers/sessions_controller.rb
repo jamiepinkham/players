@@ -1,10 +1,12 @@
 class SessionsController < Devise::SessionsController
     respond_to :json, :html
+    skip_before_action :verify_authenticity_token, if: :json_request?
 
     def create
         # Handle JSON API requests
         if request.format.json?
-            user = User.find_by_email(params[:user][:email])
+            user = User.find_for_database_authentication(username: params[:user][:username])
+
             if user && user.valid_password?(params[:user][:password])
                 self.resource = warden.authenticate!(auth_options)
                 sign_in(resource_name, resource)
@@ -37,6 +39,10 @@ class SessionsController < Devise::SessionsController
         else
             super
         end
+    end
+
+    def json_request?
+        request.format.json?
     end
 end
 

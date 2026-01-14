@@ -10,5 +10,6 @@ module Types
     field :current_season, resolver: Queries::FetchCurrentSeason
     field :trades, resolver: Queries::FetchTrades
     field :completed_trades, resolver: Queries::FetchCompletedTrades
+    field :current_user, resolver: Queries::FetchCurrentUser
   end
 end

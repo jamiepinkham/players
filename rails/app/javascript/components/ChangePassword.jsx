@@ -22,7 +22,7 @@ export default function ChangePassword() {
   const auth = useAuth();
   const callback = useCallback((token, password) => {
     auth.setPassword(token, password).then(() => {
-      history.push("/teams");
+      history.push("/sign_in");
     });
   });
 
