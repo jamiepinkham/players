@@ -19,9 +19,9 @@ const TEAM_QUERY = `
       currentPayroll
       unsalariedPlayers
       stadium
-      owner {
+      primaryEmail
+      user {
         name
-        email
       }
       currentContracts {
         player {
@@ -69,10 +69,10 @@ function TeamComponent(props) {
               <Heading level="3" margin="none">
                 {team.name}
               </Heading>
-              {team.owner && (
-                <a href={`mailto:${team.owner.email}`}>
+              {team.user && team.primaryEmail && (
+                <a href={`mailto:${team.primaryEmail}`}>
                   <MailOption />
-                  {team.owner.name}
+                  {team.user.name}
                 </a>
               )}
               <Heading level="4">
