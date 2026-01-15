@@ -5,7 +5,8 @@ module Types
     field :budget, Float, null: true
     field :stadium, String, null: true
     field :current_contracts, [Types::ContractType], null: false
-    field :owner, Types::UserType, null: true
+    field :user, Types::UserType, null: true
+    field :primary_email, String, null: true
     field :current_payroll, Float, null: false
     field :available_cash, Float, null: false
     field :total_players, Int, null: false
