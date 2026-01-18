@@ -1,0 +1,71 @@
+<div class="page-header">
+  <h1>Import Summer Draft</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <%= form_tag import_summer_draft_path, method: :post, multipart: true, class: 'form-horizontal' do %>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">CSV File</label>
+        <div class="col-sm-10">
+          <%= file_field_tag :file, accept: '.csv', class: 'form-control', required: true %>
+          <p class="help-block">
+            <strong>Expected columns:</strong> Player Name, Team, BBREF ID, Minors BBREF ID, BBREF Position
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <div class="alert alert-info">
+            <strong>Contract Details:</strong> All imported players will receive:
+            <ul>
+              <li>Amount: $500,000</li>
+              <li>Summer contract: Yes</li>
+              <li>Active: Yes (only if BBREF ID is present)</li>
+              <li>Duration: Current season +5 seasons</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <%= submit_tag "Import Summer Draft", class: 'btn btn-primary' %>
+          <%= link_to "Cancel", index_path(model_name: 'contract'), class: 'btn btn-default' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col-md-4">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Import Details</h3>
+      </div>
+      <div class="panel-body">
+        <p><strong>What happens during import:</strong></p>
+        <ol>
+          <li>Finds or creates player by BBREF ID or Minors BBREF ID</li>
+          <li>Sets player name and position</li>
+          <li>Finds team by name</li>
+          <li>Creates contract with:
+            <ul>
+              <li>$500k amount</li>
+              <li>Summer flag enabled</li>
+              <li>Active if player has BBREF ID</li>
+              <li>5 season duration from current</li>
+            </ul>
+          </li>
+        </ol>
+        <p><strong>Requirements:</strong></p>
+        <ul>
+          <li>Each row must have either BBREF ID or Minors BBREF ID (at least one)</li>
+          <li>Team must exist in database</li>
+          <li>Active season must be set</li>
+          <li>Next 5 seasons must be created and linked by next and previous ids</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

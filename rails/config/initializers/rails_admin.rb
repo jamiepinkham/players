@@ -1,3 +1,9 @@
+require 'rails_admin/import_free_agents'
+require 'rails_admin/import_summer_draft'
+
+RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
+RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
+
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
 
@@ -42,6 +48,10 @@ RailsAdmin.config do |config|
     edit
     delete
     show_in_app
+
+    ## Custom import actions
+    import_free_agents
+    import_summer_draft
 
     ## With an audit adapter, you can add:
     # history_index
