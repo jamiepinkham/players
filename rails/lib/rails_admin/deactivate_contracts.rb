@@ -15,7 +15,7 @@ module RailsAdmin
         end
 
         register_instance_option :label do
-          'Deactivate Expired Contracts'
+          'Deactivate Contracts'
         end
 
         register_instance_option :controller do
