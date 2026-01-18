@@ -1,8 +1,10 @@
 require 'rails_admin/import_free_agents'
 require 'rails_admin/import_summer_draft'
+require 'rails_admin/deactivate_contracts'
 
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
+RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateContracts)
 
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
@@ -52,6 +54,7 @@ RailsAdmin.config do |config|
     ## Custom import actions
     import_free_agents
     import_summer_draft
+    deactivate_contracts
 
     ## With an audit adapter, you can add:
     # history_index

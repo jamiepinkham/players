@@ -15,3 +15,10 @@ en:
         link: "Import Summer Draft"
         bulk_link: "Import Summer Draft"
         done: "Imported"
+      deactivate_contracts:
+        title: "Deactivate Expired Contracts"
+        menu: "Deactivate Expired Contracts"
+        breadcrumb: "Deactivate Expired Contracts"
+        link: "Deactivate Expired Contracts"
+        bulk_link: "Deactivate Expired Contracts"
+        done: "Deactivated"
