@@ -131,29 +131,16 @@ RailsAdmin.config do |config|
       field :bbrefid
       field :position
       field :bbref_minors
+      field :bbref_stats
       field :contract
       field :leading_bid
     end
-
     edit do
       field :name
       field :bbrefid
-      field :position do
-        help 'Select position first to show relevant stat fields below'
-      end
+      field :position
       field :bbref_minors
-      field :bbref_stats, :text do
-        visible do
-          bindings[:object].position.blank?
-        end
-        help 'Select a position above to get a user-friendly stats form'
-      end
-      field :bbref_stats do
-        visible do
-          bindings[:object].position.present?
-        end
-        partial 'player_stats_form'
-      end
+      field :bbref_stats
     end
   end
 
@@ -267,26 +254,3 @@ RailsAdmin.config do |config|
   config.excluded_models << JwtDenylist
 
 end
-
-# Extend RailsAdmin controller to process player_stats parameter
-module PlayerStatsProcessor
-  extend ActiveSupport::Concern
-
-  included do
-    after_action :process_player_stats_on_save, only: [:update, :create]
-  end
-
-  def process_player_stats_on_save
-    if params[:model_name] == 'player' && params[:player_stats].present?
-      player = @object
-      if player && player.persisted?
-        cleaned_stats = params[:player_stats].reject { |k, v| v.blank? }
-        unless cleaned_stats.empty?
-          player.update_column(:bbref_stats, cleaned_stats.to_json)
-        end
-      end
-    end
-  end
-end
-
-RailsAdmin::MainController.include(PlayerStatsProcessor)
