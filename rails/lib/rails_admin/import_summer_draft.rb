@@ -28,7 +28,7 @@ module RailsAdmin
 
                 unless file
                   flash[:error] = "Please select a CSV file to import"
-                  redirect_to back_or_index
+                  redirect_to dashboard_path
                   return
                 end
 
@@ -36,7 +36,7 @@ module RailsAdmin
                 current_season = Season.current
                 unless current_season
                   flash[:error] = "No active season found. Please set an active season first."
-                  redirect_to back_or_index
+                  redirect_to dashboard_path
                   return
                 end
 
@@ -46,7 +46,7 @@ module RailsAdmin
                   last_season = last_season.next_season
                   unless last_season
                     flash[:error] = "Cannot find season +5 from current. Please ensure all seasons are properly linked."
-                    redirect_to back_or_index
+                    redirect_to dashboard_path
                     return
                   end
                 end
@@ -128,7 +128,7 @@ module RailsAdmin
                 flash[:error] = "Import failed: #{e.message}"
               end
 
-              redirect_to back_or_index
+              redirect_to dashboard_path
             end
           end
         end
