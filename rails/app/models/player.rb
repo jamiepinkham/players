@@ -67,6 +67,10 @@ class Player < ApplicationRecord
 
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF']
 
+  def to_s
+    position.present? ? "#{name} (#{position})" : name
+  end
+
   class << self
 
     def search_name(name)

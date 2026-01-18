@@ -134,6 +134,7 @@ RailsAdmin.config do |config|
       field :contract
       field :leading_bid
     end
+
     edit do
       field :name
       field :bbrefid
@@ -266,3 +267,26 @@ RailsAdmin.config do |config|
   config.excluded_models << JwtDenylist
 
 end
+
+# Extend RailsAdmin controller to process player_stats parameter
+module PlayerStatsProcessor
+  extend ActiveSupport::Concern
+
+  included do
+    after_action :process_player_stats_on_save, only: [:update, :create]
+  end
+
+  def process_player_stats_on_save
+    if params[:model_name] == 'player' && params[:player_stats].present?
+      player = @object
+      if player && player.persisted?
+        cleaned_stats = params[:player_stats].reject { |k, v| v.blank? }
+        unless cleaned_stats.empty?
+          player.update_column(:bbref_stats, cleaned_stats.to_json)
+        end
+      end
+    end
+  end
+end
+
+RailsAdmin::MainController.include(PlayerStatsProcessor)
