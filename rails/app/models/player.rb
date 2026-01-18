@@ -1,6 +1,11 @@
 class Player < ApplicationRecord
   has_many :contracts
-  has_one :contract, -> { where(active: true) }
+  has_one :contract, -> {
+    current_season = Season.current
+    where(active: true)
+      .where('first_season_id <= ?', current_season&.id)
+      .where('last_season_id >= ?', current_season&.id)
+  }
 
   has_one :leading_bid, -> { where(is_leading: true) }, class_name: 'Bid'
 

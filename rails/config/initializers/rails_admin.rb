@@ -1,8 +1,10 @@
 require 'rails_admin/import_free_agents'
 require 'rails_admin/import_summer_draft'
+require 'rails_admin/deactivate_contracts'
 
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
+RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateContracts)
 
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
@@ -52,6 +54,7 @@ RailsAdmin.config do |config|
     ## Custom import actions
     import_free_agents
     import_summer_draft
+    deactivate_contracts
 
     ## With an audit adapter, you can add:
     # history_index
@@ -128,20 +131,28 @@ RailsAdmin.config do |config|
       field :bbrefid
       field :position
       field :bbref_minors
-      field :bbref_stats
       field :contract
       field :leading_bid
-      field :bbref_stats
     end
     edit do
       field :name
       field :bbrefid
-      field :position
+      field :position do
+        help 'Select position first to show relevant stat fields below'
+      end
       field :bbref_minors
-      field :bbref_stats
-      field :contract
-      field :leading_bid
-      field :bbref_stats
+      field :bbref_stats, :text do
+        visible do
+          bindings[:object].position.blank?
+        end
+        help 'Select a position above to get a user-friendly stats form'
+      end
+      field :bbref_stats do
+        visible do
+          bindings[:object].position.present?
+        end
+        partial 'player_stats_form'
+      end
     end
   end
 

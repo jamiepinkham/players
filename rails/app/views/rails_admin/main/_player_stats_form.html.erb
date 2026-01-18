@@ -1,0 +1,129 @@
+<%
+  # Parse existing stats if they exist
+  current_stats = begin
+    JSON.parse(field.value || '{}')
+  rescue
+    {}
+  end
+
+  position = form.object.position
+  is_pitcher = ['SP', 'RP'].include?(position)
+  is_hitter = ['C', '1B', '2B', '3B', 'SS', 'OF'].include?(position)
+
+  # Define stat fields for hitters and pitchers
+  hitter_stats = ['G', 'PA', 'AB', 'R', 'H', '1B', '2B', '3B', 'HR', 'RBI', 'SB', 'CS', 'BB', 'SO', 'BA', 'OBP', 'SLG', 'OPS', 'OPS+', 'TB', 'GIDP', 'HBP', 'SH', 'SF', 'IBB', 'WAR']
+  pitcher_stats = ['W', 'L', 'ERA', 'G', 'GS', 'CG', 'SHO', 'SV', 'IP', 'H', 'R', 'ER', 'HR', 'BB', 'SO', 'WHIP', 'K/9', 'BB/9', 'HR/9', 'WAR']
+%>
+
+<style>
+  .player-stats-form .form-group {
+    margin-bottom: 10px;
+  }
+  .player-stats-form .small {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .player-stats-form .input-sm {
+    height: 30px;
+    font-size: 12px;
+  }
+  .player-stats-form .well {
+    padding: 15px;
+    background-color: #f5f5f5;
+  }
+</style>
+
+<div class="control-group">
+  <label class="control-label">
+    <%= field.label %>
+  </label>
+  <div class="controls player-stats-form">
+    <% if is_hitter %>
+      <div class="well">
+        <h4>Hitter Statistics</h4>
+        <div class="row">
+          <% hitter_stats.each_with_index do |stat, index| %>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="small"><%= stat %></label>
+                <%= text_field_tag "player_stats[#{stat}]", current_stats[stat],
+                    class: 'form-control input-sm player-stat-input',
+                    placeholder: stat,
+                    data: { stat_field: true } %>
+              </div>
+            </div>
+            <% if (index + 1) % 4 == 0 %>
+              </div><div class="row">
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% elsif is_pitcher %>
+      <div class="well">
+        <h4>Pitcher Statistics</h4>
+        <div class="row">
+          <% pitcher_stats.each_with_index do |stat, index| %>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="small"><%= stat %></label>
+                <%= text_field_tag "player_stats[#{stat}]", current_stats[stat],
+                    class: 'form-control input-sm player-stat-input',
+                    placeholder: stat,
+                    data: { stat_field: true } %>
+              </div>
+            </div>
+            <% if (index + 1) % 4 == 0 %>
+              </div><div class="row">
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <p class="help-block">Select a position above to show stat fields</p>
+    <% end %>
+
+    <textarea name="player[bbref_stats]" id="player_bbref_stats_hidden" style="display: none;"></textarea>
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        // Find all forms on the page
+        var forms = document.querySelectorAll('form');
+
+        forms.forEach(function(form) {
+          form.addEventListener('submit', function(event) {
+            var stats = {};
+            var statInputs = document.querySelectorAll('.player-stat-input');
+
+            // Collect all stat values
+            statInputs.forEach(function(input) {
+              var match = input.name.match(/player_stats\[(.+)\]/);
+              if (match) {
+                var statName = match[1];
+                var value = input.value.trim();
+                if (value !== '') {
+                  stats[statName] = value;
+                }
+              }
+            });
+
+            // Update the hidden field with JSON
+            var hiddenField = document.getElementById('player_bbref_stats_hidden');
+            if (hiddenField && Object.keys(stats).length > 0) {
+              hiddenField.value = JSON.stringify(stats);
+              console.log('Setting bbref_stats to:', JSON.stringify(stats));
+            }
+          }, false);
+        });
+      });
+    </script>
+
+    <p class="help-block">
+      <% if form.object.new_record? %>
+        <strong>Note:</strong> For new players, you may need to save with name and position first, then edit to add stats.
+      <% else %>
+        Enter statistics for this <%= position %> player. Fields will be saved as JSON in bbref_stats.
+      <% end %>
+    </p>
+  </div>
+</div>
