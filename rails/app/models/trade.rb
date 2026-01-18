@@ -75,7 +75,7 @@ class Trade < ApplicationRecord
             if contract.team_id != to_team_id && contract.team_id != from_team_id
                 errors.add(:contracts, "Cannot trade a contract neither team owns - #{contract.player.name}")
             end
-            if contract.created_at > Time.now - 3.months
+            if contract.created_at > Time.now - 3.months && !contract.summer
                 errors.add(:contracts, "Cannot trade a contract signed in the last 3 months - #{contract.player.name}")
             end
         end

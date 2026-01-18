@@ -1,0 +1,17 @@
+en:
+  admin:
+    actions:
+      import_free_agents:
+        title: "Import Free Agents"
+        menu: "Import Free Agents"
+        breadcrumb: "Import Free Agents"
+        link: "Import Free Agents"
+        bulk_link: "Import Free Agents"
+        done: "Imported"
+      import_summer_draft:
+        title: "Import Summer Draft"
+        menu: "Import Summer Draft"
+        breadcrumb: "Import Summer Draft"
+        link: "Import Summer Draft"
+        bulk_link: "Import Summer Draft"
+        done: "Imported"
