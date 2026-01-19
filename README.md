@@ -107,7 +107,7 @@ The development setup uses volume mounts and asset watchers to provide a seamles
 
 Changes to these files are automatically reflected:
 ```bash
-# Edit any Ruby code
+# Edit any Ruby code, ex:
 rails/app/models/player.rb
 rails/app/controllers/graphql_controller.rb
 rails/config/routes.rb
