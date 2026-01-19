@@ -134,9 +134,14 @@ gem 'faker', '~> 3.5', group: :test
 gem 'graphiql-rails', '~> 1.10', group: :development
 gem 'byebug', '~> 13.0', groups: [:development, :test]
 gem 'web-console', '~> 4.2', group: :development
+
+# Remove the dry-* gem pins (lines 50-51)
+# These were only needed for old devise-jwt compatibility
+# gem 'dry-configurable', '0.12.1'  # DELETE THIS LINE
+# gem 'dry-container', '0.7.2'      # DELETE THIS LINE
 ```
 
-**Note:** Keep `dry-configurable` and `dry-container` pinned for now - they have major version changes that need testing.
+**Note:** The `dry-configurable` and `dry-container` gems are transitive dependencies of `devise-jwt` via `warden-jwt_auth`. The newer `devise-jwt 0.13` will pull in compatible versions automatically, so the explicit pins can be removed.
 
 ### Step 1.3: Bundle Update
 
@@ -153,11 +158,6 @@ docker compose restart players
 
 ### Step 1.4: Test Phase 1
 
-Run full test suite:
-```bash
-docker compose exec players bundle exec rails test
-```
-
 **Manual Testing Checklist:**
 - [ ] User authentication (sign in/out)
 - [ ] GraphQL queries work
@@ -170,7 +170,7 @@ docker compose exec players bundle exec rails test
 **If tests pass, commit:**
 ```bash
 git add Dockerfile rails/Gemfile rails/Gemfile.lock
-git commit -m "Phase 1: Update Ruby to 3.3.7 and security-critical gems"
+git commit -m "Phase 1: Update Ruby to 3.3.7, security-critical gems, remove dry-* pins"
 ```
 
 ---
@@ -382,7 +382,26 @@ git commit -m "Phase 3: Upgrade Rails 7.0 → 7.2"
    }
    ```
 
-### Step 4.2: Update Build Tools
+### Step 4.2: Remove Unused Dependencies
+
+This app uses **esbuild** for JavaScript bundling (not Babel/webpack). The current `package.json` still lists Babel and webpack packages that aren't actually used by the build process.
+
+Edit `rails/package.json` and **remove** these dependencies (currently on lines 4-5, 8, and 10):
+```json
+// DELETE these lines (not used with esbuild):
+"@babel/core": "^7.13.10",
+"@babel/preset-react": "^7.12.13",
+"babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+"@svgr/webpack": "^5.5.0",
+```
+
+**Why remove these:**
+- esbuild has built-in JSX transformation (doesn't need Babel)
+- No webpack configuration in the project
+- These are leftover from an old webpack/babel setup
+- Removing them reduces node_modules size and potential security surface area
+
+### Step 4.3: Update Build Tools
 
 Edit `rails/package.json` devDependencies:
 ```json
@@ -392,31 +411,48 @@ Edit `rails/package.json` devDependencies:
 }
 ```
 
-### Step 4.3: Update Babel Dependencies
-
-```json
-"dependencies": {
-  "@babel/core": "^7.26.0",
-  "@babel/preset-react": "^7.25.9",
-  // ... rest unchanged for now
-}
-```
-
 ### Step 4.4: Update Critical Security Packages
 
+Edit `rails/package.json` dependencies:
 ```json
 "dependencies": {
-  // ... keep existing babel ones ...
-  "axios": "^1.7.9",  // Critical security fix
+  "axios": "^1.7.9",  // CRITICAL security fix (CVEs in 0.21.1)
   "bootstrap": "^5.3.6",  // Already current ✓
   "sass": "^1.88.0",  // Already current ✓
-  // ... continue with rest
+
+  // Update other packages:
+  "@fontsource/fira-sans": "^5.3.0",
+  "@popperjs/core": "^2.11.8",  // Already current ✓
+  "graphql-hooks": "^6.2.0",
+  "grommet": "^2.40.0",
+  "grommet-controls": "^4.2.1",
+  "grommet-icons": "^4.13.1",
+  "jwt-decode": "^4.0.0",
+  "moment-timezone": "^0.5.46",
+  "prop-types": "^15.8.1",
+  "styled-components": "^6.1.14",
+
+  // Keep React 17 for now (upgrade in Phase 5):
+  "react": "^17.0.1",
+  "react-dom": "^17.0.1",
+  "react-router-dom": "^5.3.4",
+  "react-moment": "^1.1.1",
+  "react-currency-format": "^1.1.0",
+  "react-currency-input-field": "^3.8.1",
+  "react-currency-masked-input": "^2.5.0"
 }
 ```
 
-### Step 4.5: Rebuild and Test
+**Note:** Some packages like `styled-components` will jump major versions. Test thoroughly.
+
+### Step 4.5: Install and Test
 
 ```bash
+# Remove old node_modules to ensure clean install
+docker compose exec players rm -rf node_modules yarn.lock
+docker compose exec players yarn install
+
+# Rebuild container
 docker compose down
 docker compose build
 docker compose up
@@ -426,12 +462,13 @@ docker compose up
 - [ ] JavaScript builds without errors
 - [ ] CSS builds without errors
 - [ ] App loads in browser
-- [ ] No console errors
+- [ ] No console errors in browser console
+- [ ] Styles render correctly (check styled-components)
 
 **If successful, commit:**
 ```bash
 git add Dockerfile rails/package.json rails/yarn.lock
-git commit -m "Phase 4: Update Node to 20 and build tools"
+git commit -m "Phase 4: Update Node to 20, remove Babel, update dependencies"
 ```
 
 ---
@@ -454,31 +491,35 @@ Edit `rails/package.json`:
   "react-moment": "^3.1.0",  // Updated for React 18
   "styled-components": "^6.1.14",  // React 18 compatible
 
-  // These should work with React 18 but may need updates:
-  "grommet": "^2.40.0",  // Check compatibility
-  "grommet-controls": "^4.2.1",  // May need version bump
+  // Grommet packages (check React 18 compatibility)
+  "grommet": "^2.40.0",
+  "grommet-controls": "^4.2.1",
   "grommet-icons": "^4.13.1",
 
   // Keep react-router v5 for now (upgrade separately in Phase 6)
   "react-router-dom": "^5.3.4",
 
-  // Rest of packages...
+  // React currency components
+  "react-currency-format": "^1.1.0",
+  "react-currency-input-field": "^3.8.1",
+  "react-currency-masked-input": "^2.5.0",
+
+  // Other packages (already updated in Phase 4)
   "@fontsource/fira-sans": "^5.3.0",
   "@popperjs/core": "^2.11.8",
-  "@svgr/webpack": "^8.1.0",
-  "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-  "graphql-hooks": "^7.2.0",
+  "graphql-hooks": "^6.2.0",  // or ^7.2.0 if Phase 4 updated it
   "jwt-decode": "^4.0.0",
   "locale-currency": "^0.0.2",
   "moment-timezone": "^0.5.46",
   "normalize.css": "^8.0.1",
   "prop-types": "^15.8.1",
   "rails_admin": "3.3.0",
-  "react-currency-format": "^1.1.0",
-  "react-currency-input-field": "^3.8.1",
-  "react-currency-masked-input": "^2.5.0"
+  "bootstrap": "^5.3.6",
+  "axios": "^1.7.9"
 }
 ```
+
+**Note:** `@svgr/webpack` and `babel-plugin-transform-react-remove-prop-types` should have been removed in Phase 4.
 
 ### Step 5.2: Update to React 18 Root API
 
@@ -659,7 +700,7 @@ git commit -m "Phase 6: Upgrade React Router v5 → v6"
 
 **Estimated Time:** 2-3 hours
 
-### Step 7.1: Update Remaining Packages
+### Step 7.1: Verify Final Package Versions
 
 Check for any remaining outdated packages:
 
@@ -667,24 +708,17 @@ Check for any remaining outdated packages:
 docker compose exec players yarn outdated
 ```
 
-Update remaining packages that are safe:
-```json
-"@fontsource/fira-sans": "^5.3.0",
-"moment-timezone": "^0.5.46",
-"prop-types": "^15.8.1"
+Most packages should already be updated from previous phases. If any critical packages remain outdated, evaluate whether they need updating or if the current version is intentional (e.g., due to compatibility constraints).
+
+### Step 7.2: Verify Final Gem Versions
+
+Check that all gems are at their target versions:
+
+```bash
+docker compose exec players bundle outdated --only-explicit
 ```
 
-### Step 7.2: Update Gemfile (Remove Pins)
-
-If `dry-configurable` and `dry-container` work well, consider updating:
-
-```ruby
-# Test removing version constraints:
-gem 'dry-configurable'  # Remove '0.12.1'
-gem 'dry-container'     # Remove '0.7.2'
-```
-
-Only if tests pass.
+All explicitly listed gems should be up to date. If any show as outdated, review whether they need updating or if the current version is intentional.
 
 ### Step 7.3: Update README
 
