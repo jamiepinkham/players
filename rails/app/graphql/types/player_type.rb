@@ -5,6 +5,7 @@ module Types
     field :bbrefid, String, null: true
     field :bbref_minors, String, null: true
     field :bbref_link, String, null: false
+    field :bbref_stats, GraphQL::Types::JSON, null: true
     field :stats, [Types::StatType], null: true
     field :position, String, null: true
     field :bids, [Types::BidType], null: true do

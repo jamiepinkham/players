@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useMutation } from "graphql-hooks";
 import { Grid, Box, Text, Heading, Select } from "grommet";
 import SelectableContractList from "./SelectableContractList";
@@ -14,7 +14,7 @@ mutation CreateTrade($input: CreateTradeMutationInput!) {
   }
 }`;
 
-function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
+function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialContract, onTradeSubmitted }) {
   // State management - store FULL contract objects, not just IDs
   const [fromContracts, setFromContracts] = useState([]);
   const [toContracts, setToContracts] = useState([]);
@@ -30,6 +30,23 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, onTradeSubmitted }) {
 
   // Available teams for trade partner selection (exclude current team)
   const availableTeams = teams.filter(t => t.id != currentTeamId);
+
+  // Pre-select team and contract if provided
+  useEffect(() => {
+    if (initialTeamId && availableTeams.length > 0) {
+      const teamToSelect = availableTeams.find(t => t.id == initialTeamId);
+      if (teamToSelect) {
+        setToTeam(teamToSelect);
+      }
+    }
+  }, [initialTeamId, availableTeams]);
+
+  // Pre-select the initial contract when it's loaded
+  useEffect(() => {
+    if (initialContract && toTeam) {
+      setToContracts([initialContract]);
+    }
+  }, [initialContract, toTeam]);
 
   // Toggle handlers - store full contract objects
   const handleFromToggle = (contract, checked) => {

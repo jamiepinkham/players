@@ -1,13 +1,12 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
-  Grid,
   Text,
   TextInput,
   Select,
-  Collapsible,
   DataTable,
   Pagination,
+  Anchor,
 } from 'grommet';
 import { useQuery } from 'graphql-hooks';
 import CurrencyFormat from 'react-currency-format';
@@ -20,6 +19,7 @@ query GetPlayers {
     bbrefMinors
     name
     position
+    bbrefStats
     stats {
       title
       value
@@ -31,127 +31,46 @@ query GetPlayers {
       franchise
       summer
       amount
+      team {
+        id
+        name
+      }
+    }
+  }
+  currentSeason {
+    id
+    name
+    activeFreeAgencyPeriod {
+      id
+      maxBidsForTeam
     }
   }
 }
 `;
 
-function groupStats(stats) {
-  const grouped = {};
-  stats.forEach(({ title, value }) => {
-    grouped[title] = value;
-  });
-  return grouped;
+// Helper function to get contract status for sorting and display
+function getContractStatus(player) {
+  const hasStats = player.stats && player.stats.length > 0;
+
+  if (player.contract) {
+    return 'Under Contract';
+  } else if (hasStats) {
+    return 'Free Agent';
+  } else {
+    return 'Ineligible';
+  }
 }
-
-// Memoized PlayerCard component to prevent unnecessary re-renders
-const PlayerCard = React.memo(({ player, isExpanded, onToggle }) => {
-  const stats = groupStats(player.stats || []);
-  const hasStats = Object.keys(stats).length > 0;
-  const isPitcher = player.position === 'SP' || player.position === 'RP';
-  const contractText = player.contract ? (
-    <Box>
-      <Text>
-        Annual Amount:{' '}
-        <CurrencyFormat
-          value={player.contract.amount}
-          thousandSeparator={true}
-          prefix={'$'}
-          displayType={'text'}
-        />
-      </Text>
-      <Text>
-        {player.contract.firstSeason?.name || '?'} →{' '}
-        {player.contract.lastSeason?.name || '?'}
-      </Text>
-      <Text>{player.contract.summer && 'Summer Draftee'}</Text>
-      <Text>{player.contract.franchise && 'Francise Player'}</Text>
-    </Box>
-  ) : (
-    'Free Agent'
-  );
-
-  return (
-    <Box
-      key={player.id}
-      border={{ side: 'bottom', color: 'light-4' }}
-      pad={{ vertical: 'small' }}
-    >
-      <Box
-        direction="row"
-        justify="between"
-        align="center"
-        onClick={onToggle}
-        hoverIndicator="light-1"
-        pad={{ vertical: 'xsmall' }}
-        style={{ cursor: 'pointer' }}
-      >
-        <Box direction="row" gap="medium" width="small" flex>
-          <Text weight="bold">{player.name}</Text>
-          <Text>{player.position}</Text>
-        </Box>
-        <Text>{contractText}</Text>
-      </Box>
-
-      <Collapsible open={isExpanded}>
-        <Box pad={{ top: 'small', left: 'small' }} background="light-2">
-          {hasStats ? (
-            <DataTable
-              columns={
-                isPitcher
-                  ? [
-                      { property: 'IP', header: 'IP' },
-                      { property: 'ERA', header: 'ERA' },
-                      { property: 'W', header: 'W' },
-                      { property: 'L', header: 'L' },
-                      { property: 'SV', header: 'SV' },
-                      { property: 'G', header: 'G' },
-                      { property: 'GS', header: 'GS' },
-                      { property: 'SO9', header: 'K/9' },
-                      { property: 'BB9', header: 'BB/9' },
-                      { property: 'HR9', header: 'HR/9' },
-                      { property: 'WAR', header: 'WAR' },
-                    ]
-                  : [
-                      { property: 'PA', header: 'PA' },
-                      { property: 'HR', header: 'HR' },
-                      { property: 'R', header: 'R' },
-                      { property: 'RBI', header: 'RBI' },
-                      { property: 'SB', header: 'SB' },
-                      { property: 'BA', header: 'AVG' },
-                      { property: 'OBP', header: 'OBP' },
-                      { property: 'SLG', header: 'SLG' },
-                      { property: 'OPS', header: 'OPS' },
-                      { property: 'WAR', header: 'WAR' },
-                    ]
-              }
-              data={[stats]}
-              size="small"
-              border={{ color: 'light-4', side: 'all' }}
-              background="light-1"
-              pad={{ horizontal: 'xsmall', vertical: 'xxsmall' }}
-            />
-          ) : (
-            <Text italic color="dark-5">
-              No stats available
-            </Text>
-          )}
-        </Box>
-      </Collapsible>
-    </Box>
-  );
-});
-
-PlayerCard.displayName = 'PlayerCard';
 
 const AllPlayersListSearch = () => {
   const { loading, error, data } = useQuery(PLAYERS_QUERY);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [positionFilter, setPositionFilter] = useState('');
-  const [expandedId, setExpandedId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+
+  const hasActiveFAPeriod = data?.currentSeason?.activeFreeAgencyPeriod != null;
 
   // Debounce search input with 300ms delay
   useEffect(() => {
@@ -165,7 +84,7 @@ const AllPlayersListSearch = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, positionFilter]);
+  }, [search, positionFilter, statusFilter]);
 
   // Memoize players with lowercased names for efficient filtering
   const playersWithLowerNames = useMemo(() => {
@@ -180,13 +99,17 @@ const AllPlayersListSearch = () => {
     if (!playersWithLowerNames.length) return [];
     const searchLower = search.toLowerCase();
 
-    return playersWithLowerNames.filter((player) => {
+    let filtered = playersWithLowerNames.filter((player) => {
       const nameMatch = player.lowerName.includes(searchLower);
       const positionMatch =
         !positionFilter || !positionFilter.value || player?.position?.match(positionFilter.value);
-      return nameMatch && positionMatch;
+      const statusMatch =
+        !statusFilter || !statusFilter.value || getContractStatus(player) === statusFilter.value;
+      return nameMatch && positionMatch && statusMatch;
     });
-  }, [playersWithLowerNames, search, positionFilter]);
+
+    return filtered;
+  }, [playersWithLowerNames, search, positionFilter, statusFilter]);
 
   // Paginate filtered results
   const paginatedPlayers = useMemo(() => {
@@ -196,11 +119,6 @@ const AllPlayersListSearch = () => {
   }, [filteredPlayers, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
-
-  // Memoized toggle handler
-  const handleToggle = useCallback((playerId) => {
-    setExpandedId((prev) => (prev === playerId ? null : playerId));
-  }, []);
 
   const uniquePositions = [
     { label: 'All Positions', value: '' },
@@ -215,6 +133,13 @@ const AllPlayersListSearch = () => {
     { label: 'CF', value: '8' },
     { label: 'RF', value: '9' },
     { label: 'DH', value: 'D' },
+  ];
+
+  const statusOptions = [
+    { label: 'All Statuses', value: '' },
+    { label: 'Under Contract (Tradeable)', value: 'Under Contract' },
+    { label: 'Free Agent (Biddable)', value: 'Free Agent' },
+    { label: 'Ineligible', value: 'Ineligible' },
   ];
 
   if (loading) return <Text>Loading players...</Text>;
@@ -236,6 +161,14 @@ const AllPlayersListSearch = () => {
           clear
           onClear={() => setPositionFilter('')}
         />
+        <Select
+          placeholder="All Statuses"
+          options={statusOptions}
+          value={statusFilter}
+          onChange={({ option }) => setStatusFilter(option)}
+          clear
+          onClear={() => setStatusFilter('')}
+        />
       </Box>
 
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'small' }}>
@@ -253,14 +186,68 @@ const AllPlayersListSearch = () => {
         )}
       </Box>
 
-      {paginatedPlayers.map((player) => (
-        <PlayerCard
-          key={player.id}
-          player={player}
-          isExpanded={expandedId === player.id}
-          onToggle={() => handleToggle(player.id)}
-        />
-      ))}
+      <DataTable
+        columns={[
+          {
+            property: 'name',
+            header: <Text weight="bold">Name</Text>,
+            primary: true,
+            render: (player) => <Text weight="bold">{player.name}</Text>,
+          },
+          {
+            property: 'position',
+            header: <Text weight="bold">Position</Text>,
+            render: (player) => <Text>{player.position}</Text>,
+          },
+          {
+            property: 'contract',
+            header: <Text weight="bold">Contract Status</Text>,
+            align: 'end',
+            render: (player) => {
+              const hasStats = player.stats && player.stats.length > 0;
+
+              if (player.contract) {
+                return (
+                  <Text>
+                    {player.contract.team?.name || 'Unknown'} - <CurrencyFormat
+                      value={player.contract.amount}
+                      thousandSeparator={true}
+                      prefix={'$'}
+                      displayType={'text'}
+                    /> - Ends: {player.contract.lastSeason?.name || '?'}
+                  </Text>
+                );
+              } else if (hasStats) {
+                return <Text>Free Agent</Text>;
+              } else {
+                return <Text color="status-critical">Ineligible</Text>;
+              }
+            },
+          },
+          {
+            property: 'action',
+            header: <Text weight="bold">Action</Text>,
+            align: 'end',
+            render: (player) => {
+              const hasStats = player.stats && player.stats.length > 0;
+
+              if (player.contract) {
+                return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
+              } else if (hasStats && hasActiveFAPeriod) {
+                return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
+              } else if (hasStats && !hasActiveFAPeriod) {
+                return <Text color="dark-5">Bid (N/A)</Text>;
+              } else {
+                return <Text color="dark-5">N/A</Text>;
+              }
+            },
+          },
+        ]}
+        data={paginatedPlayers}
+        background={{
+          body: ['white', 'light-1'],
+        }}
+      />
 
       {totalPages > 1 && (
         <Box align="center" margin={{ top: 'medium' }}>

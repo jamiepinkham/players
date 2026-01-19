@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "graphql-hooks";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 import {
   Heading,
@@ -53,15 +54,56 @@ const BIDDING_CONSOLE_QUERY = `
   }
 `;
 
+const PLAYER_QUERY = `
+  query PlayerQuery($playerId: ID!) {
+    player(id: $playerId) {
+      id
+      name
+      position
+      bbrefLink
+      stats {
+        title
+        value
+      }
+    }
+  }
+`;
+
 export default function BiddingConsole() {
   const auth = useAuth();
+  const location = useLocation();
   const [show, setShow] = useState(null);
+
+  // Parse query params for player_id
+  const searchParams = new URLSearchParams(location.search);
+  const playerId = searchParams.get('player_id');
+
   const { data = { team: null, currentSeason: null }, refetch: refetch } =
     useQuery(BIDDING_CONSOLE_QUERY, {
       variables: {
         teamId: auth.teamId,
       },
     });
+
+  const {
+    loading: playerLoading,
+    data: playerData = { player: null }
+  } = useQuery(PLAYER_QUERY, {
+    variables: { playerId },
+    skip: !playerId
+  });
+
+  // When player data loads, auto-open the bid layer
+  useEffect(() => {
+    if (playerData?.player && data?.currentSeason?.activeFreeAgencyPeriod) {
+      const bids = data.currentSeason.activeFreeAgencyPeriod.bids;
+      const maxBids = data.currentSeason.activeFreeAgencyPeriod.maxBidsForTeam;
+      if (bids.length < maxBids) {
+        setShow(playerData.player);
+      }
+    }
+  }, [playerData, data]);
+
   if (!data.team) return <Spinner size="medium" alignSelf="center" />;
   const team = data.team;
   const currentSeason = data.currentSeason;
