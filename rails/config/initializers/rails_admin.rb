@@ -9,6 +9,11 @@ RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateCont
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
 
+  ## Custom navigation links
+  config.navigation_static_links = {
+    'Back to Main Site' => '/teams'
+  }
+
   ### Popular gems integration
 
   ## == Devise ==
