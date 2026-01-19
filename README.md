@@ -32,7 +32,8 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
 ├── docker-compose.portainer.yml # Production deployment config
 ├── Dockerfile             # Multi-stage Docker build
 ├── web-entrypoint.sh      # Container startup script
-├── db-restore/            # Auto-restore database backups
+├── docker/postgres/       # PostgreSQL initialization scripts
+├── db-restore/            # Place db.restore file here for auto-restore
 └── .github/workflows/     # CI/CD pipelines
 ```
 
@@ -325,16 +326,29 @@ docker compose logs -f db
 
 ### Auto-Restore from Backup
 
-See [db-restore/README.md](db-restore/README.md) for automatic database restoration on first startup.
+The application can automatically restore from a PostgreSQL dump file on database initialization.
 
-Quick example:
+**How it works:**
+- The `docker/postgres/init.sh` script runs when the database container starts for the first time
+- If it finds a file at `db-restore/db.restore`, it will automatically restore it
+- This only happens on first initialization (when the database volume is empty)
+
+**Steps to restore from backup:**
+
 ```bash
-# Place backup file
+# 1. Place your PostgreSQL dump file in the db-restore directory
 cp your-backup.dump db-restore/db.restore
 
-# Reset and restore
+# 2. Remove existing database volume (WARNING: destroys current data)
 docker compose down -v
+
+# 3. Start the application - database will auto-restore
 docker compose up
+```
+
+The restore process will be shown in the database container logs. You can monitor it with:
+```bash
+docker compose logs -f db
 ```
 
 ### Manual Database Operations
@@ -639,11 +653,3 @@ The CI/CD pipeline will automatically:
 - Build your Docker image
 - Publish to GHCR with your branch name
 - Comment on the PR with pull instructions
-
-## License
-
-[Add license information]
-
-## Contact
-
-[Add contact information or maintainer details]

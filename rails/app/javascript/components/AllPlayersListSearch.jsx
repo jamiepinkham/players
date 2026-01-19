@@ -9,6 +9,7 @@ import {
   Anchor,
 } from 'grommet';
 import { useQuery } from 'graphql-hooks';
+import { useAuth } from '../hooks/use_auth';
 import CurrencyFormat from 'react-currency-format';
 
 const PLAYERS_QUERY = `
@@ -62,6 +63,7 @@ function getContractStatus(player) {
 }
 
 const AllPlayersListSearch = () => {
+  const auth = useAuth();
   const { loading, error, data } = useQuery(PLAYERS_QUERY);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -71,6 +73,7 @@ const AllPlayersListSearch = () => {
   const itemsPerPage = 25;
 
   const hasActiveFAPeriod = data?.currentSeason?.activeFreeAgencyPeriod != null;
+  const hasTeam = auth?.teamId != null;
 
   // Debounce search input with 300ms delay
   useEffect(() => {
@@ -230,6 +233,10 @@ const AllPlayersListSearch = () => {
             align: 'end',
             render: (player) => {
               const hasStats = player.stats && player.stats.length > 0;
+
+              if (!hasTeam) {
+                return <Text color="dark-5">N/A</Text>;
+              }
 
               if (player.contract) {
                 return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
