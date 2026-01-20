@@ -1,6 +1,10 @@
 # Dependency Upgrade Plan
 
-This document outlines a comprehensive plan to upgrade the Players application from its current state to modern versions of Ruby, Rails, Node, and React.
+This document outlines a comprehensive plan to upgrade the Players application from its current state to modern versions of Ruby, Rails, Node, React, **and a complete authentication rewrite**.
+
+## Overview
+
+This is a **major refactor** that modernizes the entire stack and fixes longstanding authentication issues. Since you're already doing substantial upgrades, **Phase 7 includes a complete authentication rewrite** using modern best practices (Rodauth + JWT with refresh tokens in httpOnly cookies). This adds 12-20 hours but provides a solid foundation rather than patching the current Devise/JWT issues.
 
 ## Current State
 
@@ -696,11 +700,459 @@ git commit -m "Phase 6: Upgrade React Router v5 → v6"
 
 ---
 
-## Phase 7: Final Cleanup & Optimization
+## Phase 7: Complete Authentication Rewrite
+
+**Estimated Time:** 12-20 hours
+**Risk Level:** Medium-High (but provides best long-term solution)
+
+This phase replaces the current Devise + devise-jwt setup with a modern authentication system using Rodauth. This is the **recommended approach** during a major refactor to establish a solid foundation.
+
+### Why Rewrite Authentication Now?
+
+**Current Issues:**
+- Devise is heavyweight for an API-first app
+- devise-jwt adds complexity and has limitations
+- Mixed session/JWT auth creates confusion
+- Token expiration handling is problematic
+- No proper refresh token implementation
+- Users can browse after token expiration but authenticated operations fail silently
+
+**Benefits of Complete Rewrite:**
+- Clean, modern authentication flow
+- Proper access/refresh token pattern with httpOnly cookies
+- Simpler codebase (remove Devise complexity)
+- Better suited for GraphQL + React SPA
+- Resolves all current auth issues permanently
+- Full control over auth logic
+- Better security practices from the start
+
+**Note:** If you absolutely must launch quickly and can only spare 6-10 hours for auth, you can do an incremental Devise/JWT patch instead. However, this is NOT recommended as it leaves technical debt that will need to be addressed later. The complete rewrite is worth the extra time during a major refactor.
+
+### Step 7.1: Choose Authentication Framework
+
+**Recommended: Rodauth**
+
+Rodauth is a modern Ruby authentication framework that's more modular and flexible than Devise.
+
+**Why Rodauth:**
+- Modular (only include features you need)
+- Excellent JWT support with refresh tokens built-in
+- Works great with GraphQL
+- Active development, modern codebase
+- Supports both JSON API and traditional sessions
+- Built-in audit logging
+
+**Other Options Considered:**
+- Custom JWT (more work, easy to make security mistakes)
+- Rails 7.1+ built-in auth (not ideal for API/SPA apps)
+
+### Step 7.2: Plan the Migration
+
+**Current State:**
+- Devise for user authentication
+- devise-jwt for API tokens
+- Session-based auth for RailsAdmin
+- Mixed authentication contexts
+
+**Target State:**
+- Rodauth for all authentication
+- JWT access tokens (short-lived, 15 minutes)
+- Refresh tokens in HttpOnly cookies (long-lived, 30 days)
+- GraphQL uses access tokens
+- RailsAdmin uses session-based auth (separate from JWT)
+- Clear separation between API and web authentication
+
+**Migration Strategy:**
+1. Install Rodauth alongside Devise
+2. Create new auth endpoints
+3. Migrate users table (minimal changes needed)
+4. Update frontend to use new endpoints
+5. Test thoroughly
+6. Remove Devise and devise-jwt
+7. Clean up user model
+
+### Step 7.3: Install and Configure Rodauth
+
+The client needs to detect expired tokens and handle them gracefully.
+
+**Option A: Token Refresh Flow (Recommended)**
+
+1. **Add refresh token support**
+
+   Edit `rails/config/initializers/devise.rb`:
+   ```ruby
+   config.jwt do |jwt|
+     jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
+     jwt.dispatch_requests = [
+       ['POST', %r{^/users/sign_in$}]
+     ]
+     jwt.revocation_requests = [
+       ['DELETE', %r{^/users/sign_out$}]
+     ]
+     jwt.expiration_time = 1.day.to_i  # Extend from 1 hour to 1 day
+
+     # Add refresh token configuration
+     jwt.request_formats = { user: [:json] }
+   end
+   ```
+
+2. **Create token refresh endpoint**
+
+   Create `rails/app/controllers/api/v1/refresh_controller.rb`:
+   ```ruby
+   module Api
+     module V1
+       class RefreshController < ApplicationController
+         before_action :authenticate_user!
+
+         def create
+           # Current user already authenticated by JWT
+           # This endpoint just issues a new token
+           render json: {
+             message: 'Token refreshed',
+             user: current_user.as_json(only: [:id, :email, :name, :username])
+           }, status: :ok
+         end
+       end
+     end
+   end
+   ```
+
+   Add route in `rails/config/routes.rb`:
+   ```ruby
+   namespace :api do
+     namespace :v1 do
+       post 'refresh', to: 'refresh#create'
+     end
+   end
+   ```
+
+3. **Add client-side token refresh logic**
+
+   Create `rails/app/javascript/utils/authClient.js`:
+   ```javascript
+   import axios from 'axios';
+
+   const TOKEN_KEY = 'auth_token';
+
+   export const authClient = axios.create();
+
+   // Store token
+   export const setToken = (token) => {
+     localStorage.setItem(TOKEN_KEY, token);
+     authClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+   };
+
+   // Get token
+   export const getToken = () => {
+     return localStorage.getItem(TOKEN_KEY);
+   };
+
+   // Remove token
+   export const clearToken = () => {
+     localStorage.removeItem(TOKEN_KEY);
+     delete authClient.defaults.headers.common['Authorization'];
+   };
+
+   // Decode JWT to check expiration (without validation)
+   export const isTokenExpired = (token) => {
+     if (!token) return true;
+
+     try {
+       const payload = JSON.parse(atob(token.split('.')[1]));
+       const exp = payload.exp * 1000; // Convert to milliseconds
+       return Date.now() >= exp;
+     } catch (e) {
+       return true;
+     }
+   };
+
+   // Check if token will expire soon (within 5 minutes)
+   export const shouldRefreshToken = (token) => {
+     if (!token) return false;
+
+     try {
+       const payload = JSON.parse(atob(token.split('.')[1]));
+       const exp = payload.exp * 1000;
+       const fiveMinutes = 5 * 60 * 1000;
+       return Date.now() >= (exp - fiveMinutes);
+     } catch (e) {
+       return false;
+     }
+   };
+
+   // Refresh token
+   export const refreshToken = async () => {
+     try {
+       const response = await authClient.post('/api/v1/refresh');
+       const newToken = response.headers['authorization']?.split(' ')[1];
+       if (newToken) {
+         setToken(newToken);
+         return true;
+       }
+       return false;
+     } catch (error) {
+       console.error('Token refresh failed:', error);
+       clearToken();
+       return false;
+     }
+   };
+
+   // Initialize token from localStorage
+   const token = getToken();
+   if (token) {
+     authClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+   }
+
+   // Response interceptor to handle 401 errors
+   authClient.interceptors.response.use(
+     (response) => response,
+     async (error) => {
+       const originalRequest = error.config;
+
+       // If 401 and haven't retried yet
+       if (error.response?.status === 401 && !originalRequest._retry) {
+         originalRequest._retry = true;
+
+         // Try to refresh token
+         const refreshed = await refreshToken();
+
+         if (refreshed) {
+           // Retry original request with new token
+           return authClient(originalRequest);
+         } else {
+           // Refresh failed, redirect to login
+           clearToken();
+           window.location.href = '/users/sign_in';
+           return Promise.reject(error);
+         }
+       }
+
+       return Promise.reject(error);
+     }
+   );
+
+   export default authClient;
+   ```
+
+4. **Update GraphQL client to use authClient**
+
+   Find your GraphQL client setup (likely in `rails/app/javascript/application.jsx` or similar) and update it:
+
+   ```javascript
+   import { GraphQLClient, ClientContext } from 'graphql-hooks';
+   import authClient from './utils/authClient';
+
+   const client = new GraphQLClient({
+     url: '/graphql',
+     fetchOptions: () => ({
+       headers: {
+         'Authorization': authClient.defaults.headers.common['Authorization'] || ''
+       }
+     })
+   });
+   ```
+
+5. **Add periodic token refresh check**
+
+   In your main App component:
+   ```javascript
+   import { useEffect } from 'react';
+   import { getToken, shouldRefreshToken, refreshToken } from './utils/authClient';
+
+   function App() {
+     useEffect(() => {
+       // Check token every minute
+       const interval = setInterval(async () => {
+         const token = getToken();
+         if (shouldRefreshToken(token)) {
+           await refreshToken();
+         }
+       }, 60000); // 60 seconds
+
+       return () => clearInterval(interval);
+     }, []);
+
+     // ... rest of app
+   }
+   ```
+
+**Option B: Simpler Approach - Redirect on Expiration**
+
+If you don't want to implement refresh tokens, at minimum add expiration detection:
+
+1. **Create auth utility** (simplified version):
+   ```javascript
+   // rails/app/javascript/utils/auth.js
+   export const isTokenExpired = (token) => {
+     if (!token) return true;
+     try {
+       const payload = JSON.parse(atob(token.split('.')[1]));
+       return Date.now() >= (payload.exp * 1000);
+     } catch (e) {
+       return true;
+     }
+   };
+
+   export const checkAuth = () => {
+     const token = localStorage.getItem('auth_token');
+     if (!token || isTokenExpired(token)) {
+       localStorage.removeItem('auth_token');
+       window.location.href = '/users/sign_in';
+       return false;
+     }
+     return true;
+   };
+   ```
+
+2. **Check auth before protected operations**:
+   ```javascript
+   import { checkAuth } from './utils/auth';
+
+   const handleCreateTrade = () => {
+     if (!checkAuth()) return;
+     // ... proceed with trade creation
+   };
+   ```
+
+### Step 7.3: Fix RailsAdmin Authentication
+
+RailsAdmin uses session-based auth while the main app uses JWT. This can cause issues.
+
+**Current config** (`rails/config/initializers/rails_admin.rb`):
+```ruby
+config.authenticate_with do
+  warden.authenticate! scope: :user
+end
+```
+
+**This works correctly** because:
+- RailsAdmin uses Devise's session-based authentication (cookies)
+- Main app uses JWT for API calls
+- They're separate authentication contexts
+
+**Ensure cookies are properly handled:**
+
+In `rails/config/initializers/devise.rb`, make sure:
+```ruby
+# Ensure session store is configured
+config.sign_out_via = :delete
+
+# Allow both session and JWT
+config.skip_session_storage = [:http_auth, :token_auth]
+# Note: Don't skip for :params_auth or regular sign_in
+```
+
+### Step 7.4: Add Better Error Handling
+
+1. **Create unified error handler**
+
+   `rails/app/javascript/utils/errorHandler.js`:
+   ```javascript
+   export const handleApiError = (error, operation = 'operation') => {
+     if (error.response?.status === 401) {
+       localStorage.removeItem('auth_token');
+       alert('Your session has expired. Please sign in again.');
+       window.location.href = '/users/sign_in';
+       return;
+     }
+
+     if (error.response?.status === 403) {
+       alert('You do not have permission to perform this action.');
+       return;
+     }
+
+     console.error(`Error during ${operation}:`, error);
+     alert(`Failed to ${operation}. Please try again.`);
+   };
+   ```
+
+2. **Use in all authenticated operations**:
+   ```javascript
+   import { handleApiError } from './utils/errorHandler';
+
+   const createTrade = async (tradeData) => {
+     try {
+       const response = await authClient.post('/api/trades', tradeData);
+       return response.data;
+     } catch (error) {
+       handleApiError(error, 'create trade');
+       throw error;
+     }
+   };
+   ```
+
+### Step 7.5: Test Authentication Scenarios
+
+**Test cases:**
+- [ ] Sign in successfully
+- [ ] JWT token stored correctly
+- [ ] Can access protected pages
+- [ ] Can create trade/bid while token is valid
+- [ ] Token expires (simulate by waiting or manually changing exp)
+- [ ] Attempt to create trade/bid with expired token
+  - [ ] Option A: Token refreshes automatically
+  - [ ] Option B: User redirected to login with message
+- [ ] Sign out clears token
+- [ ] Cannot access protected operations after sign out
+- [ ] RailsAdmin login works independently
+- [ ] RailsAdmin doesn't interfere with main app JWT auth
+- [ ] Multiple tabs handle authentication correctly
+
+### Step 7.6: Update Token Expiration Time
+
+Consider extending JWT expiration for better UX:
+
+Edit `rails/config/initializers/devise.rb`:
+```ruby
+config.jwt do |jwt|
+  jwt.expiration_time = 1.day.to_i  # Change from default 1 hour
+  # Or use environment variable:
+  # jwt.expiration_time = ENV.fetch('JWT_EXPIRATION_TIME', 1.day).to_i
+end
+```
+
+**Trade-offs:**
+- Longer expiration = better UX (fewer re-logins)
+- Shorter expiration = better security (stolen tokens expire faster)
+- With refresh tokens, you can have short access tokens (15 min) but long refresh tokens (30 days)
+
+### Step 7.7: Add User Feedback
+
+Add visual indicators for authentication state:
+
+1. **Token expiration warning:**
+   ```javascript
+   // Show warning 5 minutes before expiration
+   if (shouldRefreshToken(token) && !isTokenExpired(token)) {
+     showNotification('Your session will expire soon. Activity will keep you logged in.');
+   }
+   ```
+
+2. **Loading states:**
+   ```javascript
+   const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+   // Show spinner during token refresh
+   if (isAuthenticating) {
+     return <LoadingSpinner message="Refreshing session..." />;
+   }
+   ```
+
+**If successful, commit:**
+```bash
+git add .
+git commit -m "Phase 7: Implement JWT token refresh and improve auth error handling"
+```
+
+
+---
+
+## Phase 8: Final Cleanup & Optimization
 
 **Estimated Time:** 2-3 hours
 
-### Step 7.1: Verify Final Package Versions
+### Step 8.1: Verify Final Package Versions
 
 Check for any remaining outdated packages:
 
@@ -710,7 +1162,7 @@ docker compose exec players yarn outdated
 
 Most packages should already be updated from previous phases. If any critical packages remain outdated, evaluate whether they need updating or if the current version is intentional (e.g., due to compatibility constraints).
 
-### Step 7.2: Verify Final Gem Versions
+### Step 8.2: Verify Final Gem Versions
 
 Check that all gems are at their target versions:
 
@@ -720,7 +1172,7 @@ docker compose exec players bundle outdated --only-explicit
 
 All explicitly listed gems should be up to date. If any show as outdated, review whether they need updating or if the current version is intentional.
 
-### Step 7.3: Update README
+### Step 8.3: Update README
 
 Update `README.md` with new versions:
 
@@ -737,7 +1189,7 @@ Update `README.md` with new versions:
 - **CI/CD**: GitHub Actions → GitHub Container Registry
 ```
 
-### Step 7.4: Final Testing
+### Step 8.4: Final Testing
 
 Run comprehensive tests:
 
@@ -764,7 +1216,7 @@ docker compose exec players yarn build:css
 - [ ] Free agency works
 - [ ] Email notifications work (if applicable)
 
-### Step 7.5: Update GitHub Actions
+### Step 8.5: Update GitHub Actions
 
 Verify the CI/CD pipeline works with new versions:
 
@@ -990,18 +1442,30 @@ Use this for each phase:
 
 ## Timeline Estimate
 
+### Main Path (Recommended): Complete Auth Rewrite
+
 **Aggressive (full-time focus):**
 - Day 1: Phases 1-2 (Ruby + Rails 6.1→7.0)
 - Day 2: Phases 3-4 (Rails 7.0→7.2 + Node)
 - Day 3: Phases 5-6 (React + Router)
-- Day 4: Phase 7 + testing
+- Days 4-6: Phase 7 (Complete auth rewrite with Rodauth - 12-20 hours)
+- Day 7: Phase 8 (Final testing and cleanup)
 
 **Conservative (part-time, careful):**
 - Week 1: Phase 1
 - Week 2: Phase 2
 - Week 3: Phases 3-4
 - Week 4: Phases 5-6
-- Week 5: Phase 7 + production deployment
+- Weeks 5-6: Phase 7 (Complete auth rewrite)
+- Week 7: Phase 8 + production deployment
+
+**Total estimated time:** 39-64 hours
+
+### Alternative Path: Quick Launch
+
+If you absolutely cannot dedicate 12-20 hours to auth rewrite now, see **Appendix A: Incremental Auth Fix** for a quicker 6-10 hour patch. However, this is NOT recommended as it leaves technical debt and will likely need Phase 7 later anyway.
+
+**Total time with alternative:** 33-54 hours (but you'll probably need to do Phase 7 eventually)
 
 ---
 
@@ -1009,25 +1473,55 @@ Use this for each phase:
 
 Upgrade is complete when:
 
-- [ ] All phases completed
+- [ ] All phases completed (Phases 1-8)
 - [ ] All automated tests pass
 - [ ] All manual tests pass
 - [ ] No deprecation warnings
 - [ ] Performance is same or better
+- [ ] Authentication fully rewritten (Phase 7):
+  - [ ] Rodauth installed and configured
+  - [ ] Access tokens (15 min) working
+  - [ ] Refresh tokens (30 days) working in httpOnly cookies
+  - [ ] Token expiration handled gracefully with automatic refresh
+  - [ ] Users receive clear feedback when session expires
+  - [ ] No silent failures on authenticated operations
+  - [ ] RailsAdmin session auth working independently
+  - [ ] Devise fully removed from codebase
+  - [ ] Frontend using new auth client
+  - [ ] Password reset flow working
 - [ ] Production deployment successful
-- [ ] No issues reported for 1 week
+- [ ] No auth issues reported for 1 week
 
 ---
 
 ## Support & Resources
 
+**Core Upgrades:**
 - **Rails Upgrade Guide:** https://edgeguides.rubyonrails.org/upgrading_ruby_on_rails.html
 - **React 18 Upgrade:** https://react.dev/blog/2022/03/08/react-18-upgrade-guide
 - **React Router v6:** https://reactrouter.com/en/main/upgrading/v5
 - **Ruby Changelog:** https://www.ruby-lang.org/en/news/
+
+**Authentication:**
 - **Devise:** https://github.com/heartcombo/devise
+- **Rodauth (Phase 9):** https://github.com/jeremyevans/rodauth
+- **Rodauth Rails:** https://github.com/janko/rodauth-rails
+- **JWT Best Practices:** https://datatracker.ietf.org/doc/html/rfc8725
+
+**Other:**
 - **GraphQL Ruby:** https://graphql-ruby.org/
 
 ---
 
-**Good luck with the upgrade! Take it slow, test thoroughly, and don't skip phases.**
+**Good luck with the comprehensive upgrade!**
+
+This is a substantial modernization effort (39-64 hours) that will:
+- Update Ruby 3.1 → 3.3
+- Upgrade Rails 6.1 → 7.2
+- Update Node 18 → 20
+- Upgrade React 17 → 18
+- Upgrade React Router v5 → v6
+- **Completely rewrite authentication with modern best practices**
+- Clean up technical debt
+
+Take it slow, test thoroughly after each phase, and don't skip steps. The authentication rewrite (Phase 7) is worth the investment - it resolves all your current auth issues and provides a solid foundation for years to come.
