@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Change to project root
-cd "$(dirname "$0")/.."
-
-echo "🚀 Starting app..."
-docker-compose --env-file .env up

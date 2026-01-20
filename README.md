@@ -366,6 +366,95 @@ docker compose down -v
 docker compose up
 ```
 
+### Production Database Backup
+
+**Create a backup:**
+
+1. SSH into your production host
+2. Find the database container name:
+   ```bash
+   docker ps | grep postgres
+   # Example output: players_db_1 or players-db-1
+   ```
+
+3. Create the backup:
+   ```bash
+   docker exec -i <container_name> pg_dump \
+     -Fc --no-acl --no-owner \
+     -U postgres -d players_production > backup_$(date +%Y%m%d_%H%M%S).dump
+   ```
+
+4. Download the backup to your local machine (optional):
+   ```bash
+   scp user@production-host:~/backup_*.dump ./
+   ```
+
+**Example:**
+```bash
+# Find container
+docker ps | grep postgres
+# Output: players_db_1
+
+# Create backup with timestamp
+docker exec -i players_db_1 pg_dump \
+  -Fc --no-acl --no-owner \
+  -U postgres -d players_production > backup_20260119_143022.dump
+
+# Download to local machine
+scp user@yourserver.com:~/backup_20260119_143022.dump ./
+```
+
+### Production Database Restore
+
+Production database restores must be done manually (auto-restore is disabled in production).
+
+**Steps:**
+
+1. SSH into your production host
+2. Find the database container name:
+   ```bash
+   docker ps | grep postgres
+   # Example output: players_db_1 or players-db-1
+   ```
+
+3. Copy your backup file to the container:
+   ```bash
+   docker cp backup.dump <container_name>:/tmp/backup.dump
+   ```
+
+4. Restore the database:
+   ```bash
+   docker exec -i <container_name> pg_restore \
+     --verbose --clean --no-acl --no-owner \
+     -U postgres -d players_production /tmp/backup.dump
+   ```
+
+5. Verify the restore:
+   ```bash
+   docker exec -it <container_name> psql -U postgres -d players_production -c "\dt"
+   ```
+
+**Example:**
+```bash
+# Find container
+docker ps | grep postgres
+# Output: players_db_1
+
+# Upload backup to server (from local machine)
+scp backup.dump user@yourserver.com:~/
+
+# Copy to container
+docker cp backup.dump players_db_1:/tmp/backup.dump
+
+# Restore
+docker exec -i players_db_1 pg_restore \
+  --verbose --clean --no-acl --no-owner \
+  -U postgres -d players_production /tmp/backup.dump
+
+# Verify
+docker exec -it players_db_1 psql -U postgres -d players_production -c "\dt"
+```
+
 ## Deployment
 
 ### Overview
