@@ -6,30 +6,41 @@ This document outlines the steps required to transition from one season to the n
 
 The BMPL system tracks seasons, contracts, and free agency periods. When a season ends, several database operations must be performed to properly close out the old season and prepare for the new one.
 
-## Current Season Information
+## Season Structure
 
-- **Current Season:** BMPL 2026 (ID: 6)
-- **Next Season:** BMPL 2027 (ID: 7)
-- Seasons are linked via `previous_season_id` in the database
+- Seasons are linked via `previous_season_id` forming a linked list
 - Only one season should have `is_active = true` at a time
+- Each season can have multiple free agency periods, but typically only one is active
+- Use `rails season:status` to check the current active season
 
 ## Pre-Season Switch Checklist
 
-Before switching seasons, verify the current state:
+Before switching seasons, verify the current state using the Rails console or rake task:
 
-```sql
--- Check current active season
-SELECT id, name, is_active, previous_season_id FROM seasons ORDER BY id;
+```bash
+# Best option: Use the status rake task
+docker-compose exec players rails season:status
 
--- Check expiring contracts (for current season)
-SELECT COUNT(*) FROM contracts WHERE active = true AND last_season_id = 6;
+# Or use Rails console for detailed inspection
+docker-compose exec players rails console
+```
 
--- Check active free agency period
-SELECT f.id, s.name, f.is_active FROM free_agency_periods f
-JOIN seasons s ON f.season_id = s.id WHERE f.is_active = true;
+```ruby
+# In Rails console:
 
--- Check active bids
-SELECT COUNT(*) FROM bids WHERE is_active = true;
+# Check current active season
+Season.where(is_active: true).first
+# => #<Season id: 6, name: "BMPL 2026", is_active: true>
+
+# Check expiring contracts (for current season)
+current_season = Season.current
+Contract.where(active: true, last_season_id: current_season.id).count
+
+# Check active free agency period
+FreeAgencyPeriod.where(is_active: true).includes(:season).first
+
+# Check active bids
+Bid.where(is_active: true).count
 ```
 
 ## Season Switching Steps
@@ -114,33 +125,46 @@ If you have updated player statistics for the new season:
 
 ### Verification
 
-Run these verification queries:
+After switching seasons, verify the changes:
 
-```sql
--- Check active season
-SELECT name, is_active FROM seasons WHERE is_active = true;
+```bash
+# Best option: Use the status rake task (shows everything)
+docker-compose exec players rails season:status
 
--- Check active free agency period
-SELECT s.name, f.is_active, f.max_bids_for_team
-FROM free_agency_periods f
-JOIN seasons s ON f.season_id = s.id
-WHERE f.is_active = true;
+# Or verify manually via Rails console
+docker-compose exec players rails console
+```
 
--- Count active contracts
-SELECT COUNT(*) FROM contracts WHERE active = true;
+```ruby
+# In Rails console:
 
--- Count free agents (players without active contracts)
-SELECT COUNT(*)
-FROM players p
-LEFT JOIN contracts c ON p.id = c.player_id AND c.active = true
-WHERE c.id IS NULL
-  AND p.bbref_stats IS NOT NULL
-  AND p.bbref_stats::text <> '{}'
-  AND p.bbrefid ~ '^[a-z0-9]{5,10}';
+# Check active season
+Season.current
+# => #<Season id: 7, name: "BMPL 2027", is_active: true>
 
--- Verify no contracts from previous season are still active
-SELECT COUNT(*) FROM contracts WHERE active = true AND last_season_id <= 6;
--- Should return 0 if switching from 2026 to 2027
+# Check active free agency period
+fa = FreeAgencyPeriod.where(is_active: true).includes(:season).first
+fa.season.name  # => "BMPL 2027"
+fa.max_bids_for_team  # => 7
+
+# Count active contracts
+Contract.where(active: true).count
+
+# Count free agents (players without active contracts)
+Player
+  .left_outer_joins(:contracts)
+  .where(contracts: { active: [nil, false] })
+  .where.not(bbref_stats: nil)
+  .where("bbref_stats::text != '{}'")
+  .where.not(bbrefid: [nil, ''])
+  .where("bbrefid ~ '^[a-z0-9]{5,10}'")
+  .distinct
+  .count
+
+# Verify no contracts from previous season are still active
+old_season = Season.find(6)  # Previous season ID
+Contract.where(active: true).where("last_season_id <= ?", old_season.id).count
+# Should return 0
 ```
 
 ## Quick Reference Commands
@@ -218,32 +242,38 @@ docker-compose start players
 - Free agency period max_bids_for_team is 0
 - Season not marked as active
 
-**Check:**
-```sql
-SELECT s.name, s.is_active, f.is_active as fa_active, f.max_bids_for_team
-FROM seasons s
-LEFT JOIN free_agency_periods f ON f.season_id = s.id
-WHERE s.is_active = true;
+**Check via Rails console:**
+```ruby
+# Check season and free agency period status
+season = Season.current
+fa = season.free_agency_periods.where(is_active: true).first
+
+puts "Season: #{season.name}, Active: #{season.is_active}"
+puts "FA Period: #{fa ? "Active (max bids: #{fa.max_bids_for_team})" : "None"}"
 ```
 
 ### Issue: Old contracts still showing as active
 
-**Solution:**
-```sql
--- Find contracts that should be expired
-SELECT c.id, p.name, t.name, c.last_season_id, s.name
-FROM contracts c
-JOIN players p ON c.player_id = p.id
-JOIN teams t ON c.team_id = t.id
-JOIN seasons s ON c.last_season_id = s.id
-WHERE c.active = true
-  AND c.last_season_id < (SELECT id FROM seasons WHERE is_active = true);
+**Solution via Rails console:**
+```ruby
+# Find contracts that should be expired
+current_season = Season.current
+expired_contracts = Contract
+  .where(active: true)
+  .where("last_season_id < ?", current_season.id)
+  .includes(:player, :team, :last_season)
 
--- Deactivate them
-UPDATE contracts
-SET active = false
-WHERE active = true
-  AND last_season_id < (SELECT id FROM seasons WHERE is_active = true);
+# Review them
+expired_contracts.each do |c|
+  puts "#{c.player.name} (#{c.team.name}) - ends #{c.last_season.name}"
+end
+
+# Deactivate them
+expired_contracts.update_all(active: false)
+
+# Verify
+Contract.where(active: true).where("last_season_id < ?", current_season.id).count
+# Should return 0
 ```
 
 ## Related Files
@@ -277,4 +307,4 @@ These tasks use Rails domain models and follow all validations and business logi
 ---
 
 **Last Updated:** 2026-01-23
-**Document Version:** 1.0
+**Document Version:** 2.0 (Rails domain code only)
