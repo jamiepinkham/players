@@ -41,11 +41,11 @@ class Player < ApplicationRecord
        .and(players[:bbrefid].not_eq(nil))
        .and(players[:bbrefid].not_eq(''))
       #  .and(Arel.sql("players.bbref_stats::jsonb != '""'::jsonb"))
-       .and(Arel.sql("players.bbrefid ~ '^[a-z0-9]{9}$'"))
+       .and(Arel.sql("players.bbrefid ~ '^[a-z0-9]{5,10}$'"))
 
 
-     contract_active = contracts[:first_season_id].gteq(season_id)
-       .and(contracts[:last_season_id].lteq(season_id))
+     contract_active = contracts[:first_season_id].lteq(season_id)
+       .and(contracts[:last_season_id].gteq(season_id))
        .and(contracts[:active].eq(true))
 
      left_outer_joins(:contracts)
