@@ -11,6 +11,14 @@ class Contract < ApplicationRecord
 
   has_and_belongs_to_many :trades
 
+  def first_season_with_fallback
+    first_season || Season.order(:id).first
+  end
+
+  def last_season_with_fallback
+    last_season || Season.order(:id).first
+  end
+
   def self.search(search)
     teams = Team.search(search)
     players = Player.search(search)

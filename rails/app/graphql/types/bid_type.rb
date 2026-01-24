@@ -11,5 +11,13 @@ module Types
     field :first_season, Types::SeasonType, null: true
     field :last_season, Types::SeasonType, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
+
+    def first_season
+      object.first_season_with_fallback
+    end
+
+    def last_season
+      object.last_season_with_fallback
+    end
   end
 end

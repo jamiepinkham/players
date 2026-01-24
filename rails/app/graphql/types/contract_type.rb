@@ -11,5 +11,13 @@ module Types
     field :franchise, Boolean, null: true
     field :winning_bid, Types::BidType, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
+
+    def first_season
+      object.first_season_with_fallback
+    end
+
+    def last_season
+      object.last_season_with_fallback
+    end
   end
 end
