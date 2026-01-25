@@ -32,7 +32,7 @@ module RailsAdmin
 
                 unless hitters_file && pitchers_file
                   flash[:error] = "Please select both CSV files (hitters and pitchers)"
-                  redirect_to dashboard_path
+                  
                   return
                 end
 
@@ -103,7 +103,7 @@ module RailsAdmin
                 flash[:error] = "Import failed: #{e.message}"
               end
 
-              redirect_to dashboard_path
+              
             end
           end
         end

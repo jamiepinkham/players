@@ -26,7 +26,7 @@ module RailsAdmin
 
                 unless season_id.present?
                   flash[:error] = "Please select a season"
-                  redirect_to dashboard_path
+                  
                   return
                 end
 
@@ -40,7 +40,7 @@ module RailsAdmin
 
                 if count == 0
                   flash[:notice] = "No active contracts found for #{selected_season.name}"
-                  redirect_to dashboard_path
+                  
                   return
                 end
 
@@ -53,7 +53,7 @@ module RailsAdmin
                 flash[:error] = "Failed to deactivate contracts: #{e.message}"
               end
 
-              redirect_to dashboard_path
+              
             end
           end
         end

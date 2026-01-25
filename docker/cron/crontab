@@ -1,0 +1,2 @@
+# Run maintenance task nightly at midnight
+0 0 * * * /usr/local/bin/maintenance.sh >> /var/log/cron.log 2>&1
