@@ -80,7 +80,10 @@ RailsAdmin.config do |config|
       field :created_at
     end
     edit do
-      field :player
+      field :player do
+        associated_collection_cache_all false
+        help 'Type to search for players'
+      end
       field :team
       field :annual_amount
       field :is_active
@@ -105,7 +108,10 @@ RailsAdmin.config do |config|
     edit do
       field :amount
       field :team
-      field :player
+      field :player do
+        associated_collection_cache_all false
+        help 'Type to search for players'
+      end
       field :active
       field :summer
       field :franchise
@@ -136,7 +142,10 @@ RailsAdmin.config do |config|
       field :bbrefid
       field :position
       field :bbref_minors
-      field :bbref_stats
+      field :bbref_stats do
+        searchable false
+        queryable false
+      end
       field :contract
       field :leading_bid
     end
