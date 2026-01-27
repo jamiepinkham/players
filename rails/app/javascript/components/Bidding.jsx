@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionPanel,
   Text,
+  Paragraph,
 } from "grommet";
 
 import PlayerLists from "./PlayerLists";
@@ -73,6 +74,19 @@ export default function BiddingConsole() {
   const auth = useAuth();
   const location = useLocation();
   const [show, setShow] = useState(null);
+
+  // Check if user has a team assigned
+  if (!auth.teamId) {
+    return (
+      <Box pad="large" align="center">
+        <Heading level={3}>Team Required</Heading>
+        <Paragraph textAlign="center">
+          You must be assigned to a team to access the bidding feature.
+          Please contact your league administrator.
+        </Paragraph>
+      </Box>
+    );
+  }
 
   // Parse query params for player_id
   const searchParams = new URLSearchParams(location.search);

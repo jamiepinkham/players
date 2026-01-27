@@ -30,16 +30,20 @@ function SessionLogin() {
   const history = useHistory();
   const { from } = location.state || { from: { pathname: "/teams" } };
   function login(username, password) {
-    auth.signIn(username, password).then((token) => {
-      if (token) {
-        history.replace(from);
-      } else {
+    auth.signIn(username, password)
+      .then((token) => {
+        if (token) {
+          // Small delay to ensure token is propagated
+          setTimeout(() => {
+            history.replace(from);
+          }, 100);
+        } else {
+          setHasError(true);
+        }
+      })
+      .catch((error) => {
         setHasError(true);
-      }
-    });
-    // .catch(
-    //     setHasError(true)
-    // );
+      });
   }
 
   if (!auth.isSignedIn) {

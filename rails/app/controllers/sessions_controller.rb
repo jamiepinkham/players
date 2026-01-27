@@ -1,6 +1,8 @@
 class SessionsController < Devise::SessionsController
     respond_to :json, :html
     skip_before_action :verify_authenticity_token, if: :json_request?
+    skip_before_action :require_no_authentication, only: [:create], if: :json_request?
+    skip_before_action :verify_signed_out_user, only: [:destroy], if: :json_request?
 
     def create
         # Handle JSON API requests
@@ -10,9 +12,15 @@ class SessionsController < Devise::SessionsController
             if user && user.valid_password?(params[:user][:password])
                 self.resource = warden.authenticate!(auth_options)
                 sign_in(resource_name, resource)
-                render json: { jwt: current_token }
+                token = current_token
+
+                if token.present?
+                    render json: { jwt: token }
+                else
+                    render json: { errors: "Authentication failed" }, status: :unauthorized
+                end
             else
-                render json: {errors: "username/password not found"}
+                render json: {errors: "username/password not found"}, status: :unauthorized
             end
         else
             # Handle HTML form requests (for RailsAdmin)

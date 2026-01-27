@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "graphql-hooks";
 import { useLocation } from "react-router-dom";
-import { Spinner, Accordion, AccordionPanel } from "grommet";
+import { Spinner, Accordion, AccordionPanel, Box, Heading, Paragraph } from "grommet";
 import { useAuth } from "../../../hooks/use_auth";
 import PendingTrades from "../PendingTrades";
 import SplitScreenTradeBuilder from "./SplitScreenTradeBuilder";
@@ -45,11 +45,24 @@ const PLAYER_CONTRACT_QUERY = `
 `;
 
 function TradeOfferComponent() {
-  const teamId = useAuth().teamId;
+  const { teamId } = useAuth();
   const location = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [initialTeam, setInitialTeam] = useState(null);
   const [initialContract, setInitialContract] = useState(null);
+
+  // Check if user has a team assigned
+  if (!teamId) {
+    return (
+      <Box pad="large" align="center">
+        <Heading level={3}>Team Required</Heading>
+        <Paragraph textAlign="center">
+          You must be assigned to a team to access the trade feature.
+          Please contact your league administrator.
+        </Paragraph>
+      </Box>
+    );
+  }
 
   // Parse query params for player_id
   const searchParams = new URLSearchParams(location.search);

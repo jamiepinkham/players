@@ -19,6 +19,7 @@ import { render } from "react-dom";
 import { ClientContext, GraphQLClient } from "graphql-hooks";
 import { ProvideAuth } from "./hooks/use_auth"
 import { BrowserRouter as Router } from "react-router-dom";
+import { getAuthToken, clearAuthToken, redirectToLogin } from "./utils/auth";
 
 import siteTheme from "./site-theme";
 import { Grommet, Box } from "grommet";
@@ -39,11 +40,32 @@ const GlobalStyle = createGlobalStyle`
 
 import App from "./components/App";
 
-// Initialize GraphQL client with JWT token from localStorage if it exists
-const localToken = localStorage.getItem("bmpl-token");
+// Custom fetch wrapper with authentication error handling
+const fetchWithAuth = async (url, options = {}) => {
+  // Always get fresh token from localStorage
+  const token = getAuthToken();
+
+  const headers = {
+    ...options.headers,
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  };
+
+  const response = await fetch(url, { ...options, headers });
+
+  // Handle 401 Unauthorized - token is invalid or expired
+  // Backend now returns 401 for invalid tokens
+  if (response.status === 401) {
+    clearAuthToken();
+    redirectToLogin();
+  }
+
+  return response;
+};
+
+// Initialize GraphQL client with custom fetch that handles auth
 const client = new GraphQLClient({
   url: "/graphql",
-  headers: localToken ? { Authorization: `Bearer ${localToken}` } : {}
+  fetch: fetchWithAuth
 });
 
 function AppShell() {

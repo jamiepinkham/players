@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
+import { getAuthToken, validateToken } from "../utils/auth";
 import axios from "axios";
 
 import PrivateRoute from "./PrivateRoute";
@@ -39,9 +40,27 @@ export default function App(props) {
   );
 
   const handleAdminClick = useCallback(async () => {
+    // Get fresh token from localStorage
+    const token = getAuthToken();
+
+    if (!token) {
+      alert('You must be logged in to access admin.');
+      history.push('/sign_in');
+      return;
+    }
+
+    // Validate token before navigating to admin
+    const isValid = await validateToken(token);
+
+    if (!isValid) {
+      alert('Your session has expired. Please log in again.');
+      history.push('/sign_in');
+      return;
+    }
+
     // Navigate to admin_login endpoint which will handle session creation and redirect
-    window.location.href = `/admin_login?token=${auth.token}`;
-  }, [auth.token]);
+    window.location.href = `/admin_login?token=${token}`;
+  }, [history]);
   return (
     <Box>
       <Header background="brand" pad="small">
@@ -102,13 +121,13 @@ export default function App(props) {
             <Route exact path="/sign_in" component={SessionLogin} />
             <Route exact path="/forgot" component={ForgotPasswordForm} />
             <Route path="/reset/:token" component={ChangePassword} />
-            <Route path="/player_search" component={AllPlayersListSearch} />
-            <Route exact path="/teams" component={TeamsList} />
-            <Route exact path="/team/:id" component={TeamComponent} />
+            <PrivateRoute path="/player_search" component={AllPlayersListSearch} />
+            <PrivateRoute exact path="/teams" component={TeamsList} />
+            <PrivateRoute exact path="/team/:id" component={TeamComponent} />
             <PrivateRoute exact path="/profile" component={Profile} />
             <PrivateRoute exact path="/bidding" component={Bidding} />
             <PrivateRoute exact path='/trade' component={TradeOfferComponent} />
-            <Route exact path="/trades" component={CompletedTrades} />
+            <PrivateRoute exact path="/trades" component={CompletedTrades} />
             <Route path="*">
               <NoMatch />
             </Route>

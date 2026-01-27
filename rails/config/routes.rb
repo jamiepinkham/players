@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   # Custom user endpoints
   put '/users/username', to: 'usernames#update'
+  get '/users/validate', to: 'users/validations#show'
 
   root 'static#index'
   get '*path', to: 'static#index', constraints: lambda { |req|
