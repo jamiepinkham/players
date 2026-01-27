@@ -33,10 +33,7 @@ function SessionLogin() {
     auth.signIn(username, password)
       .then((token) => {
         if (token) {
-          // Small delay to ensure token is propagated
-          setTimeout(() => {
-            history.replace(from);
-          }, 100);
+          history.replace(from);
         } else {
           setHasError(true);
         }
