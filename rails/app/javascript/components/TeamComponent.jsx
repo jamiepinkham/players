@@ -54,10 +54,14 @@ function TeamComponent(props) {
   if (loading) return <Spinner size="medium" />;
 
   if (error) {
+    console.error("TeamComponent GraphQL Error:", error);
+    console.error("URL param id:", id);
+    console.error("Query variables:", { id });
     return (
       <Box pad="medium">
         <Heading level="3" color="status-error">Error loading team</Heading>
-        <p>{error.message || "Failed to load team data. Please try logging in again."}</p>
+        <p>Error: {JSON.stringify(error, null, 2)}</p>
+        <p>Team ID from URL: {id || "undefined"}</p>
       </Box>
     );
   }
