@@ -1,6 +1,6 @@
 import React from "react";
-import { Text, Tip, Anchor, Box } from "grommet";
-import { Launch } from "grommet-icons";
+import { Text, Tip, Anchor } from "grommet";
+import { CircleInformation } from "grommet-icons";
 
 /**
  * PlayerName component with Baseball Reference hover tooltip
@@ -12,7 +12,7 @@ import { Launch } from "grommet-icons";
  */
 const PlayerName = ({ name, bbrefid, bold = false }) => {
   // If no bbrefid, just show the name
-  if (!bbrefid) {
+  if (!bbrefid || bbrefid.trim() === '') {
     return <Text weight={bold ? "bold" : "normal"}>{name}</Text>;
   }
 
@@ -22,32 +22,16 @@ const PlayerName = ({ name, bbrefid, bold = false }) => {
   const bbrefUrl = `https://www.baseball-reference.com/players/${firstLetter}/${bbrefid}.shtml`;
 
   return (
-    <Tip
-      content={
-        <Box
-          pad="xsmall"
-          gap="xxsmall"
-          direction="row"
-          align="center"
-        >
-          <Launch size="small" />
-          <Text size="small">View on Baseball Reference</Text>
-        </Box>
-      }
-      plain
-      dropProps={{ align: { bottom: "top" } }}
+    <Anchor
+      href={bbrefUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="View on Baseball Reference"
     >
-      <Anchor
-        href={bbrefUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ textDecoration: "none" }}
-      >
-        <Text weight={bold ? "bold" : "normal"} color="brand">
-          {name}
-        </Text>
-      </Anchor>
-    </Tip>
+      <Text weight={bold ? "bold" : "normal"}>
+        {name}
+      </Text>
+    </Anchor>
   );
 };
 
