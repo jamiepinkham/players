@@ -22,3 +22,9 @@ en:
         link: "Deactivate Contracts"
         bulk_link: "Deactivate Contracts"
         done: "Deactivated"
+      reset_user_password:
+        title: "Reset Password"
+        menu: "Reset Password"
+        breadcrumb: "Reset Password"
+        link: "Reset Password"
+        done: "Password Reset"

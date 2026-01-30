@@ -25,5 +25,3 @@
     <p>Here is a note from <%= @trade.from_team.name %>:</p>
     <p><%= @trade.note %></p>
 <% end %>
-
-View your trades here: <%= (ENV['BASE_URL'] || 'http://localhost:3000') + '/trade' %> 
