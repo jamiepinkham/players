@@ -27,10 +27,10 @@ const PlayerName = ({ name, bbrefid, bold = false }) => {
       target="_blank"
       rel="noopener noreferrer"
       title="View on Baseball Reference"
+      color="brand"
+      style={{ textDecoration: 'underline' }}
     >
-      <Text weight={bold ? "bold" : "normal"}>
-        {name}
-      </Text>
+      {name}
     </Anchor>
   );
 };
