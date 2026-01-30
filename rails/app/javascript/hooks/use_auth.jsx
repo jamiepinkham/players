@@ -98,26 +98,35 @@ function useProvideAuth() {
     return axios.delete("/users/sign_out", {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
   };
 
-  const changePassword = (password) => {
+  const changePassword = (currentPassword, newPassword) => {
     let config = {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     };
     return axios
       .put(
-        "users/password",
+        "/users/password",
         {
-          new_pass: password,
+          current_password: currentPassword,
+          new_pass: newPassword,
         },
         config
       )
       .then((response) => {
         return response.data;
+      })
+      .catch((error) => {
+        if (error.response && error.response.data) {
+          throw new Error(error.response.data.errors || "Failed to update password");
+        }
+        throw error;
       });
   };
 
@@ -125,6 +134,7 @@ function useProvideAuth() {
     let config = {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     };
     return axios

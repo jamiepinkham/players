@@ -10,8 +10,10 @@ class SessionsController < Devise::SessionsController
             user = User.find_for_database_authentication(username: params[:user][:username])
 
             if user && user.valid_password?(params[:user][:password])
-                self.resource = warden.authenticate!(auth_options)
-                sign_in(resource_name, resource)
+                # Sign in the validated user directly instead of re-authenticating
+                # This ensures the JWT token is generated for the correct user
+                self.resource = user
+                sign_in(resource_name, user)
                 token = current_token
 
                 if token.present?

@@ -1,5 +1,6 @@
 class UsernamesController < ApplicationController
   respond_to :json
+  skip_before_action :verify_authenticity_token, only: [:update]
   before_action :authenticate_user_from_jwt!
 
   # PUT /users/username
