@@ -20,6 +20,7 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         amount
         player {
           name
+          bbrefid
           isTradeEligible
           stats {
             title

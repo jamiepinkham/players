@@ -21,6 +21,7 @@ const PLAYER_CONTRACT_QUERY = `
     player(id: $playerId) {
       id
       name
+      bbrefid
       position
       isTradeEligible
       contract {
@@ -36,6 +37,7 @@ const PLAYER_CONTRACT_QUERY = `
         player {
           id
           name
+          bbrefid
           position
           isTradeEligible
         }

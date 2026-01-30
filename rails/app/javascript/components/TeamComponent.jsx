@@ -8,6 +8,7 @@ import { MailOption } from "grommet-icons";
 
 import TeamBudgetInfo from "./TeamBudgetInfo";
 import { Link } from "react-router-dom";
+import PlayerName from "./PlayerName";
 
 const TEAM_QUERY = `
   query TeamQuery($id: ID!) {
@@ -111,7 +112,12 @@ function TeamComponent(props) {
               header: "Name",
               primary: true,
               sortable: true,
-              render: (contract) => contract.player.name
+              render: (contract) => (
+                <PlayerName
+                  name={contract.player.name}
+                  bbrefid={contract.player.bbrefid}
+                />
+              )
             },
             {
               property: "player.position",
