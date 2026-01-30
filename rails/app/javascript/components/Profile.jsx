@@ -21,7 +21,7 @@ const CURRENT_USER_QUERY = `
 export default function Profile() {
   const auth = useAuth();
   const history = useHistory();
-  const { loading, data } = useQuery(CURRENT_USER_QUERY);
+  const { loading, data, refetch } = useQuery(CURRENT_USER_QUERY);
 
   if (loading) return <Spinner size="medium" alignSelf="center" />;
 
@@ -47,7 +47,7 @@ export default function Profile() {
 
       <Accordion pad="xsmall" multiple={true}>
         <AccordionPanel label={`Change Username${user?.username ? ` (current: ${user.username})` : ''}`}>
-          <UpdateUsernameForm auth={auth} currentUsername={user?.username} />
+          <UpdateUsernameForm auth={auth} currentUsername={user?.username} onSuccess={refetch} />
         </AccordionPanel>
         <AccordionPanel label="Change Password">
           <ResetPasswordForm auth={auth} />

@@ -21,17 +21,22 @@ class ApplicationController < ActionController::Base
     return @current_user if defined?(@current_user)
 
     @current_user = nil
+    puts "DEBUG: Authorization header: #{request.headers['Authorization']}"
     if request.headers['Authorization'].present?
       begin
         jwt = request.headers['Authorization'].split(' ')[1]
+        puts "DEBUG: JWT token: #{jwt[0..20]}..." if jwt
         jwt_secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.secret_key_base
         jwt_payloads = JWT.decode(jwt, jwt_secret)
         jwt_payload = jwt_payloads.first
         @current_user = User.find_by(id: jwt_payload['sub'])
+        puts "DEBUG: User found: #{@current_user&.id}"
       rescue JWT::ExpiredSignature, JWT::VerificationError, JWT::DecodeError => e
-        Rails.logger.warn "JWT authentication failed: #{e.message}"
+        puts "DEBUG: JWT authentication failed: #{e.message}"
         @current_user = nil
       end
+    else
+      puts "DEBUG: No Authorization header present"
     end
     @current_user
   end

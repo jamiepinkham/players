@@ -30,17 +30,19 @@ class PasswordsController < Devise::PasswordsController
     # Handle authenticated user changing their password
     elsif @current_user_id
       user = User.find(@current_user_id)
-      password = params[:new_pass]
-      if user.valid_password?(password)
-        user.password = params[:new_pass]
-        begin
-          user.save
+      current_password = params[:current_password]
+      new_password = params[:new_pass]
+
+      # Validate current password first
+      if user.valid_password?(current_password)
+        user.password = new_password
+        if user.save
           render json: { status: "ok" }
-        rescue
-          render json: { errors: $!}
+        else
+          render json: { errors: user.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end
       else
-        render json: {errors: "invalid password" }
+        render json: { errors: "Current password is incorrect" }, status: :unprocessable_entity
       end
     else
       render json: { errors: "Unauthorized" }, status: :unauthorized
