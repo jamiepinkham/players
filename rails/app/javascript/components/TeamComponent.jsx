@@ -44,15 +44,37 @@ const TEAM_QUERY = `
 `;
 function TeamComponent(props) {
   const { id } = useParams();
-  const { data = { team: null }, refetch: refetchTeams } = useQuery(
+  const { loading, error, data = { team: null }, refetch: refetchTeams } = useQuery(
     TEAM_QUERY,
     {
       variables: { id },
     }
   );
 
+  if (loading) return <Spinner size="medium" />;
+
+  if (error) {
+    console.error("TeamComponent GraphQL Error:", error);
+    console.error("URL param id:", id);
+    console.error("Query variables:", { id });
+    return (
+      <Box pad="medium">
+        <Heading level="3" color="status-error">Error loading team</Heading>
+        <p>Error: {JSON.stringify(error, null, 2)}</p>
+        <p>Team ID from URL: {id || "undefined"}</p>
+      </Box>
+    );
+  }
+
   let { team } = data;
-  if (!team) return <Spinner size="medium" />;
+  if (!team) {
+    return (
+      <Box pad="medium">
+        <Heading level="3">Team not found</Heading>
+        <p>The team you're looking for doesn't exist.</p>
+      </Box>
+    );
+  }
 
   return (
     <Box>
