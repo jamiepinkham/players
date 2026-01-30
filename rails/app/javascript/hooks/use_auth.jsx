@@ -1,8 +1,27 @@
-import React, { useState, useContext, createContext } from "react";
+import React, { useState, useContext, createContext, useEffect } from "react";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 import { ClientContext } from "graphql-hooks";
 import { ResponsiveContext } from "grommet";
+import {
+  getAuthToken,
+  setAuthToken,
+  clearAuthToken,
+  validateToken,
+  redirectToLogin
+} from "../utils/auth";
+
+// Add axios interceptor for 401 responses
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      clearAuthToken();
+      redirectToLogin();
+    }
+    return Promise.reject(error);
+  }
+);
 
 const authContext = createContext();
 
@@ -17,11 +36,41 @@ export const useAuth = () => {
 
 function useProvideAuth() {
   const client = useContext(ClientContext);
-  const localToken = localStorage.getItem("bmpl-token");
+  const localToken = getAuthToken();
   const [token, setToken] = useState(localToken || undefined);
-  const isAdmin = token ? jwt_decode(token).adm == "true" : false;
-  const isSignedIn = token ? (jwt_decode(token) ? true : false) : false;
-  const teamId = token ? jwt_decode(token).tm : undefined;
+  const [isValidating, setIsValidating] = useState(true);
+
+  // Safely decode token with error handling
+  let decodedToken = null;
+  try {
+    if (token) {
+      decodedToken = jwt_decode(token);
+    }
+  } catch (error) {
+    console.error('Invalid JWT token format:', error);
+    // Clear invalid token
+    clearAuthToken();
+    setToken(null);
+  }
+
+  const isAdmin = decodedToken ? decodedToken.adm == "true" : false;
+  const isSignedIn = !!decodedToken;
+  const teamId = decodedToken ? decodedToken.tm : undefined;
+
+  // Validate token on mount
+  useEffect(() => {
+    async function checkAuth() {
+      const currentToken = getAuthToken();
+      if (currentToken) {
+        const valid = await validateToken(currentToken);
+        if (!valid) {
+          setToken(null);
+        }
+      }
+      setIsValidating(false);
+    }
+    checkAuth();
+  }, []);
   const signIn = (username, password) => {
     return axios
       .post("/users/sign_in", {
@@ -33,16 +82,18 @@ function useProvideAuth() {
       .then((response) => {
         if (response.data.jwt) {
           const responseToken = response.data.jwt;
+          // CRITICAL: Save to localStorage BEFORE updating React state
+          // Otherwise React will trigger navigation before token is saved
+          setAuthToken(responseToken);
           setToken(responseToken);
-          localStorage.setItem("bmpl-token", responseToken);
-          client.setHeader("Authorization", `Bearer ${responseToken}`);
           return responseToken;
         }
+        return null;
       });
   };
 
   const signOut = () => {
-    localStorage.clear();
+    clearAuthToken();
     setToken(null);
     return axios.delete("/users/sign_out", {
       headers: {
@@ -125,6 +176,7 @@ function useProvideAuth() {
   return {
     isAdmin,
     isSignedIn,
+    isValidating,
     teamId,
     token,
     signIn,
