@@ -44,15 +44,33 @@ const TEAM_QUERY = `
 `;
 function TeamComponent(props) {
   const { id } = useParams();
-  const { data = { team: null }, refetch: refetchTeams } = useQuery(
+  const { loading, error, data = { team: null }, refetch: refetchTeams } = useQuery(
     TEAM_QUERY,
     {
       variables: { id },
     }
   );
 
+  if (loading) return <Spinner size="medium" />;
+
+  if (error) {
+    return (
+      <Box pad="medium">
+        <Heading level="3" color="status-error">Error loading team</Heading>
+        <p>{error.message || "Failed to load team data. Please try logging in again."}</p>
+      </Box>
+    );
+  }
+
   let { team } = data;
-  if (!team) return <Spinner size="medium" />;
+  if (!team) {
+    return (
+      <Box pad="medium">
+        <Heading level="3">Team not found</Heading>
+        <p>The team you're looking for doesn't exist.</p>
+      </Box>
+    );
+  }
 
   return (
     <Box>
