@@ -104,7 +104,7 @@ function TradeOfferComponent() {
           currentTeamId={teamId}
           initialTeamId={initialTeam?.id}
           initialContract={initialContract}
-          onTradeSubmitted={() => location.reload()}
+          onTradeSubmitted={() => window.location.reload()}
         />
       </AccordionPanel>
     </Accordion>
