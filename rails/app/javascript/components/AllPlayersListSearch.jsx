@@ -7,8 +7,10 @@ import {
   DataTable,
   Pagination,
   Anchor,
+  Button,
 } from 'grommet';
-import { useQuery } from 'graphql-hooks';
+import { FormUp, FormDown } from 'grommet-icons';
+import { useManualQuery } from 'graphql-hooks';
 import { useAuth } from '../hooks/use_auth';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
@@ -16,30 +18,45 @@ import LoadingState from './LoadingState';
 import { DATA_TABLE_THEME } from '../constants/ui';
 
 const PLAYERS_QUERY = `
-query GetPlayers {
-  activePlayers {
-    id
-    bbrefid
-    bbrefMinors
-    name
-    position
-    bbrefStats
-    stats {
-      title
-      value
-    }
-    contract {
-      firstSeason { name }
-      lastSeason { name }
-      active
-      franchise
-      summer
-      amount
-      team {
-        id
-        name
+query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $position: String, $status: String, $sortDirection: String) {
+  activePlayersPaginated(
+    page: $page
+    perPage: $perPage
+    nameSearch: $nameSearch
+    position: $position
+    status: $status
+    sortDirection: $sortDirection
+  ) {
+    players {
+      id
+      bbrefid
+      bbrefMinors
+      name
+      position
+      bbrefStats
+      stats {
+        title
+        value
+      }
+      contract {
+        firstSeason { name }
+        lastSeason { name }
+        active
+        franchise
+        summer
+        amount
+        team {
+          id
+          name
+        }
       }
     }
+    totalCount
+    totalPages
+    currentPage
+    perPage
+    hasNextPage
+    hasPreviousPage
   }
   currentSeason {
     id
@@ -52,31 +69,15 @@ query GetPlayers {
 }
 `;
 
-// Helper function to get contract status for sorting and display
-function getContractStatus(player) {
-  const hasStats = player.stats && player.stats.length > 0;
-
-  if (player.contract) {
-    return 'Under Contract';
-  } else if (hasStats) {
-    return 'Free Agent';
-  } else {
-    return 'Ineligible';
-  }
-}
-
 const AllPlayersListSearch = () => {
   const auth = useAuth();
-  const { loading, error, data } = useQuery(PLAYERS_QUERY);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [positionFilter, setPositionFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortDirection, setSortDirection] = useState('asc');
   const itemsPerPage = 25;
-
-  const hasActiveFAPeriod = data?.currentSeason?.activeFreeAgencyPeriod != null;
-  const hasTeam = auth?.teamId != null;
 
   // Debounce search input with 300ms delay
   useEffect(() => {
@@ -87,44 +88,72 @@ const AllPlayersListSearch = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, positionFilter, statusFilter]);
+  }, [search, positionFilter, statusFilter, sortDirection]);
 
-  // Memoize players with lowercased names for efficient filtering
-  const playersWithLowerNames = useMemo(() => {
-    if (!data?.activePlayers) return [];
-    return data.activePlayers.map((player) => ({
-      ...player,
-      lowerName: player.name.toLowerCase(),
-    }));
-  }, [data?.activePlayers]);
+  // Map position filter label to server-side position value
+  const getPositionValue = (filter) => {
+    if (!filter || !filter.value) return '';
+    // Map the filter values to the position values expected by the server
+    const positionMap = {
+      'SP': 'SP',
+      'RP': 'RP',
+      '2': 'C',
+      '3': '1B',
+      '4': '2B',
+      '5': '3B',
+      '6': 'SS',
+      '7': 'OF',
+      '8': 'OF',
+      '9': 'OF',
+      'D': 'DH',
+    };
+    return positionMap[filter.value] || filter.value;
+  };
 
-  const filteredPlayers = useMemo(() => {
-    if (!playersWithLowerNames.length) return [];
-    const searchLower = search.toLowerCase();
+  const [fetchPlayers, { loading, error, data }] = useManualQuery(PLAYERS_QUERY);
 
-    let filtered = playersWithLowerNames.filter((player) => {
-      const nameMatch = player.lowerName.includes(searchLower);
-      const positionMatch =
-        !positionFilter || !positionFilter.value || player?.position?.match(positionFilter.value);
-      const statusMatch =
-        !statusFilter || !statusFilter.value || getContractStatus(player) === statusFilter.value;
-      return nameMatch && positionMatch && statusMatch;
+  // Fetch data whenever variables change
+  useEffect(() => {
+    fetchPlayers({
+      variables: {
+        page: currentPage,
+        perPage: itemsPerPage,
+        nameSearch: search,
+        position: getPositionValue(positionFilter),
+        status: statusFilter?.value || '',
+        sortDirection: sortDirection,
+      },
     });
+  }, [sortDirection, currentPage, search, positionFilter, statusFilter]);
 
-    return filtered;
-  }, [playersWithLowerNames, search, positionFilter, statusFilter]);
+  // Handle column header click for sorting (name only)
+  const handleSort = () => {
+    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  };
 
-  // Paginate filtered results
-  const paginatedPlayers = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredPlayers.slice(startIndex, endIndex);
-  }, [filteredPlayers, currentPage, itemsPerPage]);
+  const hasActiveFAPeriod = data?.currentSeason?.activeFreeAgencyPeriod != null;
+  const hasTeam = auth?.teamId != null;
 
-  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+  const players = data?.activePlayersPaginated?.players || [];
+  const totalCount = data?.activePlayersPaginated?.totalCount || 0;
+  const totalPages = data?.activePlayersPaginated?.totalPages || 0;
+
+  // Helper to render sortable column header (name only)
+  const renderSortableHeader = (label) => (
+    <Button
+      plain
+      onClick={handleSort}
+      hoverIndicator
+    >
+      <Box direction="row" align="center" gap="xsmall">
+        <Text weight="bold">{label}</Text>
+        {sortDirection === 'asc' ? <FormUp size="small" /> : <FormDown size="small" />}
+      </Box>
+    </Button>
+  );
 
   const uniquePositions = [
     { label: 'All Positions', value: '' },
@@ -179,12 +208,12 @@ const AllPlayersListSearch = () => {
 
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'small' }}>
         <Text size="small" color="dark-4">
-          Showing {paginatedPlayers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
-          {Math.min(currentPage * itemsPerPage, filteredPlayers.length)} of {filteredPlayers.length} players
+          Showing {players.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+          {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} players
         </Text>
         {totalPages > 1 && (
           <Pagination
-            numberItems={filteredPlayers.length}
+            numberItems={totalCount}
             page={currentPage}
             step={itemsPerPage}
             onChange={({ page }) => setCurrentPage(page)}
@@ -197,7 +226,7 @@ const AllPlayersListSearch = () => {
           columns={[
           {
             property: 'name',
-            header: "Name",
+            header: renderSortableHeader('Name'),
             primary: true,
             render: (player) => <PlayerName name={player.name} bbrefid={player.bbrefid} bold />,
           },
@@ -254,7 +283,7 @@ const AllPlayersListSearch = () => {
             },
           },
         ]}
-        data={paginatedPlayers}
+        data={players}
         background={DATA_TABLE_THEME.background}
         />
       </Box>
@@ -262,7 +291,7 @@ const AllPlayersListSearch = () => {
       {totalPages > 1 && (
         <Box align="center" margin={{ top: 'medium' }}>
           <Pagination
-            numberItems={filteredPlayers.length}
+            numberItems={totalCount}
             page={currentPage}
             step={itemsPerPage}
             onChange={({ page }) => setCurrentPage(page)}

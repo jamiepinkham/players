@@ -51,6 +51,31 @@ class Player < ApplicationRecord
      left_outer_joins(:contracts)
        .where(stats_present.or(contract_active))
        .select('DISTINCT ON (players.bbrefid) players.*')
+   }
+
+   scope :filter_by_status, ->(status, season_id) {
+     return all if status.blank?
+
+     case status
+     when 'Under Contract'
+       # Players with an active contract for the current season
+       # Use WHERE to filter the already-joined contracts from with_stats_or_current_contract
+       where('contracts.active = ? AND contracts.first_season_id <= ? AND contracts.last_season_id >= ?',
+             true, season_id, season_id)
+     when 'Free Agent'
+       # Players with valid stats but NO active contract for the current season
+       # Since with_stats_or_current_contract already joined contracts, we just filter
+       # for rows where contract is NULL or not active for current season
+       where('contracts.id IS NULL OR contracts.active = ? OR contracts.first_season_id > ? OR contracts.last_season_id < ?',
+             false, season_id, season_id)
+     when 'Ineligible'
+       # Players without valid stats and no active contract
+       # Since with_stats_or_current_contract only returns players WITH stats or contracts,
+       # ineligible players won't be in the result set
+       none
+     else
+       all
+     end
    } 
 
   def is_free_agent?
@@ -74,7 +99,9 @@ class Player < ApplicationRecord
   class << self
 
     def search_name(name)
-      Player.where("lower(name) LIKE '%#{name.downcase}%'")
+      return all if name.blank?
+      sanitized = sanitize_sql_like(name.downcase)
+      Player.where("lower(name) LIKE ?", "%#{sanitized}%")
     end
 
     def match_string_for_position(position)
