@@ -1,7 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
+import { getAuthToken, validateToken } from "../utils/auth";
 import axios from "axios";
+import { useQuery } from "graphql-hooks";
 
 import PrivateRoute from "./PrivateRoute";
 import TeamsList from "./TeamsList";
@@ -27,10 +29,73 @@ import {
   History
 } from "grommet-icons";
 
+const NOTIFICATIONS_QUERY = `
+  query NotificationsQuery($teamId: ID!) {
+    trades(team: $teamId) {
+      id
+    }
+    currentSeason {
+      activeFreeAgencyPeriod {
+        bids(teamId: $teamId, active: true) {
+          id
+        }
+      }
+    }
+  }
+`;
+
 
 export default function App(props) {
   const auth = useAuth();
   const history = useHistory();
+  const location = useLocation();
+
+  // Query for pending trades and active bids to show notification dots
+  // Poll every 10 seconds to keep dots updated
+  const { data: notificationsData, refetch: refetchNotifications } = useQuery(NOTIFICATIONS_QUERY, {
+    variables: { teamId: auth.teamId },
+    skip: !auth.teamId || !auth.isSignedIn,
+    skipCache: true,
+  });
+
+  // Poll every 30 seconds to catch any missed updates
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      const interval = setInterval(() => {
+        refetchNotifications();
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Refetch notifications when navigating to update immediately
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      refetchNotifications();
+    }
+  }, [location.pathname, auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Listen for trade/bid updates and refetch immediately
+  useEffect(() => {
+    const handleTradeUpdate = () => {
+      if (refetchNotifications) {
+        refetchNotifications();
+      }
+    };
+
+    window.addEventListener('tradeUpdated', handleTradeUpdate);
+    window.addEventListener('bidPlaced', handleTradeUpdate);
+
+    return () => {
+      window.removeEventListener('tradeUpdated', handleTradeUpdate);
+      window.removeEventListener('bidPlaced', handleTradeUpdate);
+    };
+  }, [refetchNotifications]);
+
+  const hasPendingTrades = notificationsData?.trades?.length > 0;
+  const hasActiveBids = notificationsData?.currentSeason?.activeFreeAgencyPeriod?.bids?.length > 0;
+
   const handleOnClick = useCallback(
     (page) => {
       history.push(`/${page}`);
@@ -39,56 +104,144 @@ export default function App(props) {
   );
 
   const handleAdminClick = useCallback(async () => {
+    // Get fresh token from localStorage
+    const token = getAuthToken();
+
+    if (!token) {
+      alert('You must be logged in to access admin.');
+      history.push('/sign_in');
+      return;
+    }
+
+    // Validate token before navigating to admin
+    const isValid = await validateToken(token);
+
+    if (!isValid) {
+      alert('Your session has expired. Please log in again.');
+      history.push('/sign_in');
+      return;
+    }
+
     // Navigate to admin_login endpoint which will handle session creation and redirect
-    window.location.href = `/admin_login?token=${auth.token}`;
-  }, [auth.token]);
+    window.location.href = `/admin_login?token=${token}`;
+  }, [history]);
   return (
     <Box>
-      <Header background="brand" pad="small">
-        <Heading level="2">BMPL</Heading>
+      <Header
+        background="brand"
+        pad={{ horizontal: "medium", vertical: "xsmall" }}
+        round={{ corner: "bottom", size: "small" }}
+        elevation="small"
+      >
+        <Heading level="2" color="white" margin="none">BMPL</Heading>
         {auth.isSignedIn && (
-          <Nav direction="row" pad="medium">
-            <Anchor
-              icon={<List />}
-              hoverIndicator
-              label="Teams"
-              onClick={() => handleOnClick("teams")}
-            />
-            <Anchor
-              icon={<Currency />}
-              hoverIndicator
-              label="Bidding"
-              onClick={() => handleOnClick("bidding")}
-            />
-            <Anchor
-              icon={<Sync />}
-              hoverIndicator
-              label="Trade"
-              onClick={() => handleOnClick("trade")}
-            />
-            <Anchor
-              icon={<History />}
-              hoverIndicator
-              label="All Trades"
-              onClick={() => handleOnClick("trades")}
-            />
-            <Anchor
-              hoverIndicator
-              icon={<Search />}
-              label="Player Search"
-              onClick={() => handleOnClick("player_search")}
-            />
-            <Anchor
-              icon={<UserSettings />}
-              hoverIndicator
-              label="Settings"
-              onClick={() => handleOnClick("profile")}
-            />
+          <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
+            <Box
+              border={location.pathname.startsWith("/team") ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<List />}
+                hoverIndicator
+                label="Teams"
+                color="white"
+                onClick={() => handleOnClick("teams")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/bidding" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={
+                  <Box style={{ position: 'relative' }}>
+                    <Currency />
+                    {hasActiveBids && (
+                      <Box
+                        background="status-error"
+                        round="full"
+                        style={{
+                          position: 'absolute',
+                          top: '-4px',
+                          right: '-4px',
+                          width: '8px',
+                          height: '8px',
+                        }}
+                      />
+                    )}
+                  </Box>
+                }
+                hoverIndicator
+                label="Bidding"
+                color="white"
+                onClick={() => handleOnClick("bidding")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/trade" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={
+                  <Box style={{ position: 'relative' }}>
+                    <Sync />
+                    {hasPendingTrades && (
+                      <Box
+                        background="status-error"
+                        round="full"
+                        style={{
+                          position: 'absolute',
+                          top: '-4px',
+                          right: '-4px',
+                          width: '8px',
+                          height: '8px',
+                        }}
+                      />
+                    )}
+                  </Box>
+                }
+                hoverIndicator
+                label="Trade"
+                color="white"
+                onClick={() => handleOnClick("trade")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/trades" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<History />}
+                hoverIndicator
+                label="All Trades"
+                color="white"
+                onClick={() => handleOnClick("trades")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/player_search" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                hoverIndicator
+                icon={<Search />}
+                label="Player Search"
+                color="white"
+                onClick={() => handleOnClick("player_search")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/profile" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<UserSettings />}
+                hoverIndicator
+                label="Settings"
+                color="white"
+                onClick={() => handleOnClick("profile")}
+              />
+            </Box>
             {auth.isAdmin && (
               <Anchor
                 icon={<UserAdmin />}
                 hoverIndicator
                 label="Admin"
+                color="white"
                 onClick={handleAdminClick}
               />
             )}
@@ -102,13 +255,13 @@ export default function App(props) {
             <Route exact path="/sign_in" component={SessionLogin} />
             <Route exact path="/forgot" component={ForgotPasswordForm} />
             <Route path="/reset/:token" component={ChangePassword} />
-            <Route path="/player_search" component={AllPlayersListSearch} />
-            <Route exact path="/teams" component={TeamsList} />
-            <Route exact path="/team/:id" component={TeamComponent} />
+            <PrivateRoute path="/player_search" component={AllPlayersListSearch} />
+            <PrivateRoute exact path="/teams" component={TeamsList} />
+            <PrivateRoute exact path="/team/:id" component={TeamComponent} />
             <PrivateRoute exact path="/profile" component={Profile} />
             <PrivateRoute exact path="/bidding" component={Bidding} />
             <PrivateRoute exact path='/trade' component={TradeOfferComponent} />
-            <Route exact path="/trades" component={CompletedTrades} />
+            <PrivateRoute exact path="/trades" component={CompletedTrades} />
             <Route path="*">
               <NoMatch />
             </Route>

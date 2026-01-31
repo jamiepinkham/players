@@ -3,6 +3,8 @@ import { useQuery } from "graphql-hooks";
 import { Text, Spinner, List, CheckBox, Box, FormField, DataTable } from "grommet";
 
 import CurrencyFormat from "react-currency-format";
+import PlayerName from "../PlayerName";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 const TEAM_CONTRACTS_QUERY = `
 query TradingConsoleTeamContractsQuery($teamId: ID!)  {
@@ -21,6 +23,7 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         amount
         player {
           name
+          bbrefid
           isTradeEligible
           stats {
             title
@@ -46,9 +49,10 @@ function TeamContractList({ team, onContractChecked }) {
   if (!data.team) return <Spinner size="medium" alignSelf="center" />;
 
   return (
-    <DataTable
-      primaryKey='id'
-      background={['light-1', 'light-2']}
+    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <DataTable
+        primaryKey='id'
+        background={DATA_TABLE_THEME.background}
       data={
         data.team.currentContracts.sort((lhs, rhs) => {
           if (lhs.player.name.toUpperCase() > rhs.player.name.toUpperCase()) {
@@ -61,31 +65,32 @@ function TeamContractList({ team, onContractChecked }) {
       columns={[
         {
           sortable: true,
-          header: <Text>Player</Text>,
+          header: "Player",
           property: 'player.name',
           render: item => (
-            <CheckBox label={item.player.name} value={item.id} disabled={!item.player.isTradeEligible} onChange={(change) => {
+            <CheckBox label={<PlayerName name={item.player.name} bbrefid={item.player.bbrefid} />} value={item.id} disabled={!item.player.isTradeEligible} onChange={(change) => {
               onContractChecked(item, change.target.checked)
             }} />
           )
         },
         {
           property: 'amount',
-          header: <Text>Annual Contract Amount</Text>,
+          header: "Annual Contract Amount",
           render: item => (
-            <CurrencyFormat 
-              value={item.amount} 
-              displayType={"text"} 
-              thousandSeparator={true} 
+            <CurrencyFormat
+              value={item.amount}
+              displayType={"text"}
+              thousandSeparator={true}
               prefix={"$"} />
           )
         },
         {
           property: 'lastSeason.name',
-          header: <Text>Contract Final Season</Text>
+          header: "Contract Final Season"
         }
       ]}
-    />
+      />
+    </Box>
   );
 }
 

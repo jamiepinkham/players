@@ -23,12 +23,20 @@ class Bid < ApplicationRecord
   scope :leading, -> { where(is_leading: true) }
   scope :active, -> { where(is_active: true) }
 
+  def first_season_with_fallback
+    first_season || Season.order(:id).first
+  end
+
+  def last_season_with_fallback
+    last_season || Season.order(:id).first
+  end
+
   def season
     free_agency_period.season
   end
 
   def contract_length
-    first_season.count_seasons_to(last_season)
+    first_season_with_fallback.count_seasons_to(last_season_with_fallback)
   end
 
   def total_amount

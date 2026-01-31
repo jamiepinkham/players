@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "graphql-hooks";
 import { useLocation } from "react-router-dom";
-import { Spinner, Accordion, AccordionPanel } from "grommet";
+import { Spinner, Tabs, Tab, Box, Heading, Paragraph } from "grommet";
 import { useAuth } from "../../../hooks/use_auth";
 import PendingTrades from "../PendingTrades";
 import SplitScreenTradeBuilder from "./SplitScreenTradeBuilder";
@@ -21,6 +21,7 @@ const PLAYER_CONTRACT_QUERY = `
     player(id: $playerId) {
       id
       name
+      bbrefid
       position
       isTradeEligible
       contract {
@@ -36,6 +37,7 @@ const PLAYER_CONTRACT_QUERY = `
         player {
           id
           name
+          bbrefid
           position
           isTradeEligible
         }
@@ -45,11 +47,24 @@ const PLAYER_CONTRACT_QUERY = `
 `;
 
 function TradeOfferComponent() {
-  const teamId = useAuth().teamId;
+  const { teamId } = useAuth();
   const location = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [initialTeam, setInitialTeam] = useState(null);
   const [initialContract, setInitialContract] = useState(null);
+
+  // Check if user has a team assigned
+  if (!teamId) {
+    return (
+      <Box pad="large" align="center">
+        <Heading level={3}>Team Required</Heading>
+        <Paragraph textAlign="center">
+          You must be assigned to a team to access the trade feature.
+          Please contact your league administrator.
+        </Paragraph>
+      </Box>
+    );
+  }
 
   // Parse query params for player_id
   const searchParams = new URLSearchParams(location.search);
@@ -74,27 +89,35 @@ function TradeOfferComponent() {
     if (playerData?.player?.contract?.team) {
       setInitialTeam(playerData.player.contract.team);
       setInitialContract(playerData.player.contract);
-      // Open the "Propose New Trade" panel
-      setActiveIndex([1]);
+      // Open the "Propose New Trade" tab
+      setActiveIndex(1);
     }
   }, [playerData]);
 
   if (!data.teams) return <Spinner size="medium" alignSelf="center" />;
   return (
-    <Accordion multiple={true} activeIndex={activeIndex} onActive={(index) => setActiveIndex(index)}>
-      <AccordionPanel label='Pending Trades' background='light-2'>
-        <PendingTrades />
-      </AccordionPanel>
-      <AccordionPanel label='Propose New Trade' background='light-2'>
-        <SplitScreenTradeBuilder
-          teams={data.teams}
-          currentTeamId={teamId}
-          initialTeamId={initialTeam?.id}
-          initialContract={initialContract}
-          onTradeSubmitted={() => location.reload()}
-        />
-      </AccordionPanel>
-    </Accordion>
+    <Box fill>
+      <Tabs
+        activeIndex={activeIndex}
+        onActive={(index) => setActiveIndex(index)}
+        justify="start"
+      >
+        <Tab title='Pending Trades'>
+          <Box pad="medium">
+            <PendingTrades />
+          </Box>
+        </Tab>
+        <Tab title='Propose New Trade'>
+          <SplitScreenTradeBuilder
+            teams={data.teams}
+            currentTeamId={teamId}
+            initialTeamId={initialTeam?.id}
+            initialContract={initialContract}
+            onTradeSubmitted={() => window.location.reload()}
+          />
+        </Tab>
+      </Tabs>
+    </Box>
   );
 }
 

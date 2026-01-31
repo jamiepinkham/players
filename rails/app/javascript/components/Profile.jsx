@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/use_auth";
 import { useHistory } from "react-router";
 import { useQuery } from "graphql-hooks";
 
-import { Accordion, AccordionPanel, Box, Button, Heading, Spinner, Text } from "grommet";
+import { Tabs, Tab, Box, Button, Heading, Spinner, Text } from "grommet";
 
 import ResetPasswordForm from "./ResetPasswordForm";
 import UpdateUsernameForm from "./UpdateUsernameForm";
@@ -13,7 +13,16 @@ const CURRENT_USER_QUERY = `
     currentUser {
       id
       username
-      name
+      team {
+        id
+        name
+        teamEmails {
+          id
+          email
+          primary
+          receiveTradeNotifications
+        }
+      }
     }
   }
 `;
@@ -21,7 +30,7 @@ const CURRENT_USER_QUERY = `
 export default function Profile() {
   const auth = useAuth();
   const history = useHistory();
-  const { loading, data } = useQuery(CURRENT_USER_QUERY);
+  const { loading, data, refetch } = useQuery(CURRENT_USER_QUERY);
 
   if (loading) return <Spinner size="medium" alignSelf="center" />;
 
@@ -29,43 +38,78 @@ export default function Profile() {
 
   return (
     <Box direction="column" gap="medium" pad={{ vertical: "medium" }}>
-      <Heading level={2} margin={{ top: "none", bottom: "small" }}>
-        Profile
-      </Heading>
-
-      <Box background="light-2" pad="medium" round="small" gap="xsmall">
-        {user?.name && (
-          <Text size="large" weight="bold">
-            {user.name}
-          </Text>
-        )}
+      <Box
+        background="light-1"
+        pad="medium"
+        round="small"
+        gap="small"
+        elevation="small"
+        border={{
+          side: "all",
+          color: "border",
+          size: "xsmall",
+        }}
+      >
         <Box direction="row" gap="xsmall">
           <Text weight="bold">Username:</Text>
           <Text>{user?.username}</Text>
         </Box>
+        <Box direction="row" gap="xsmall">
+          <Text weight="bold">Team:</Text>
+          <Text>{user?.team?.name || "N/A"}</Text>
+        </Box>
+        {user?.team && (
+          <Box gap="xsmall">
+            <Text weight="bold">Team Emails:</Text>
+            {user.team.teamEmails && user.team.teamEmails.length > 0 ? (
+              <Box pad={{ left: "small" }} gap="xxsmall">
+                {user.team.teamEmails.map((teamEmail) => (
+                  <Box key={teamEmail.id} direction="row" gap="xsmall" align="center">
+                    <Text>{teamEmail.email}</Text>
+                    {teamEmail.primary && (
+                      <Text size="xsmall" color="brand" weight="bold">(Primary)</Text>
+                    )}
+                    {teamEmail.receiveTradeNotifications && (
+                      <Text size="xsmall" color="status-ok">(Trade Notifications)</Text>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Text pad={{ left: "small" }} color="status-critical">No emails configured</Text>
+            )}
+          </Box>
+        )}
+        <Box pad={{ top: "small" }} border={{ side: "top", color: "light-4" }}>
+          <Button
+            href="/sign_in"
+            label="Sign Out"
+            onClick={() => {
+              auth.signOut().then(() => {
+                history.push("/");
+              });
+            }}
+            alignSelf="start"
+          />
+        </Box>
       </Box>
 
-      <Accordion pad="xsmall" multiple={true}>
-        <AccordionPanel label={`Change Username${user?.username ? ` (current: ${user.username})` : ''}`}>
-          <UpdateUsernameForm auth={auth} currentUsername={user?.username} />
-        </AccordionPanel>
-        <AccordionPanel label="Change Password">
-          <ResetPasswordForm auth={auth} />
-        </AccordionPanel>
-      </Accordion>
-
-      <Box pad={{ top: "medium" }} border={{ side: "top", color: "light-4" }}>
-        <Button
-          href="/sign_in"
-          label="Sign Out"
-          onClick={() => {
-            auth.signOut().then(() => {
-              history.push("/");
-            });
-          }}
-          alignSelf="start"
-        />
-      </Box>
+      <Tabs justify="start">
+        <Tab title="Change Username">
+          <Box pad="medium" gap="small">
+            <Box direction="row" gap="xsmall">
+              <Text weight="bold">Current username:</Text>
+              <Text>{user?.username}</Text>
+            </Box>
+            <UpdateUsernameForm auth={auth} currentUsername={user?.username} onSuccess={refetch} />
+          </Box>
+        </Tab>
+        <Tab title="Change Password">
+          <Box pad="medium">
+            <ResetPasswordForm auth={auth} />
+          </Box>
+        </Tab>
+      </Tabs>
     </Box>
   );
 }

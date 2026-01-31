@@ -11,6 +11,7 @@ import {
   Anchor
 } from "grommet";
 import CurrencyFormat from "react-currency-format";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 const POSITION_PLAYER_LIST_QUERY = `
 query PositionPlayerListQuery($position: String!) {
@@ -77,38 +78,35 @@ const PlayerPositionSearchTable = ({ position }) => {
           }}
           disabled={loading} />
 
-      <DataTable
-        placeholder={loading ? "Loading" : ""}
-        sortable={false}
-        fill
-        border
-        background={{
-          header: "dark-2",
-          body: ["white", "light-2"],
-        }}
+      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+        <DataTable
+          placeholder={loading ? "Loading" : ""}
+          sortable={false}
+          fill
+          background={DATA_TABLE_THEME.background}
         primaryKey="id"
         columns={[
           {
             property: 'name',
-            header: <Text>Name</Text>,
+            header: "Name",
             render: (player) => (
               <Anchor href={player.bbrefLink} label={player.name} target="_blank" />
             )
           },
           {
             property: 'position',
-            header: <Text>Position</Text>
+            header: "Position"
           },
           {
             property: 'contract.lastSeason.name',
-            header: <Text>Contract Ends</Text>,
+            header: "Contract Ends",
             render: (player) => (
               <Text>{player.contract ? player.contract.lastSeason.name : "Free Agent"}</Text>
             )
           },
           {
             property: 'contract.amount',
-            header: <Text>Amount</Text>,
+            header: "Amount",
             render: (player) => (
               <CurrencyFormat
                 value={player.contract ? player.contract.amount : "0"}
@@ -120,7 +118,7 @@ const PlayerPositionSearchTable = ({ position }) => {
           },
           {
             property: 'contract.team.name',
-            header: <Text>Team</Text>,
+            header: "Team",
             render: (player) => (
               <Text>{player.contract ? player.contract.team.name : "No team"}</Text>
             )
@@ -131,5 +129,6 @@ const PlayerPositionSearchTable = ({ position }) => {
           return player.name.toLowerCase().includes(searchTerm.toLowerCase())
         })} />
       </Box>
+    </Box>
   )
 }

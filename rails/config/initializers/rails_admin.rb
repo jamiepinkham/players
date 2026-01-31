@@ -1,10 +1,12 @@
 require 'rails_admin/import_free_agents'
 require 'rails_admin/import_summer_draft'
 require 'rails_admin/deactivate_contracts'
+require 'rails_admin/reset_user_password'
 
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateContracts)
+RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ResetUserPassword)
 
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
@@ -61,6 +63,9 @@ RailsAdmin.config do |config|
     import_summer_draft
     deactivate_contracts
 
+    ## Custom member actions
+    reset_user_password
+
     ## With an audit adapter, you can add:
     # history_index
     # history_show
@@ -80,7 +85,10 @@ RailsAdmin.config do |config|
       field :created_at
     end
     edit do
-      field :player
+      field :player do
+        associated_collection_cache_all false
+        help 'Type to search for players'
+      end
       field :team
       field :annual_amount
       field :is_active
@@ -105,7 +113,10 @@ RailsAdmin.config do |config|
     edit do
       field :amount
       field :team
-      field :player
+      field :player do
+        associated_collection_cache_all false
+        help 'Type to search for players'
+      end
       field :active
       field :summer
       field :franchise
@@ -136,7 +147,10 @@ RailsAdmin.config do |config|
       field :bbrefid
       field :position
       field :bbref_minors
-      field :bbref_stats
+      field :bbref_stats do
+        searchable false
+        queryable false
+      end
       field :contract
       field :leading_bid
     end

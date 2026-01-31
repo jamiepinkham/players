@@ -51,7 +51,6 @@ export default function ForgotPasswordForm() {
               <TextInput
                 id="username"
                 name="username"
-                icon={<MailOption />}
                 placeholder="username"
                 value={value.username}
               />

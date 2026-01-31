@@ -2,12 +2,15 @@ import React from "react";
 import { useQuery } from "graphql-hooks";
 import { useParams } from "react-router";
 import CurrencyFormat from "react-currency-format";
-import { Grid, Heading, Spinner, Box, DataTable, CheckBox, List } from "grommet";
+import { Grid, Heading, Box, DataTable, CheckBox, List, Text } from "grommet";
 
 import { MailOption } from "grommet-icons";
 
 import TeamBudgetInfo from "./TeamBudgetInfo";
 import { Link } from "react-router-dom";
+import PlayerName from "./PlayerName";
+import LoadingState from "./LoadingState";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 const TEAM_QUERY = `
   query TeamQuery($id: ID!) {
@@ -44,44 +47,67 @@ const TEAM_QUERY = `
 `;
 function TeamComponent(props) {
   const { id } = useParams();
-  const { data = { team: null }, refetch: refetchTeams } = useQuery(
+  const { loading, error, data = { team: null }, refetch: refetchTeams } = useQuery(
     TEAM_QUERY,
     {
       variables: { id },
     }
   );
 
+  if (loading) return <LoadingState message="Loading team data..." />;
+
+  if (error) {
+    return (
+      <Box pad="medium">
+        <Heading level="3" color="status-error">Error loading team</Heading>
+        <p>{error.message || "Failed to load team data. Please try logging in again."}</p>
+      </Box>
+    );
+  }
+
   let { team } = data;
-  if (!team) return <Spinner size="medium" />;
+  if (!team) {
+    return (
+      <Box pad="medium">
+        <Heading level="3">Team not found</Heading>
+        <p>The team you're looking for doesn't exist.</p>
+      </Box>
+    );
+  }
 
   return (
     <Box>
       <Box
-        gap="xxsmall"
+        gap="small"
         pad="small"
         elevation="small"
+        background="light-1"
+        round="small"
         border={{
           side: "all",
           color: "border",
           size: "xsmall",
         }}
       >
-              <Heading level="3" margin="none">
-                {team.name}
-              </Heading>
-              {team.user && team.primaryEmail && (
-                <a href={`mailto:${team.primaryEmail}`}>
-                  <MailOption />
-                  {team.user.name}
-                </a>
-              )}
-              <Heading level="4">
-                {team.stadium}
-              </Heading>
-            
-          <TeamBudgetInfo team={team} />
+        <Box direction="row" justify="between" align="center">
+          <Box gap="xxsmall">
+            <Heading level="3" margin="none">
+              {team.name}
+            </Heading>
+            <Text size="small" color="text-weak">{team.stadium}</Text>
+          </Box>
+          {team.user && team.primaryEmail && (
+            <Box direction="row" gap="xxsmall" align="center">
+              <a href={`mailto:${team.primaryEmail}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <MailOption size="small" />
+                <Text size="small">{team.user.name}</Text>
+              </a>
+            </Box>
+          )}
         </Box>
-      <Box gridArea="players" background="light-2" pad="xsmall">
+        <TeamBudgetInfo team={team} />
+      </Box>
+      <Box margin={{ top: "medium" }} round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
         <DataTable
           columns={[
             {
@@ -89,7 +115,12 @@ function TeamComponent(props) {
               header: "Name",
               primary: true,
               sortable: true,
-              render: (contract) => contract.player.name
+              render: (contract) => (
+                <PlayerName
+                  name={contract.player.name}
+                  bbrefid={contract.player.bbrefid}
+                />
+              )
             },
             {
               property: "player.position",
@@ -137,11 +168,7 @@ function TeamComponent(props) {
           data={team.currentContracts}
           sortable={true}
           fill
-          border
-          background={{
-            header: "dark-2",
-            body: ["white", "light-2"],
-          }}
+          background={DATA_TABLE_THEME.background}
         />
       </Box>
       </Box>

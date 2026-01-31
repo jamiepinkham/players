@@ -5,78 +5,144 @@ import { Box, Form, FormField, TextInput, Button, Text } from "grommet";
 import { Lock } from "grommet-icons";
 
 export default function ResetPasswordForm({ auth }) {
-  const validateLength = (field, value) => {
-    if (value.newPassword.length > 0 && value.newPassword.length < 8) {
-      return "not long enough";
-    }
-    return "";
-  };
-
   const [formState, setFormState] = useState({
+    currentPassword: "",
     newPassword: "",
     newPasswordConfirm: "",
     errorMessage: "",
-    passwordValid: false,
-    formValid: false,
+    successMessage: "",
   });
+
+  const validatePasswordMatch = (passwordConfirm) => {
+    if (formState.newPassword && passwordConfirm) {
+      if (formState.newPassword !== passwordConfirm) {
+        return "Passwords do not match";
+      }
+    }
+    return undefined;
+  };
+
+  const validatePasswordLength = (password) => {
+    if (password && password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    return undefined;
+  };
+
+  const isFormValid = () => {
+    return (
+      formState.currentPassword.length > 0 &&
+      formState.newPassword.length >= 8 &&
+      formState.newPassword === formState.newPasswordConfirm
+    );
+  };
+
   return (
     <Box pad="medium">
       <Form
         validate="change"
         value={formState}
         onChange={(nextValue) => {
-          setFormState(nextValue);
+          setFormState({ ...nextValue, errorMessage: "", successMessage: "" });
         }}
         onReset={() =>
           setFormState({
+            currentPassword: "",
             newPassword: "",
             newPasswordConfirm: "",
-            formErrors: { password: "" },
-            passwordValid: false,
-            formValid: false,
+            errorMessage: "",
+            successMessage: "",
           })
         }
         onSubmit={({ value }) => {
-          auth.changePassword(value.newPassword);
+          auth
+            .changePassword(value.currentPassword, value.newPassword)
+            .then((response) => {
+              if (response && response.status === "ok") {
+                setFormState({
+                  currentPassword: "",
+                  newPassword: "",
+                  newPasswordConfirm: "",
+                  errorMessage: "",
+                  successMessage: "Password updated successfully!",
+                });
+              } else {
+                setFormState({
+                  ...formState,
+                  errorMessage: response?.errors || "Failed to update password",
+                  successMessage: "",
+                });
+              }
+            })
+            .catch((error) => {
+              setFormState({
+                ...formState,
+                errorMessage: error.message || "Failed to update password",
+                successMessage: "",
+              });
+            });
         }}
       >
-        <FormField name="new-password-input-id" htmlFor="new-password-input-id">
+        <FormField
+          name="currentPassword"
+          htmlFor="currentPassword"
+          label="Current Password"
+        >
+          <TextInput
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            required
+            placeholder="current password"
+            value={formState.currentPassword}
+          />
+        </FormField>
+        <FormField
+          name="newPassword"
+          htmlFor="newPassword"
+          label="New Password"
+          validate={validatePasswordLength}
+        >
           <TextInput
             type="password"
             id="newPassword"
             name="newPassword"
-            icon={<Lock />}
             pattern=".{8,}"
             required
             title="8 characters minimum"
-            placeholder="password"
+            placeholder="new password"
             value={formState.newPassword}
           />
         </FormField>
         <FormField
-          name="password-confirm-input-id"
-          htmlFor="password-confirm-input-id"
-          validate={validateLength}
+          name="newPasswordConfirm"
+          htmlFor="newPasswordConfirm"
+          label="Confirm New Password"
+          validate={validatePasswordMatch}
         >
           <TextInput
             type="password"
             id="newPasswordConfirm"
             name="newPasswordConfirm"
-            icon={<Lock />}
             required
-            placeholder="again"
+            placeholder="confirm new password"
             value={formState.newPasswordConfirm}
           />
         </FormField>
         <Box pad={{ horizontal: "small" }}>
-          <Text color="status-error">{formState.errorMessage}</Text>
+          {formState.successMessage && (
+            <Text color="status-ok">{formState.successMessage}</Text>
+          )}
+          {formState.errorMessage && (
+            <Text color="status-error">{formState.errorMessage}</Text>
+          )}
         </Box>
         <Box direction="row" justify="between" margin={{ top: "medium" }}>
           <Button
             type="submit"
             primary
-            label="Submit"
-            disabled={formState.formValid}
+            label="Update Password"
+            disabled={!isFormValid()}
           />
         </Box>
       </Form>

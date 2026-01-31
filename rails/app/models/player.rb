@@ -41,16 +41,41 @@ class Player < ApplicationRecord
        .and(players[:bbrefid].not_eq(nil))
        .and(players[:bbrefid].not_eq(''))
       #  .and(Arel.sql("players.bbref_stats::jsonb != '""'::jsonb"))
-       .and(Arel.sql("players.bbrefid ~ '^[a-z0-9]{9}$'"))
+       .and(Arel.sql("players.bbrefid ~ '^[a-z0-9]{5,10}$'"))
 
 
-     contract_active = contracts[:first_season_id].gteq(season_id)
-       .and(contracts[:last_season_id].lteq(season_id))
+     contract_active = contracts[:first_season_id].lteq(season_id)
+       .and(contracts[:last_season_id].gteq(season_id))
        .and(contracts[:active].eq(true))
 
      left_outer_joins(:contracts)
        .where(stats_present.or(contract_active))
        .select('DISTINCT ON (players.bbrefid) players.*')
+   }
+
+   scope :filter_by_status, ->(status, season_id) {
+     return all if status.blank?
+
+     case status
+     when 'Under Contract'
+       # Players with an active contract for the current season
+       # Use WHERE to filter the already-joined contracts from with_stats_or_current_contract
+       where('contracts.active = ? AND contracts.first_season_id <= ? AND contracts.last_season_id >= ?',
+             true, season_id, season_id)
+     when 'Free Agent'
+       # Players with valid stats but NO active contract for the current season
+       # Since with_stats_or_current_contract already joined contracts, we just filter
+       # for rows where contract is NULL or not active for current season
+       where('contracts.id IS NULL OR contracts.active = ? OR contracts.first_season_id > ? OR contracts.last_season_id < ?',
+             false, season_id, season_id)
+     when 'Ineligible'
+       # Players without valid stats and no active contract
+       # Since with_stats_or_current_contract only returns players WITH stats or contracts,
+       # ineligible players won't be in the result set
+       none
+     else
+       all
+     end
    } 
 
   def is_free_agent?
@@ -62,7 +87,7 @@ class Player < ApplicationRecord
   end
 
   def is_trade_eligible?
-    return self.contract.blank? || (self.contract.created_at < (Time.now - 3.months))
+    return self.contract.blank? || self.contract.summer || (self.contract.created_at < (Time.now - 3.months))
   end
 
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF']
@@ -74,7 +99,9 @@ class Player < ApplicationRecord
   class << self
 
     def search_name(name)
-      Player.where("lower(name) LIKE '%#{name.downcase}%'")
+      return all if name.blank?
+      sanitized = sanitize_sql_like(name.downcase)
+      Player.where("lower(name) LIKE ?", "%#{sanitized}%")
     end
 
     def match_string_for_position(position)

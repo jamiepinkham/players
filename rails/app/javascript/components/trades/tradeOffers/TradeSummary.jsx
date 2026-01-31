@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Heading, Text, Button } from 'grommet';
+import { Box, Heading, Text, Button, Spinner } from 'grommet';
 import CurrencyFormat from 'react-currency-format';
+import PlayerName from '../../PlayerName';
 
 function TradeSummary({
   fromTeam,
@@ -24,14 +25,18 @@ function TradeSummary({
           <Text weight="bold">{fromTeam ? fromTeam.name : 'Your Team'} sends:</Text>
           {fromContracts.length > 0 ? (
             fromContracts.map(c => (
-              <Text key={c.id} size="small">
-                • {c.player.name} (<CurrencyFormat
-                  value={c.amount}
-                  displayType="text"
-                  thousandSeparator
-                  prefix="$"
-                />/yr)
-              </Text>
+              <Box key={c.id} direction="row" gap="xxsmall" align="center">
+                <Text size="small">•</Text>
+                <PlayerName name={c.player.name} bbrefid={c.player.bbrefid} />
+                <Text size="small">
+                  (<CurrencyFormat
+                    value={c.amount}
+                    displayType="text"
+                    thousandSeparator
+                    prefix="$"
+                  />/yr)
+                </Text>
+              </Box>
             ))
           ) : (
             <Text size="small" color="text-weak">No players selected</Text>
@@ -54,14 +59,18 @@ function TradeSummary({
             <Text weight="bold">{toTeam.name} sends:</Text>
             {toContracts.length > 0 ? (
               toContracts.map(c => (
-                <Text key={c.id} size="small">
-                  • {c.player.name} (<CurrencyFormat
-                    value={c.amount}
-                    displayType="text"
-                    thousandSeparator
-                    prefix="$"
-                  />/yr)
-                </Text>
+                <Box key={c.id} direction="row" gap="xxsmall" align="center">
+                  <Text size="small">•</Text>
+                  <PlayerName name={c.player.name} bbrefid={c.player.bbrefid} />
+                  <Text size="small">
+                    (<CurrencyFormat
+                      value={c.amount}
+                      displayType="text"
+                      thousandSeparator
+                      prefix="$"
+                    />/yr)
+                  </Text>
+                </Box>
               ))
             ) : (
               <Text size="small" color="text-weak">No players selected</Text>
@@ -80,20 +89,21 @@ function TradeSummary({
         )}
       </Box>
 
-      <Box direction="row" gap="medium" align="center">
-        {/* Validation errors */}
-        {validation.errors.length > 0 && (
-          <Box pad="small" background="status-error" round="small" flex>
-            {validation.errors.map((error, i) => (
-              <Text key={i} color="white" size="small">• {error}</Text>
-            ))}
-          </Box>
-        )}
+      {/* Validation errors */}
+      {validation.errors.length > 0 && (
+        <Box pad="small" background="status-error" round="small">
+          {validation.errors.map((error, i) => (
+            <Text key={i} color="white" size="small">• {error}</Text>
+          ))}
+        </Box>
+      )}
 
-        {/* Submit button */}
+      {/* Submit button on new line */}
+      <Box>
         <Button
           primary
           label={isSubmitting ? "Submitting..." : "Submit Trade Proposal"}
+          icon={isSubmitting ? <Spinner size="xsmall" /> : undefined}
           onClick={onSubmit}
           disabled={!validation.isValid || isSubmitting}
         />

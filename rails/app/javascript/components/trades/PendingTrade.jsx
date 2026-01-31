@@ -1,9 +1,11 @@
-import React from 'react';
-import { Grid, Box, Text, Button } from "grommet";
+import React, { useState } from 'react';
+import { Grid, Box, Text, Button, Spinner } from "grommet";
 import PendingTradeContracts from './PendingTradeContracts';
 
 
 function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
+    const [isAccepting, setIsAccepting] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
     let fromContracts, fromCashAmount, fromTeamName, toContracts, toCashAmount, toTeamName;
 
     if (myTeamId === trade.fromTeam.id) {
@@ -19,11 +21,21 @@ function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
     }
 
     async function acceptTrade() {
-        await onAcceptTrade(trade.id);
+        setIsAccepting(true);
+        try {
+            await onAcceptTrade(trade.id);
+        } finally {
+            setIsAccepting(false);
+        }
     }
 
     async function rejectTrade() {
-        await onRejectTrade(trade.id);
+        setIsRejecting(true);
+        try {
+            await onRejectTrade(trade.id);
+        } finally {
+            setIsRejecting(false);
+        }
     }
 
     return (
@@ -47,9 +59,25 @@ function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
             </Box>
             <Box gridArea='footer' gap='small' alignSelf='end'>
                 {trade.toTeam.id == myTeamId &&
-                    <Button pad="small" align='end' primary onClick={acceptTrade} label="Accept" />
+                    <Button
+                        pad="small"
+                        align='end'
+                        primary
+                        onClick={acceptTrade}
+                        label={isAccepting ? "Accepting..." : "Accept"}
+                        icon={isAccepting ? <Spinner size="xsmall" /> : undefined}
+                        disabled={isAccepting || isRejecting}
+                    />
                 }
-                <Button pad="small" align='end' secondary onClick={rejectTrade} label="Reject" />
+                <Button
+                    pad="small"
+                    align='end'
+                    secondary
+                    onClick={rejectTrade}
+                    label={isRejecting ? "Rejecting..." : "Reject"}
+                    icon={isRejecting ? <Spinner size="xsmall" /> : undefined}
+                    disabled={isAccepting || isRejecting}
+                />
             </Box>
         </Grid>
     );

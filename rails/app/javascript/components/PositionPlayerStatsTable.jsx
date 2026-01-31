@@ -1,7 +1,9 @@
 import React from "react";
-import { Button, DataTable } from "grommet";
+import { Button, DataTable, Box } from "grommet";
 import CurrencyFormat from "react-currency-format";
 import LeadingBidComponent from "./LeadingBidComponent";
+import PlayerName from "./PlayerName";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 export default function PositionPlayerStatsTable({
   players,
@@ -14,6 +16,9 @@ export default function PositionPlayerStatsTable({
     {
       property: "name",
       header: "Name",
+      render: (player) => (
+        <PlayerName name={player.name} bbrefid={player.bbrefid} />
+      ),
     },
   ];
 
@@ -145,17 +150,17 @@ export default function PositionPlayerStatsTable({
 
 
   return (
-    <DataTable
-      columns={columns}
-      pin="header"
-      data={players}
-      sortable={true}
-      fill
-      border
-      background={{
-        header: "dark-2",
-        body: ["white", "light-2"],
-      }}
-    />
+    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <DataTable
+        columns={columns}
+        data={players}
+        sortable={true}
+        fill
+        background={{
+          header: "dark-1",
+          body: ["white", "light-1"]
+        }}
+      />
+    </Box>
   );
 }

@@ -1,7 +1,9 @@
 import React from "react";
 import { useQuery } from "graphql-hooks";
-import { Text, Spinner, CheckBox, DataTable } from "grommet";
+import { Text, Spinner, CheckBox, DataTable, Box } from "grommet";
 import CurrencyFormat from "react-currency-format";
+import PlayerName from "../../PlayerName";
+import { DATA_TABLE_THEME } from "../../../constants/ui";
 
 const TEAM_CONTRACTS_QUERY = `
 query TradingConsoleTeamContractsQuery($teamId: ID!)  {
@@ -20,6 +22,8 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         amount
         player {
           name
+          bbrefid
+          position
           isTradeEligible
           stats {
             title
@@ -48,10 +52,11 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
   if (!data?.team) return <Text color="status-critical">Team not found</Text>;
 
   return (
-    <DataTable
-      primaryKey='id'
-      background={['light-1', 'light-2']}
-      size='medium'
+    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <DataTable
+        primaryKey='id'
+        background={DATA_TABLE_THEME.background}
+        size='medium'
       data={
         data.team.currentContracts.sort((lhs, rhs) => {
           if (lhs.player.name.toUpperCase() > rhs.player.name.toUpperCase()) {
@@ -64,11 +69,11 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
       columns={[
         {
           sortable: true,
-          header: <Text>Player</Text>,
+          header: "Player",
           property: 'player.name',
           render: item => (
             <CheckBox
-              label={item.player.name}
+              label={<PlayerName name={item.player.name} bbrefid={item.player.bbrefid} />}
               value={item.id}
               checked={selectedContracts.some(c => c.id === item.id)}
               disabled={!item.player.isTradeEligible}
@@ -80,7 +85,7 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
         },
         {
           property: 'amount',
-          header: <Text>Annual Amount</Text>,
+          header: "Annual Amount",
           render: item => (
             <CurrencyFormat
               value={item.amount}
@@ -91,11 +96,11 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
         },
         {
           property: 'lastSeason.name',
-          header: <Text>Final Season</Text>
+          header: "Final Season"
         },
         {
           property: 'player.isTradeEligible',
-          header: <Text>Eligible</Text>,
+          header: "Eligible",
           render: item => (
             <Text color={item.player.isTradeEligible ? 'status-ok' : 'status-error'}>
               {item.player.isTradeEligible ? 'Yes' : 'No'}
@@ -103,7 +108,8 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
           )
         }
       ]}
-    />
+      />
+    </Box>
   );
 }
 

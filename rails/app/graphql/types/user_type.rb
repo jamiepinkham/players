@@ -4,5 +4,6 @@ module Types
     field :username, String, null: false
     field :name, String, null: true
     field :is_admin, Boolean, null: false
+    field :team, Types::TeamType, null: true
   end
 end

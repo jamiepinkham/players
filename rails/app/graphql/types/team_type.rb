@@ -7,6 +7,7 @@ module Types
     field :current_contracts, [Types::ContractType], null: false
     field :user, Types::UserType, null: true
     field :primary_email, String, null: true
+    field :team_emails, [Types::TeamEmailType], null: false
     field :current_payroll, Float, null: false
     field :available_cash, Float, null: false
     field :total_players, Int, null: false

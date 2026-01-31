@@ -44,7 +44,6 @@ export default function ChangePassword() {
                 type="password"
                 id="password"
                 name="password"
-                icon={<Lock />}
                 placeholder="password"
                 value={value.password}
               />
@@ -57,7 +56,6 @@ export default function ChangePassword() {
                 type="password"
                 id="password-confirm"
                 name="password_confirm"
-                icon={<Lock />}
                 placeholder="again"
                 value={value.password_confirm}
               />

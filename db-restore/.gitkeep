@@ -1,5 +1,0 @@
-# Database Restore Directory
-
-Place your PostgreSQL dump file here as `db.restore` to automatically restore on database initialization.
-
-See main README.md Database Management section for details.

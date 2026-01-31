@@ -30,16 +30,17 @@ function SessionLogin() {
   const history = useHistory();
   const { from } = location.state || { from: { pathname: "/teams" } };
   function login(username, password) {
-    auth.signIn(username, password).then((token) => {
-      if (token) {
-        history.replace(from);
-      } else {
+    auth.signIn(username, password)
+      .then((token) => {
+        if (token) {
+          history.replace(from);
+        } else {
+          setHasError(true);
+        }
+      })
+      .catch((error) => {
         setHasError(true);
-      }
-    });
-    // .catch(
-    //     setHasError(true)
-    // );
+      });
   }
 
   if (!auth.isSignedIn) {
@@ -68,7 +69,6 @@ function SessionLogin() {
                 <TextInput
                   id="username"
                   name="username"
-                  icon={<MailOption />}
                   placeholder="username"
                   value={value.username}
                 />
@@ -78,7 +78,6 @@ function SessionLogin() {
                   type="password"
                   id="password"
                   name="password"
-                  icon={<Lock />}
                   placeholder="password"
                   value={value.password}
                 />
