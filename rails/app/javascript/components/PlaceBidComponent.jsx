@@ -7,6 +7,8 @@ import CurrencyFormat from "react-currency-format";
 import CurrencyInput from "./CurrencyInput";
 import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
 import PlayerName from "./PlayerName";
+import LoadingState from "./LoadingState";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 const PLAYER_CONTRACT_MINIMUMS_QUERY = `
 query PlayerContractMimimumsQuery($playerId: ID!) {
@@ -56,6 +58,7 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
     minimum: 0,
     numberOfYears: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     loading,
     error,
@@ -81,7 +84,7 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
       return false;
     }
   }
-  if (loading) return <Spinner size="medium" alignSelf="center" />;
+  if (loading) return <LoadingState message="Loading player details..." />;
   return (
     <Box direction="column" pad="small" overflow="scroll">
       <Box direction="row" gap="xsmall" align="center">
@@ -94,7 +97,7 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
 
       <Grid
         background="light-4"
-        pad="xxsmall"
+        pad="small"
         rows={[
           { count: "fit", size: "small" },
           { count: "fit", size: "small" },
@@ -106,11 +109,13 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
           { name: "fields", start: [0, 1], end: [1, 1] },
         ]}
       >
-        <Box gridArea="minimums" pad="xxsmall">
-        <DataTable
-                pad="xxsmall"
-                margin="xxsmall"
-                columns={[
+        <Box gridArea="minimums" pad="xsmall">
+          <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+            <DataTable
+                  pad="xsmall"
+                  margin="none"
+                  background={DATA_TABLE_THEME.background}
+                  columns={[
                   {
                     property: "duration",
                     header: "Contract Length",
@@ -132,8 +137,9 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
                   },
                 ]}
                 data={data.player.contractMinimums}
-              />
-        </Box>
+                />
+            </Box>
+          </Box>
 
         <Box
           direction="column"
@@ -191,20 +197,25 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
                 </Form>
                 <Box align="end">
                   <Button
-                    onClick={() => {
-                        let bid = {
-                            teamId: teamId,
-                            playerId: player.id,
-                            annualAmount: annualAmount,
-                            finalSeasonId: selectedSeasonOption.value,
-                        };
-                        createBidMutation({variables: {"input": bid}})
-                        onBidCreated()
+                    onClick={async () => {
+                        setIsSubmitting(true);
+                        try {
+                            let bid = {
+                                teamId: teamId,
+                                playerId: player.id,
+                                annualAmount: annualAmount,
+                                finalSeasonId: selectedSeasonOption.value,
+                            };
+                            await createBidMutation({variables: {"input": bid}})
+                            onBidCreated()
+                        } finally {
+                            setIsSubmitting(false);
+                        }
                     }}
-                    disabled={!isValidBid()}
-                  >
-                    Place Bid
-                  </Button>
+                    disabled={!isValidBid() || isSubmitting}
+                    icon={isSubmitting ? <Spinner size="xsmall" /> : undefined}
+                    label={isSubmitting ? "Placing..." : "Place Bid"}
+                  />
                 </Box>
               </Box>
         </Box>

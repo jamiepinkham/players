@@ -32,6 +32,7 @@ import {
 export default function App(props) {
   const auth = useAuth();
   const history = useHistory();
+  const location = useLocation();
   const handleOnClick = useCallback(
     (page) => {
       history.push(`/${page}`);
@@ -63,51 +64,87 @@ export default function App(props) {
   }, [history]);
   return (
     <Box>
-      <Header background="brand" pad="small">
-        <Heading level="2">BMPL</Heading>
+      <Header
+        background="brand"
+        pad={{ horizontal: "medium", vertical: "xsmall" }}
+        round={{ corner: "bottom", size: "small" }}
+        elevation="small"
+      >
+        <Heading level="2" color="white" margin="none">BMPL</Heading>
         {auth.isSignedIn && (
-          <Nav direction="row" pad="medium">
-            <Anchor
-              icon={<List />}
-              hoverIndicator
-              label="Teams"
-              onClick={() => handleOnClick("teams")}
-            />
-            <Anchor
-              icon={<Currency />}
-              hoverIndicator
-              label="Bidding"
-              onClick={() => handleOnClick("bidding")}
-            />
-            <Anchor
-              icon={<Sync />}
-              hoverIndicator
-              label="Trade"
-              onClick={() => handleOnClick("trade")}
-            />
-            <Anchor
-              icon={<History />}
-              hoverIndicator
-              label="All Trades"
-              onClick={() => handleOnClick("trades")}
-            />
-            <Anchor
-              hoverIndicator
-              icon={<Search />}
-              label="Player Search"
-              onClick={() => handleOnClick("player_search")}
-            />
-            <Anchor
-              icon={<UserSettings />}
-              hoverIndicator
-              label="Settings"
-              onClick={() => handleOnClick("profile")}
-            />
+          <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
+            <Box
+              border={location.pathname.startsWith("/team") ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<List />}
+                hoverIndicator
+                label="Teams"
+                color="white"
+                onClick={() => handleOnClick("teams")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/bidding" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<Currency />}
+                hoverIndicator
+                label="Bidding"
+                color="white"
+                onClick={() => handleOnClick("bidding")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/trade" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<Sync />}
+                hoverIndicator
+                label="Trade"
+                color="white"
+                onClick={() => handleOnClick("trade")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/trades" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<History />}
+                hoverIndicator
+                label="All Trades"
+                color="white"
+                onClick={() => handleOnClick("trades")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/player_search" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                hoverIndicator
+                icon={<Search />}
+                label="Player Search"
+                color="white"
+                onClick={() => handleOnClick("player_search")}
+              />
+            </Box>
+            <Box
+              border={location.pathname === "/profile" ? { side: "bottom", color: "white", size: "small" } : undefined}
+            >
+              <Anchor
+                icon={<UserSettings />}
+                hoverIndicator
+                label="Settings"
+                color="white"
+                onClick={() => handleOnClick("profile")}
+              />
+            </Box>
             {auth.isAdmin && (
               <Anchor
                 icon={<UserAdmin />}
                 hoverIndicator
                 label="Admin"
+                color="white"
                 onClick={handleAdminClick}
               />
             )}

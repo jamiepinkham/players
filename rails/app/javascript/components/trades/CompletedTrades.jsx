@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import Moment from "react-moment";
 import { useQuery } from "graphql-hooks";
-import { List, Spinner, Text, Box, Grid, Header, Select, CheckBox } from "grommet";
+import { List, Text, Box, Grid, Header, Select, CheckBox } from "grommet";
+import { History } from "grommet-icons";
 import PendingTradeContracts from "./PendingTradeContracts";
+import LoadingState from "../LoadingState";
+import EmptyState from "../EmptyState";
 
 const TRADES_QUERY = `
 query getCompletedTrades { 
@@ -50,8 +53,14 @@ query getCompletedTrades {
 export default function CompletedTrades() {
     const { loading, error, data, refetch, cacheHit } = useQuery(TRADES_QUERY);
 
-    if (!data || !data.completedTrades) return <Spinner size="medium" alignSelf="center" />;
-    if (data.completedTrades.length == 0) return (<Box margin="medium"><Text>No completed trades</Text></Box>);
+    if (!data || !data.completedTrades) return <LoadingState message="Loading completed trades..." />;
+    if (data.completedTrades.length == 0) return (
+        <EmptyState
+            icon={History}
+            title="No completed trades"
+            message="There are no completed trades to display yet"
+        />
+    );
     
     return (
             <List gap="small" background={['white', 'light-2']} alignSelf="stretch" children={(item, index) => {

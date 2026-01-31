@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useMutation } from "graphql-hooks";
-import { Grid, Box, Text, Heading, Select } from "grommet";
+import { Grid, Box, Text, Heading, Select, Layer, Button } from "grommet";
 import SelectableContractList from "./SelectableContractList";
 import TradeSummary from "./TradeSummary";
 import CurrencyInput from "../../CurrencyInput";
@@ -22,6 +22,7 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
   const [fromCash, setFromCash] = useState(0);
   const [toCash, setToCash] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const [createTradeMutation] = useMutation(CREATE_TRADE_MUTATION);
 
@@ -128,7 +129,7 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
       onTradeSubmitted();
     } catch (error) {
       console.error('Trade submission error:', error);
-      alert(`Error submitting trade: ${error.message}`);
+      setNotification({ message: `Error submitting trade: ${error.message}`, type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -142,66 +143,44 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
   };
 
   return (
-    <Grid
-      rows={['auto', 'auto']}
-      columns={['1/2', '1/2']}
-      gap='medium'
-      pad='medium'
-      areas={[
-        { name: 'summaryPanel', start: [0, 0], end: [1, 0] },
-        { name: 'leftPanel', start: [0, 1], end: [0, 1] },
-        { name: 'rightPanel', start: [1, 1], end: [1, 1] },
-      ]}
-    >
-      {/* Summary Panel - Top */}
-      <Box gridArea='summaryPanel'>
-        <TradeSummary
-          fromTeam={fromTeam}
-          fromContracts={fromContracts}
-          fromCash={fromCash}
-          toTeam={toTeam}
-          toContracts={toContracts}
-          toCash={toCash}
-          validation={validation}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      </Box>
+    <>
+      <Grid
+        rows={['auto', 'auto', 'auto', 'auto']}
+        columns={['1/2', '1/2']}
+        gap='medium'
+        pad='medium'
+        areas={[
+          { name: 'summaryPanel', start: [0, 0], end: [1, 0] },
+          { name: 'leftTeamHeader', start: [0, 1], end: [0, 1] },
+          { name: 'rightTeamHeader', start: [1, 1], end: [1, 1] },
+          { name: 'leftCash', start: [0, 2], end: [0, 2] },
+          { name: 'rightCash', start: [1, 2], end: [1, 2] },
+          { name: 'leftPlayers', start: [0, 3], end: [0, 3] },
+          { name: 'rightPlayers', start: [1, 3], end: [1, 3] },
+        ]}
+      >
+        {/* Summary Panel - Top */}
+        <Box gridArea='summaryPanel'>
+          <TradeSummary
+            fromTeam={fromTeam}
+            fromContracts={fromContracts}
+            fromCash={fromCash}
+            toTeam={toTeam}
+            toContracts={toContracts}
+            toCash={toCash}
+            validation={validation}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+          />
+        </Box>
 
-      {/* Left Panel - Your Team */}
-      <Box gridArea='leftPanel' gap='small'>
-        {/* Team Header */}
-        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+        {/* Row 1: Team Headers */}
+        <Box gridArea='leftTeamHeader' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
           <Text weight='bold' margin={{ bottom: 'xsmall' }}>Your Team:</Text>
           <Text>{fromTeam?.name || 'Your Team'} - Budget: ${fromTeam?.budget?.toLocaleString() || '0'}</Text>
         </Box>
 
-        {/* Cash Input */}
-        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
-          <CurrencyInput
-            value={fromCash}
-            onChange={(event) => {
-              setFromCash(parseInt(event.target.value) || 0);
-            }}
-            placeholder='Enter amount'
-          />
-        </Box>
-
-        {/* Player Roster */}
-        <Box>
-          <SelectableContractList
-            team={fromTeam}
-            selectedContracts={fromContracts}
-            onToggle={handleFromToggle}
-          />
-        </Box>
-      </Box>
-
-      {/* Right Panel - Partner Team */}
-      <Box gridArea='rightPanel' gap='small'>
-        {/* Team Selector with Team Info */}
-        <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+        <Box gridArea='rightTeamHeader' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
           <Text weight='bold' margin={{ bottom: 'xsmall' }}>Trade Partner:</Text>
           <Select
             options={availableTeams}
@@ -213,38 +192,85 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
           />
         </Box>
 
+        {/* Row 2: Cash Inputs */}
+        <Box gridArea='leftCash' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
+          <CurrencyInput
+            value={fromCash}
+            onChange={(event) => {
+              setFromCash(parseInt(event.target.value) || 0);
+            }}
+            placeholder='Enter amount'
+          />
+        </Box>
+
         {toTeam ? (
-          <>
-
-            {/* Cash Input */}
-            <Box pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-              <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
-              <CurrencyInput
-                value={toCash}
-                onChange={(event) => {
-                  setToCash(parseInt(event.target.value) || 0);
-                }}
-                placeholder='Enter amount'
-              />
-            </Box>
-
-            {/* Player Roster */}
-            <Box>
-              <SelectableContractList
-                team={toTeam}
-                selectedContracts={toContracts}
-                onToggle={handleToToggle}
-              />
-            </Box>
-          </>
+          <Box gridArea='rightCash' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
+            <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
+            <CurrencyInput
+              value={toCash}
+              onChange={(event) => {
+                setToCash(parseInt(event.target.value) || 0);
+              }}
+              placeholder='Enter amount'
+            />
+          </Box>
         ) : (
-          /* Placeholder when no team selected */
-          <Box align='center' justify='center' pad='large'>
-            <Text color='text-weak'>Select a trade partner to continue</Text>
+          <Box gridArea='rightCash' align='center' justify='center' pad='small' background='light-2' round='small'>
+            <Text color='text-weak' size='small'>Select a trade partner</Text>
           </Box>
         )}
-      </Box>
-    </Grid>
+
+        {/* Row 3: Player Rosters */}
+        <Box gridArea='leftPlayers'>
+          <SelectableContractList
+            team={fromTeam}
+            selectedContracts={fromContracts}
+            onToggle={handleFromToggle}
+          />
+        </Box>
+
+        {toTeam ? (
+          <Box gridArea='rightPlayers'>
+            <SelectableContractList
+              team={toTeam}
+              selectedContracts={toContracts}
+              onToggle={handleToToggle}
+            />
+          </Box>
+        ) : (
+          <Box gridArea='rightPlayers' align='center' justify='center' pad='large'>
+            <Text color='text-weak'>Select a trade partner to view their roster</Text>
+          </Box>
+        )}
+      </Grid>
+
+    {notification && (
+      <Layer
+        position="top"
+        modal={false}
+        margin={{ vertical: "medium", horizontal: "small" }}
+        responsive={false}
+        plain
+      >
+        <Box
+          background={notification.type === 'error' ? 'status-error' : 'status-ok'}
+          pad="medium"
+          gap="small"
+          round="small"
+          elevation="medium"
+        >
+          <Text color="white">{notification.message}</Text>
+          <Button
+            label="Dismiss"
+            onClick={() => setNotification(null)}
+            size="small"
+            secondary
+          />
+        </Box>
+      </Layer>
+    )}
+    </>
   );
 }
 

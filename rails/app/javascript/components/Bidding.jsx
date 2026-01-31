@@ -13,6 +13,7 @@ import {
   Text,
   Paragraph,
 } from "grommet";
+import { Currency } from "grommet-icons";
 
 import PlayerLists from "./PlayerLists";
 import TeamBudgetInfo from "./TeamBudgetInfo";
@@ -21,6 +22,8 @@ import CurrencyFormat from "react-currency-format";
 import Moment from "react-moment";
 import { max } from "moment-timezone";
 import PlayerName from "./PlayerName";
+import EmptyState from "./EmptyState";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 const BIDDING_CONSOLE_QUERY = `
   query BiddingConsoleQuery($teamId: ID!) {
@@ -134,18 +137,26 @@ export default function BiddingConsole() {
 
   return (
     <Box>
-      <Box margin="xxsmall">
-        <Heading level={3} pad="xsmall">
+      <Box
+        pad="small"
+        gap="small"
+        round="small"
+        background="light-1"
+        border={{ color: "border", size: "xsmall" }}
+        elevation="small"
+      >
+        <Heading level={3} margin="none">
           {team.name} Bidding Console
         </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box>
+      <Box margin={{ top: "medium" }}>
         <Accordion>
           <AccordionPanel label={`Current Bids (${bids.length} of ${maxBids} used)`}>
             {bids.length > 0 ? (
-              <DataTable
-                columns={[
+              <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+                <DataTable
+                  columns={[
                   {
                     property: "player.name",
                     header: "Player",
@@ -188,17 +199,21 @@ export default function BiddingConsole() {
                   },
                 ]}
                 data={bids}
-              />
+                background={DATA_TABLE_THEME.background}
+                />
+              </Box>
             ) : (
-              <Heading level={5} margin="xsmall">
-                No bids
-              </Heading>
+              <EmptyState
+                icon={Currency}
+                title="No bids placed yet"
+                message="Select a player below to place your first bid"
+              />
             )}
           </AccordionPanel>
         </Accordion>
       </Box>
-      <Box pad="xsmall">
-        <Heading level={3} margin="xsmall">
+      <Box pad="small" gap="small">
+        <Heading level={3} margin="none">
           Players
         </Heading>
         <PlayerLists onPlayerSelected={onPlayerSelected} />

@@ -92,7 +92,6 @@ export default function ResetPasswordForm({ auth }) {
             type="password"
             id="currentPassword"
             name="currentPassword"
-            icon={<Lock />}
             required
             placeholder="current password"
             value={formState.currentPassword}
@@ -108,7 +107,6 @@ export default function ResetPasswordForm({ auth }) {
             type="password"
             id="newPassword"
             name="newPassword"
-            icon={<Lock />}
             pattern=".{8,}"
             required
             title="8 characters minimum"
@@ -126,7 +124,6 @@ export default function ResetPasswordForm({ auth }) {
             type="password"
             id="newPasswordConfirm"
             name="newPasswordConfirm"
-            icon={<Lock />}
             required
             placeholder="confirm new password"
             value={formState.newPasswordConfirm}

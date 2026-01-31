@@ -4,6 +4,7 @@ import { Text, Spinner, List, CheckBox, Box, FormField, DataTable } from "gromme
 
 import CurrencyFormat from "react-currency-format";
 import PlayerName from "../PlayerName";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 const TEAM_CONTRACTS_QUERY = `
 query TradingConsoleTeamContractsQuery($teamId: ID!)  {
@@ -48,9 +49,10 @@ function TeamContractList({ team, onContractChecked }) {
   if (!data.team) return <Spinner size="medium" alignSelf="center" />;
 
   return (
-    <DataTable
-      primaryKey='id'
-      background={['light-1', 'light-2']}
+    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <DataTable
+        primaryKey='id'
+        background={DATA_TABLE_THEME.background}
       data={
         data.team.currentContracts.sort((lhs, rhs) => {
           if (lhs.player.name.toUpperCase() > rhs.player.name.toUpperCase()) {
@@ -63,7 +65,7 @@ function TeamContractList({ team, onContractChecked }) {
       columns={[
         {
           sortable: true,
-          header: <Text>Player</Text>,
+          header: "Player",
           property: 'player.name',
           render: item => (
             <CheckBox label={<PlayerName name={item.player.name} bbrefid={item.player.bbrefid} />} value={item.id} disabled={!item.player.isTradeEligible} onChange={(change) => {
@@ -73,21 +75,22 @@ function TeamContractList({ team, onContractChecked }) {
         },
         {
           property: 'amount',
-          header: <Text>Annual Contract Amount</Text>,
+          header: "Annual Contract Amount",
           render: item => (
-            <CurrencyFormat 
-              value={item.amount} 
-              displayType={"text"} 
-              thousandSeparator={true} 
+            <CurrencyFormat
+              value={item.amount}
+              displayType={"text"}
+              thousandSeparator={true}
               prefix={"$"} />
           )
         },
         {
           property: 'lastSeason.name',
-          header: <Text>Contract Final Season</Text>
+          header: "Contract Final Season"
         }
       ]}
-    />
+      />
+    </Box>
   );
 }
 

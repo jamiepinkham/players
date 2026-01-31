@@ -12,6 +12,8 @@ import { useQuery } from 'graphql-hooks';
 import { useAuth } from '../hooks/use_auth';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
+import LoadingState from './LoadingState';
+import { DATA_TABLE_THEME } from '../constants/ui';
 
 const PLAYERS_QUERY = `
 query GetPlayers {
@@ -146,7 +148,7 @@ const AllPlayersListSearch = () => {
     { label: 'Ineligible', value: 'Ineligible' },
   ];
 
-  if (loading) return <Text>Loading players...</Text>;
+  if (loading) return <LoadingState message="Loading players..." />;
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
   return (
@@ -190,22 +192,23 @@ const AllPlayersListSearch = () => {
         )}
       </Box>
 
-      <DataTable
-        columns={[
+      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+        <DataTable
+          columns={[
           {
             property: 'name',
-            header: <Text weight="bold">Name</Text>,
+            header: "Name",
             primary: true,
             render: (player) => <PlayerName name={player.name} bbrefid={player.bbrefid} bold />,
           },
           {
             property: 'position',
-            header: <Text weight="bold">Position</Text>,
+            header: "Position",
             render: (player) => <Text>{player.position}</Text>,
           },
           {
             property: 'contract',
-            header: <Text weight="bold">Contract Status</Text>,
+            header: "Contract Status",
             align: 'end',
             render: (player) => {
               const hasStats = player.stats && player.stats.length > 0;
@@ -230,7 +233,7 @@ const AllPlayersListSearch = () => {
           },
           {
             property: 'action',
-            header: <Text weight="bold">Action</Text>,
+            header: "Action",
             align: 'end',
             render: (player) => {
               const hasStats = player.stats && player.stats.length > 0;
@@ -252,10 +255,9 @@ const AllPlayersListSearch = () => {
           },
         ]}
         data={paginatedPlayers}
-        background={{
-          body: ['white', 'light-1'],
-        }}
-      />
+        background={DATA_TABLE_THEME.background}
+        />
+      </Box>
 
       {totalPages > 1 && (
         <Box align="center" margin={{ top: 'medium' }}>

@@ -62,7 +62,7 @@ class Player < ApplicationRecord
   end
 
   def is_trade_eligible?
-    return self.contract.blank? || (self.contract.created_at < (Time.now - 3.months))
+    return self.contract.blank? || self.contract.summer || (self.contract.created_at < (Time.now - 3.months))
   end
 
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF']

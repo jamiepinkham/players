@@ -69,7 +69,6 @@ function SessionLogin() {
                 <TextInput
                   id="username"
                   name="username"
-                  icon={<MailOption />}
                   placeholder="username"
                   value={value.username}
                 />
@@ -79,7 +78,6 @@ function SessionLogin() {
                   type="password"
                   id="password"
                   name="password"
-                  icon={<Lock />}
                   placeholder="password"
                   value={value.password}
                 />
