@@ -16,6 +16,12 @@ const CURRENT_USER_QUERY = `
       team {
         id
         name
+        teamEmails {
+          id
+          email
+          primary
+          receiveTradeNotifications
+        }
       }
     }
   }
@@ -36,7 +42,7 @@ export default function Profile() {
         Profile
       </Heading>
 
-      <Box background="light-2" pad="medium" round="small" gap="xsmall">
+      <Box background="light-2" pad="medium" round="small" gap="small">
         <Box direction="row" gap="xsmall">
           <Text weight="bold">Username:</Text>
           <Text>{user?.username}</Text>
@@ -45,6 +51,28 @@ export default function Profile() {
           <Text weight="bold">Team:</Text>
           <Text>{user?.team?.name || "N/A"}</Text>
         </Box>
+        {user?.team && (
+          <Box gap="xsmall">
+            <Text weight="bold">Team Emails:</Text>
+            {user.team.teamEmails && user.team.teamEmails.length > 0 ? (
+              <Box pad={{ left: "small" }} gap="xxsmall">
+                {user.team.teamEmails.map((teamEmail) => (
+                  <Box key={teamEmail.id} direction="row" gap="xsmall" align="center">
+                    <Text>{teamEmail.email}</Text>
+                    {teamEmail.primary && (
+                      <Text size="xsmall" color="brand" weight="bold">(Primary)</Text>
+                    )}
+                    {teamEmail.receiveTradeNotifications && (
+                      <Text size="xsmall" color="status-ok">(Trade Notifications)</Text>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Text pad={{ left: "small" }} color="status-critical">No emails configured</Text>
+            )}
+          </Box>
+        )}
       </Box>
 
       <Accordion pad="xsmall" multiple={true}>
