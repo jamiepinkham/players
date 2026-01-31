@@ -14,6 +14,10 @@ const CURRENT_USER_QUERY = `
       id
       username
       name
+      team {
+        id
+        name
+      }
     }
   }
 `;
@@ -42,6 +46,10 @@ export default function Profile() {
         <Box direction="row" gap="xsmall">
           <Text weight="bold">Username:</Text>
           <Text>{user?.username}</Text>
+        </Box>
+        <Box direction="row" gap="xsmall">
+          <Text weight="bold">Team:</Text>
+          <Text>{user?.team?.name || "N/A"}</Text>
         </Box>
       </Box>
 
