@@ -13,7 +13,6 @@ const CURRENT_USER_QUERY = `
     currentUser {
       id
       username
-      name
       team {
         id
         name
@@ -38,11 +37,6 @@ export default function Profile() {
       </Heading>
 
       <Box background="light-2" pad="medium" round="small" gap="xsmall">
-        {user?.name && (
-          <Text size="large" weight="bold">
-            {user.name}
-          </Text>
-        )}
         <Box direction="row" gap="xsmall">
           <Text weight="bold">Username:</Text>
           <Text>{user?.username}</Text>
