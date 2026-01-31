@@ -58,23 +58,40 @@ export default function App(props) {
     skipCache: true,
   });
 
-  // Poll every 10 seconds to catch updates when accepting/rejecting trades or placing bids
+  // Poll every 30 seconds to catch any missed updates
   useEffect(() => {
     if (auth.teamId && auth.isSignedIn && refetchNotifications) {
       const interval = setInterval(() => {
         refetchNotifications();
-      }, 10000); // 10 seconds
+      }, 30000); // 30 seconds
 
       return () => clearInterval(interval);
     }
   }, [auth.teamId, auth.isSignedIn, refetchNotifications]);
 
-  // Also refetch notifications when navigating to update immediately
+  // Refetch notifications when navigating to update immediately
   useEffect(() => {
     if (auth.teamId && auth.isSignedIn && refetchNotifications) {
       refetchNotifications();
     }
   }, [location.pathname, auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Listen for trade/bid updates and refetch immediately
+  useEffect(() => {
+    const handleTradeUpdate = () => {
+      if (refetchNotifications) {
+        refetchNotifications();
+      }
+    };
+
+    window.addEventListener('tradeUpdated', handleTradeUpdate);
+    window.addEventListener('bidPlaced', handleTradeUpdate);
+
+    return () => {
+      window.removeEventListener('tradeUpdated', handleTradeUpdate);
+      window.removeEventListener('bidPlaced', handleTradeUpdate);
+    };
+  }, [refetchNotifications]);
 
   const hasPendingTrades = notificationsData?.trades?.length > 0;
   const hasActiveBids = notificationsData?.currentSeason?.activeFreeAgencyPeriod?.bids?.length > 0;
