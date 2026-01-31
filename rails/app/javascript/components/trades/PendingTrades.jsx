@@ -16,6 +16,7 @@ const TRADES_QUERY = `
                 id
                 player {
                     name
+                    bbrefid
                     position
                 }
                 amount
@@ -32,6 +33,7 @@ const TRADES_QUERY = `
                 id
                 player {
                     name
+                    bbrefid
                     position
                 }
                 amount
