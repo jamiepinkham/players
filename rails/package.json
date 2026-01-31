@@ -34,7 +34,7 @@
     "install-peers": "^1.0.3"
   },
   "engines": {
-    "node": ">=15"
+    "node": ">=20"
   },
   "resolutions": {
     "rails_admin/@fortawesome/fontawesome-free": "^5.15.0"
