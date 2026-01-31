@@ -207,6 +207,8 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
                                 finalSeasonId: selectedSeasonOption.value,
                             };
                             await createBidMutation({variables: {"input": bid}})
+                            // Dispatch custom event to notify App component to refresh notifications
+                            window.dispatchEvent(new CustomEvent('bidPlaced'));
                             onBidCreated()
                         } finally {
                             setIsSubmitting(false);

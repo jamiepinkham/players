@@ -97,6 +97,8 @@ export default function PendingTrades() {
             }
 
             refetch();
+            // Dispatch custom event to notify App component to refresh notifications
+            window.dispatchEvent(new CustomEvent('tradeUpdated'));
         } catch (error) {
             console.error('Accept trade error:', error);
             setNotification({ message: `Error accepting trade: ${error.message}`, type: 'error' });
@@ -115,6 +117,8 @@ export default function PendingTrades() {
             }
 
             refetch();
+            // Dispatch custom event to notify App component to refresh notifications
+            window.dispatchEvent(new CustomEvent('tradeUpdated'));
         } catch (error) {
             console.error('Reject trade error:', error);
             setNotification({ message: `Error rejecting trade: ${error.message}`, type: 'error' });

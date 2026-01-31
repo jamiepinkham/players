@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 import { getAuthToken, validateToken } from "../utils/auth";
 import axios from "axios";
+import { useQuery } from "graphql-hooks";
 
 import PrivateRoute from "./PrivateRoute";
 import TeamsList from "./TeamsList";
@@ -28,11 +29,73 @@ import {
   History
 } from "grommet-icons";
 
+const NOTIFICATIONS_QUERY = `
+  query NotificationsQuery($teamId: ID!) {
+    trades(team: $teamId) {
+      id
+    }
+    currentSeason {
+      activeFreeAgencyPeriod {
+        bids(teamId: $teamId, active: true) {
+          id
+        }
+      }
+    }
+  }
+`;
+
 
 export default function App(props) {
   const auth = useAuth();
   const history = useHistory();
   const location = useLocation();
+
+  // Query for pending trades and active bids to show notification dots
+  // Poll every 10 seconds to keep dots updated
+  const { data: notificationsData, refetch: refetchNotifications } = useQuery(NOTIFICATIONS_QUERY, {
+    variables: { teamId: auth.teamId },
+    skip: !auth.teamId || !auth.isSignedIn,
+    skipCache: true,
+  });
+
+  // Poll every 30 seconds to catch any missed updates
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      const interval = setInterval(() => {
+        refetchNotifications();
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Refetch notifications when navigating to update immediately
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      refetchNotifications();
+    }
+  }, [location.pathname, auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Listen for trade/bid updates and refetch immediately
+  useEffect(() => {
+    const handleTradeUpdate = () => {
+      if (refetchNotifications) {
+        refetchNotifications();
+      }
+    };
+
+    window.addEventListener('tradeUpdated', handleTradeUpdate);
+    window.addEventListener('bidPlaced', handleTradeUpdate);
+
+    return () => {
+      window.removeEventListener('tradeUpdated', handleTradeUpdate);
+      window.removeEventListener('bidPlaced', handleTradeUpdate);
+    };
+  }, [refetchNotifications]);
+
+  const hasPendingTrades = notificationsData?.trades?.length > 0;
+  const hasActiveBids = notificationsData?.currentSeason?.activeFreeAgencyPeriod?.bids?.length > 0;
+
   const handleOnClick = useCallback(
     (page) => {
       history.push(`/${page}`);
@@ -88,7 +151,24 @@ export default function App(props) {
               border={location.pathname === "/bidding" ? { side: "bottom", color: "white", size: "small" } : undefined}
             >
               <Anchor
-                icon={<Currency />}
+                icon={
+                  <Box style={{ position: 'relative' }}>
+                    <Currency />
+                    {hasActiveBids && (
+                      <Box
+                        background="status-error"
+                        round="full"
+                        style={{
+                          position: 'absolute',
+                          top: '-4px',
+                          right: '-4px',
+                          width: '8px',
+                          height: '8px',
+                        }}
+                      />
+                    )}
+                  </Box>
+                }
                 hoverIndicator
                 label="Bidding"
                 color="white"
@@ -99,7 +179,24 @@ export default function App(props) {
               border={location.pathname === "/trade" ? { side: "bottom", color: "white", size: "small" } : undefined}
             >
               <Anchor
-                icon={<Sync />}
+                icon={
+                  <Box style={{ position: 'relative' }}>
+                    <Sync />
+                    {hasPendingTrades && (
+                      <Box
+                        background="status-error"
+                        round="full"
+                        style={{
+                          position: 'absolute',
+                          top: '-4px',
+                          right: '-4px',
+                          width: '8px',
+                          height: '8px',
+                        }}
+                      />
+                    )}
+                  </Box>
+                }
                 hoverIndicator
                 label="Trade"
                 color="white"
