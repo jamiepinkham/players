@@ -29,7 +29,7 @@ const POSITION_PLAYER_LIST_QUERY = `
   }
 `;
 
-export default function PositionPlayerList({ position, onPlayerSelected }) {
+export default function PositionPlayerList({ position, onPlayerSelected, searchTerm = "" }) {
   const { data = { players: null }, refetch: refetchPlayers } = useQuery(
     POSITION_PLAYER_LIST_QUERY,
     {
@@ -42,9 +42,16 @@ export default function PositionPlayerList({ position, onPlayerSelected }) {
   let { players } = data;
   if (!players) return <Spinner size="medium" alignSelf="center" />;
 
+  // Filter players by search term
+  const filteredPlayers = searchTerm
+    ? players.filter((player) =>
+        player.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : players;
+
   return (
     <PositionPlayerStatsTable
-      players={players}
+      players={filteredPlayers}
       position={position}
       onPlayerSelected={onPlayerSelected}
       includeBidLink={true}
