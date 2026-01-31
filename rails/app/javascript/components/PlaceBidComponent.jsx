@@ -6,6 +6,7 @@ import CurrencyFormat from "react-currency-format";
 
 import CurrencyInput from "./CurrencyInput";
 import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
+import PlayerName from "./PlayerName";
 
 const PLAYER_CONTRACT_MINIMUMS_QUERY = `
 query PlayerContractMimimumsQuery($playerId: ID!) {
@@ -83,7 +84,12 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
   if (loading) return <Spinner size="medium" alignSelf="center" />;
   return (
     <Box direction="column" pad="small" overflow="scroll">
-      <Heading level={3}>Bidding on: {player.name}</Heading>
+      <Box direction="row" gap="xsmall" align="center">
+        <Heading level={3} margin="none">Bidding on:</Heading>
+        <Heading level={3} margin="none">
+          <PlayerName name={player.name} bbrefid={player.bbrefid} />
+        </Heading>
+      </Box>
       <PositionPlayerStatsTable players={[player]} position={player.position} />
 
       <Grid

@@ -62,6 +62,7 @@ const PLAYER_QUERY = `
     player(id: $playerId) {
       id
       name
+      bbrefid
       position
       bbrefLink
       stats {
