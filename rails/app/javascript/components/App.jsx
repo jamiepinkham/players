@@ -170,24 +170,7 @@ export default function App(props) {
               border={location.pathname === "/trades" ? { side: "bottom", color: "white", size: "small" } : undefined}
             >
               <Anchor
-                icon={
-                  <Box style={{ position: 'relative' }}>
-                    <History />
-                    {hasPendingTrades && (
-                      <Box
-                        background="status-error"
-                        round="full"
-                        style={{
-                          position: 'absolute',
-                          top: '-4px',
-                          right: '-4px',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                      />
-                    )}
-                  </Box>
-                }
+                icon={<History />}
                 hoverIndicator
                 label="All Trades"
                 color="white"
