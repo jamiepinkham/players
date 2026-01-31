@@ -23,6 +23,10 @@ export default function UpdateUsernameForm({ auth, currentUsername, onSuccess })
     return undefined;
   };
 
+  const isFormValid = () => {
+    return formState.username && validateUsername(formState.username) === undefined;
+  };
+
   return (
     <Form
       validate="change"
@@ -89,7 +93,7 @@ export default function UpdateUsernameForm({ auth, currentUsername, onSuccess })
         )}
       </Box>
       <Box direction="row" justify="between" margin={{ top: "medium" }}>
-        <Button type="submit" primary label="Update Username" />
+        <Button type="submit" primary label="Update Username" disabled={!isFormValid()} />
       </Box>
     </Form>
   );
