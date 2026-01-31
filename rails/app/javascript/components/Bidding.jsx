@@ -20,6 +20,7 @@ import PlaceBidComponent from "./PlaceBidComponent";
 import CurrencyFormat from "react-currency-format";
 import Moment from "react-moment";
 import { max } from "moment-timezone";
+import PlayerName from "./PlayerName";
 
 const BIDDING_CONSOLE_QUERY = `
   query BiddingConsoleQuery($teamId: ID!) {
@@ -42,6 +43,7 @@ const BIDDING_CONSOLE_QUERY = `
                 createdAt
                 player {
                     name
+                    bbrefid
                 }
                 annualAmount
                 lastSeason {
@@ -60,6 +62,7 @@ const PLAYER_QUERY = `
     player(id: $playerId) {
       id
       name
+      bbrefid
       position
       bbrefLink
       stats {
@@ -146,6 +149,12 @@ export default function BiddingConsole() {
                   {
                     property: "player.name",
                     header: "Player",
+                    render: (bid) => (
+                      <PlayerName
+                        name={bid.player.name}
+                        bbrefid={bid.player.bbrefid}
+                      />
+                    ),
                   },
                   {
                     property: "amount",

@@ -66,4 +66,30 @@ class User < ApplicationRecord
   def jwt_payload
     {'adm' => self.is_admin?.to_s, 'tm' => self.team&.id }
   end
+
+  # Override Devise method to send reset instructions to all team emails
+  def send_reset_password_instructions
+    token = set_reset_password_token
+
+    # Get all team emails or fall back to username if no team
+    emails_to_notify = if team&.team_emails&.any?
+      team.team_emails.pluck(:email)
+    else
+      [email] # Falls back to username (aliased as email)
+    end
+
+    # Send to each email
+    emails_to_notify.each do |email_address|
+      UserMailer.reset_password_instructions(self, token, to: email_address).deliver_later
+    end
+
+    token
+  end
+
+  # Override class method as well
+  def self.send_reset_password_instructions(attributes={})
+    recoverable = find_or_initialize_with_errors(reset_password_keys, attributes, :not_found)
+    recoverable.send_reset_password_instructions if recoverable.persisted?
+    recoverable
+  end
 end

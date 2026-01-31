@@ -8,6 +8,7 @@ import { MailOption } from "grommet-icons";
 
 import TeamBudgetInfo from "./TeamBudgetInfo";
 import { Link } from "react-router-dom";
+import PlayerName from "./PlayerName";
 
 const TEAM_QUERY = `
   query TeamQuery($id: ID!) {
@@ -54,14 +55,10 @@ function TeamComponent(props) {
   if (loading) return <Spinner size="medium" />;
 
   if (error) {
-    console.error("TeamComponent GraphQL Error:", error);
-    console.error("URL param id:", id);
-    console.error("Query variables:", { id });
     return (
       <Box pad="medium">
         <Heading level="3" color="status-error">Error loading team</Heading>
-        <p>Error: {JSON.stringify(error, null, 2)}</p>
-        <p>Team ID from URL: {id || "undefined"}</p>
+        <p>{error.message || "Failed to load team data. Please try logging in again."}</p>
       </Box>
     );
   }
@@ -111,7 +108,12 @@ function TeamComponent(props) {
               header: "Name",
               primary: true,
               sortable: true,
-              render: (contract) => contract.player.name
+              render: (contract) => (
+                <PlayerName
+                  name={contract.player.name}
+                  bbrefid={contract.player.bbrefid}
+                />
+              )
             },
             {
               property: "player.position",

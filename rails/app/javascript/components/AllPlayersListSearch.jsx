@@ -11,6 +11,7 @@ import {
 import { useQuery } from 'graphql-hooks';
 import { useAuth } from '../hooks/use_auth';
 import CurrencyFormat from 'react-currency-format';
+import PlayerName from './PlayerName';
 
 const PLAYERS_QUERY = `
 query GetPlayers {
@@ -195,7 +196,7 @@ const AllPlayersListSearch = () => {
             property: 'name',
             header: <Text weight="bold">Name</Text>,
             primary: true,
-            render: (player) => <Text weight="bold">{player.name}</Text>,
+            render: (player) => <PlayerName name={player.name} bbrefid={player.bbrefid} bold />,
           },
           {
             property: 'position',

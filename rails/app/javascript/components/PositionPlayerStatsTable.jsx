@@ -2,6 +2,7 @@ import React from "react";
 import { Button, DataTable } from "grommet";
 import CurrencyFormat from "react-currency-format";
 import LeadingBidComponent from "./LeadingBidComponent";
+import PlayerName from "./PlayerName";
 
 export default function PositionPlayerStatsTable({
   players,
@@ -14,6 +15,9 @@ export default function PositionPlayerStatsTable({
     {
       property: "name",
       header: "Name",
+      render: (player) => (
+        <PlayerName name={player.name} bbrefid={player.bbrefid} />
+      ),
     },
   ];
 
