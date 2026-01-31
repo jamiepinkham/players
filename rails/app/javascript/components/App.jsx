@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 import { getAuthToken, validateToken } from "../utils/auth";
@@ -51,10 +51,18 @@ export default function App(props) {
   const location = useLocation();
 
   // Query for pending trades and active bids to show notification dots
-  const { data: notificationsData } = useQuery(NOTIFICATIONS_QUERY, {
+  const { data: notificationsData, refetch: refetchNotifications } = useQuery(NOTIFICATIONS_QUERY, {
     variables: { teamId: auth.teamId },
     skip: !auth.teamId || !auth.isSignedIn,
+    skipCache: true,
   });
+
+  // Refetch notifications when navigating to keep dots updated
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      refetchNotifications();
+    }
+  }, [location.pathname, auth.teamId, auth.isSignedIn, refetchNotifications]);
 
   const hasPendingTrades = notificationsData?.trades?.length > 0;
   const hasActiveBids = notificationsData?.currentSeason?.activeFreeAgencyPeriod?.bids?.length > 0;
