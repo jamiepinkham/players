@@ -51,13 +51,25 @@ export default function App(props) {
   const location = useLocation();
 
   // Query for pending trades and active bids to show notification dots
+  // Poll every 10 seconds to keep dots updated
   const { data: notificationsData, refetch: refetchNotifications } = useQuery(NOTIFICATIONS_QUERY, {
     variables: { teamId: auth.teamId },
     skip: !auth.teamId || !auth.isSignedIn,
     skipCache: true,
   });
 
-  // Refetch notifications when navigating to keep dots updated
+  // Poll every 10 seconds to catch updates when accepting/rejecting trades or placing bids
+  useEffect(() => {
+    if (auth.teamId && auth.isSignedIn && refetchNotifications) {
+      const interval = setInterval(() => {
+        refetchNotifications();
+      }, 10000); // 10 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [auth.teamId, auth.isSignedIn, refetchNotifications]);
+
+  // Also refetch notifications when navigating to update immediately
   useEffect(() => {
     if (auth.teamId && auth.isSignedIn && refetchNotifications) {
       refetchNotifications();
