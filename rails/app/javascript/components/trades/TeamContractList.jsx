@@ -3,6 +3,7 @@ import { useQuery } from "graphql-hooks";
 import { Text, Spinner, List, CheckBox, Box, FormField, DataTable } from "grommet";
 
 import CurrencyFormat from "react-currency-format";
+import PlayerName from "../PlayerName";
 
 const TEAM_CONTRACTS_QUERY = `
 query TradingConsoleTeamContractsQuery($teamId: ID!)  {
@@ -65,7 +66,7 @@ function TeamContractList({ team, onContractChecked }) {
           header: <Text>Player</Text>,
           property: 'player.name',
           render: item => (
-            <CheckBox label={item.player.name} value={item.id} disabled={!item.player.isTradeEligible} onChange={(change) => {
+            <CheckBox label={<PlayerName name={item.player.name} bbrefid={item.player.bbrefid} />} value={item.id} disabled={!item.player.isTradeEligible} onChange={(change) => {
               onContractChecked(item, change.target.checked)
             }} />
           )

@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "graphql-hooks";
 import { Text, Spinner, CheckBox, DataTable } from "grommet";
 import CurrencyFormat from "react-currency-format";
+import PlayerName from "../../PlayerName";
 
 const TEAM_CONTRACTS_QUERY = `
 query TradingConsoleTeamContractsQuery($teamId: ID!)  {
@@ -21,6 +22,7 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         player {
           name
           bbrefid
+          position
           isTradeEligible
           stats {
             title
@@ -69,7 +71,7 @@ function SelectableContractList({ team, selectedContracts = [], onToggle }) {
           property: 'player.name',
           render: item => (
             <CheckBox
-              label={item.player.name}
+              label={<PlayerName name={item.player.name} bbrefid={item.player.bbrefid} />}
               value={item.id}
               checked={selectedContracts.some(c => c.id === item.id)}
               disabled={!item.player.isTradeEligible}

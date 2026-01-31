@@ -1,6 +1,8 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableFooter, TableHeader, TableRow, Text } from "grommet";
 import CurrencyFormat from "react-currency-format";
+import PlayerName from "../PlayerName";
+
 export default function PendingTradeContracts({ contracts, cash }) {
     return (
         <Table>
@@ -23,7 +25,9 @@ export default function PendingTradeContracts({ contracts, cash }) {
             <TableBody>
                 {contracts.map((contract) =>
                     <TableRow key={contract.id}>
-                        <TableCell>{contract.player.name}</TableCell>
+                        <TableCell>
+                            <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
+                        </TableCell>
                         <TableCell>{contract.player.position}</TableCell>
                         <TableCell>
                             <CurrencyFormat

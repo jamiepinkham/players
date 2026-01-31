@@ -14,6 +14,7 @@ query getCompletedTrades {
             id
             player {
                 name
+                bbrefid
                 position
             }
             amount
@@ -21,8 +22,8 @@ query getCompletedTrades {
                 name
             }
         }
-        fromCashAmount 
-  	
+        fromCashAmount
+
         toTeam {
             name
         }
@@ -30,6 +31,7 @@ query getCompletedTrades {
             id
             player {
                 name
+                bbrefid
                 position
     	    }
     	    amount
