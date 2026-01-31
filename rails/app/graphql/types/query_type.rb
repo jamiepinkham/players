@@ -4,6 +4,7 @@ module Types
     field :team, resolver: Queries::FetchTeam
     field :players, resolver: Queries::FetchPlayers
     field :active_players, resolver: Queries::ActivePlayers
+    field :active_players_paginated, resolver: Queries::ActivePlayersPaginated
     field :player, resolver: Queries::FetchPlayer
     field :player_search, resolver: Queries::SearchPlayers
     field :seasons, resolver: Queries::FetchSeasons
