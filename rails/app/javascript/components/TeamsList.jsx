@@ -3,7 +3,9 @@ import { useQuery } from "graphql-hooks";
 
 import CurrencyFormat from "react-currency-format";
 
-import { DataTable, Anchor } from "grommet";
+import { DataTable, Anchor, Box } from "grommet";
+import LoadingState from "./LoadingState";
+import { DATA_TABLE_THEME } from "../constants/ui";
 
 const LIST_TEAMS_QUERY = `
   query ListTeamsQuery {
@@ -19,11 +21,14 @@ const LIST_TEAMS_QUERY = `
 `;
 
 function TeamsList() {
-  const { data = { teams: [] }, refetch: refetchTeams } =
+  const { loading, data = { teams: [] }, refetch: refetchTeams } =
     useQuery(LIST_TEAMS_QUERY);
 
+  if (loading) return <LoadingState message="Loading teams..." />;
+
   return (
-    <DataTable
+    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <DataTable
       columns={[
         {
           property: "name",
@@ -81,12 +86,9 @@ function TeamsList() {
       data={data.teams}
       sortable={true}
       fill
-      border
-      background={{
-        header: "dark-2",
-        body: ["white", "light-2"],
-      }}
-    />
+      background={DATA_TABLE_THEME.background}
+      />
+    </Box>
   );
 }
 

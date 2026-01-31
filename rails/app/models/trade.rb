@@ -26,7 +26,7 @@ class Trade < ApplicationRecord
     def accept!
         contracts.each do |contract|
             contract.team_id = contract.team_id == from_team_id ? to_team_id : from_team_id
-            contract.summer = false
+            # Summer draftee status is preserved through trades
             contract.save!
         end
 
