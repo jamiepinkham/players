@@ -47,7 +47,9 @@ class SessionsController < Devise::SessionsController
         if request.format.json?
             render json: { status: "ok"}
         else
-            super
+            # Redirect to main app after sign out from admin panel
+            # Users will need to log in through the React app to access admin again
+            redirect_to root_path, notice: "Signed out successfully."
         end
     end
 
