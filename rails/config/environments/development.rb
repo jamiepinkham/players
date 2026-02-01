@@ -1,10 +1,12 @@
+require "active_support/core_ext/integer/time"
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  # In the development environment your application's code is reloaded on
-  # every request. This slows down response time but is perfect for development
+  # In the development environment your application's code is reloaded any time
+  # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  config.enable_reloading = true
 
   # Do not eager load code on boot.
   config.eager_load = false
@@ -12,15 +14,18 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
-  config.public_file_server.enabled = true
-  
+  # Enable server timing
+  config.server_timing = true
+
   # Enable/disable caching. By default caching is disabled.
-  if Rails.root.join('tmp/caching-dev.txt').exist?
+  # Run rails dev:cache to toggle caching.
+  if Rails.root.join("tmp/caching-dev.txt").exist?
     config.action_controller.perform_caching = true
+    config.action_controller.enable_fragment_cache_logging = true
 
     config.cache_store = :memory_store
     config.public_file_server.headers = {
-      'Cache-Control' => 'public, max-age=172800'
+      "Cache-Control" => "public, max-age=#{2.days.to_i}"
     }
   else
     config.action_controller.perform_caching = false
@@ -28,66 +33,41 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-
-
-  # Enable email delivery in development - save to file
-  config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.delivery_method = :file
-  config.action_mailer.file_settings = { location: Rails.root.join('tmp/mails') }
-  config.action_mailer.perform_deliveries = true
+  # Don't care if the mailer can't send.
+  config.action_mailer.raise_delivery_errors = false
 
   config.action_mailer.perform_caching = false
-
-  # Mailgun SMTP Configuration - Using Environment Variables
-  # For development, you can use MailHog or similar tools (e.g., localhost:1025)
-  config.action_mailer.smtp_settings = {
-    address:              ENV['MAILGUN_SMTP_ADDRESS'] || 'localhost',
-    port:                 ENV['MAILGUN_SMTP_PORT']&.to_i || 1025,
-    domain:               ENV['MAILGUN_SMTP_DOMAIN'] || 'localhost',
-    user_name:            ENV['MAILGUN_SMTP_USERNAME'],
-    password:             ENV['MAILGUN_SMTP_PASSWORD'],
-    authentication:       (ENV['MAILGUN_SMTP_AUTHENTICATION'] || 'plain').to_sym,
-    enable_starttls_auto: false  # Typically disabled for local development
-  }
-
-  # Set default from address from environment
-  config.action_mailer.default_options = {
-    from: ENV['MAILER_FROM'] || 'no-reply@billymartinplayersleague.com'
-  }
-
-  config.navigational_formats = []
-  config.api_only = true
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
+  # Raise exceptions for disallowed deprecations.
+  config.active_support.disallowed_deprecation = :raise
+
+  # Tell Active Support which deprecation messages to disallow.
+  config.active_support.disallowed_deprecation_warnings = []
+
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
 
-  # Debug mode disables concatenation and preprocessing of assets.
-  # This option may cause significant delays in view rendering with a large
-  # number of complex assets.
-  config.assets.debug = true
+  # Highlight code that triggered database queries in logs.
+  config.active_record.verbose_query_logs = true
+
+  # Highlight code that enqueued background job in logs.
+  config.active_job.verbose_enqueue_logs = true
 
   # Suppress logger output for asset requests.
   config.assets.quiet = true
-  
 
-  # Raises error for missing translations
-  # config.action_view.raise_on_missing_translations = true
+  # Raises error for missing translations.
+  # config.i18n.raise_on_missing_translations = true
 
-  # Use an evented file watcher to asynchronously detect changes in source code,
-  # routes, locales, etc. This feature depends on the listen gem.
-  # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  # Annotate rendered view with file names.
+  # config.action_view.annotate_rendered_view_with_filenames = true
 
-  config.middleware.use ActionDispatch::Flash
+  # Uncomment if you wish to allow Action Cable access from any origin.
+  # config.action_cable.disable_request_forgery_protection = true
 
-  # Use an evented file watcher to asynchronously detect changes in source code,
-  # routes, locales, etc. This feature depends on the listen gem.
-  # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
-
-  config.assets.precompile += ['graphiql/rails/application.js', 'graphiql/rails/application.css']
-
-  config.hosts.clear
-
+  # Raise error when a before_action's only/except options reference missing actions
+  config.action_controller.raise_on_missing_callback_actions = true
 end

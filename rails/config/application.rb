@@ -1,4 +1,4 @@
-require_relative 'boot'
+require_relative "boot"
 
 require "rails"
 # Pick the frameworks you want:
@@ -13,34 +13,27 @@ require "action_mailer/railtie"
 require "action_view/railtie"
 require "action_cable/engine"
 require "rails/test_unit/railtie"
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
 module BmplFinances
   class Application < Rails::Application
-    # Settings in config/environments/* take precedence over those specified here.
-    # Application configuration should go into files in config/initializers
-    # -- all .rb files in that directory are automatically loaded.
-    Rails.application.routes.default_url_options[:host] = 'players.billymartinplayersleague.com'
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 7.1
 
-    config.middleware.use ActionDispatch::Cookies
-    config.middleware.use Rack::MethodOverride
-    config.middleware.use ActionDispatch::Session::CookieStore, {}
+    # Please, add to the `ignore` list any other `lib` subdirectories that do
+    # not contain `.rb` files, or that should not be reloaded or eager loaded.
+    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    config.autoload_lib(ignore: %w(assets tasks))
 
-    null_regex = Regexp.new(/\Anull\z/)
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        hostnames = [null_regex, 'localhost:5100', 'localhost:3000']
-        hostnames += ENV['CORS_ORIGINS'].split(',') if ENV['CORS_ORIGINS']
-        origins hostnames
-        resource '*',
-          headers: :any,
-          methods: :any,
-          expose: ['Content-Disposition'],
-          credentials: true
-      end
-    end
-    
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
   end
 end
