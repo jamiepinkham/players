@@ -1,6 +1,6 @@
 import React, { useState, useContext, createContext, useEffect } from "react";
 import axios from "axios";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { ClientContext } from "graphql-hooks";
 import { ResponsiveContext } from "grommet";
 import {
@@ -44,7 +44,7 @@ function useProvideAuth() {
   let decodedToken = null;
   try {
     if (token) {
-      decodedToken = jwt_decode(token);
+      decodedToken = jwtDecode(token);
     }
   } catch (error) {
     console.error('Invalid JWT token format:', error);

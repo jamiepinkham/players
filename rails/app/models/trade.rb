@@ -1,5 +1,6 @@
 class Trade < ApplicationRecord
-    has_and_belongs_to_many :contracts
+    has_many :contract_trades, dependent: :destroy
+    has_many :contracts, through: :contract_trades
     belongs_to :from_team, class_name: 'Team'
     belongs_to :to_team, class_name: 'Team'
 
@@ -13,11 +14,11 @@ class Trade < ApplicationRecord
 
     after_create :send_proposal_email
 
-    enum status: {
+    enum :status, {
         pending: 0,
         accepted: 1,
         rejected: 2
-    }, _prefix: true
+    }, prefix: true
 
     def pending?
         status_pending?
@@ -51,11 +52,11 @@ class Trade < ApplicationRecord
 
     private
     def send_proposal_email
-        NotificationMailer.trade_proposal(self.clone).deliver
+        NotificationMailer.trade_proposal(self).deliver_later
     end
 
     def valid_trade_date
-        if !Rails.env.development? && Date.today.month >= 8 && Date.today.month <= 11
+        if !Rails.env.development? && Date.current.month >= 8 && Date.current.month <= 11
             errors.add(:created_at, "Trades cannot be done in August - November")
         end
     end
@@ -75,7 +76,7 @@ class Trade < ApplicationRecord
             if contract.team_id != to_team_id && contract.team_id != from_team_id
                 errors.add(:contracts, "Cannot trade a contract neither team owns - #{contract.player.name}")
             end
-            if contract.created_at > Time.now - 3.months && !contract.summer
+            if contract.created_at > Time.current - 3.months && !contract.summer
                 errors.add(:contracts, "Cannot trade a contract signed in the last 3 months - #{contract.player.name}")
             end
         end

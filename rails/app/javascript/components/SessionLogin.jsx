@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect, useHistory, useLocation } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../hooks/use_auth";
 
@@ -14,26 +14,24 @@ import {
   CardHeader,
   CardBody,
   Paragraph,
-  Image,
 } from "grommet";
 
-import { CircleQuestion, Lock, MailOption } from "grommet-icons";
+import { CircleQuestion } from "grommet-icons";
 
 import sliding from "../images/sliding.jpg";
-console.log(sliding);
 
 function SessionLogin() {
   const auth = useAuth();
   const [hasError, setHasError] = useState(false);
   const [value, setValue] = useState({ username: "", password: "" });
   const location = useLocation();
-  const history = useHistory();
-  const { from } = location.state || { from: { pathname: "/teams" } };
+  const navigate = useNavigate();
+  const from = location.state?.from?.pathname || "/teams";
   function login(username, password) {
     auth.signIn(username, password)
       .then((token) => {
         if (token) {
-          history.replace(from);
+          navigate(from, { replace: true });
         } else {
           setHasError(true);
         }
@@ -111,7 +109,7 @@ function SessionLogin() {
       </Box>
     );
   } else {
-    return <Redirect to="/teams" />;
+    return <Navigate to="/teams" replace />;
   }
 }
 

@@ -36,6 +36,7 @@ rails/config/master.key
 .env.staging
 .env.local
 .env.*.local
+.env.portainer.test
 
 # Portainer stack environment files (ignore actual values, commit template)
 stack.env

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 
 import {
@@ -19,7 +19,7 @@ import { Login, MailOption } from "grommet-icons";
 export default function ForgotPasswordForm() {
   let [value, setValue] = useState({ username: "" });
   let [error, setError] = useState(false);
-  let history = useHistory();
+  let navigate = useNavigate();
   let auth = useAuth();
   let callback = useCallback(
     (value) => {
@@ -28,11 +28,11 @@ export default function ForgotPasswordForm() {
           setError(true);
         } else {
           setError(false);
-          history.push("/sign_in");
+          navigate("/sign_in");
         }
       });
     },
-    [setError]
+    [setError, navigate, auth]
   );
   return (
     <Box align="center">

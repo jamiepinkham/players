@@ -1,5 +1,5 @@
 class NotificationMailer < ApplicationMailer
-    default from: "no-reply@billymartinplayersleague.com"
+    default from: ENV.fetch('NOTIFICATION_FROM_EMAIL', 'no-reply@billymartinplayersleague.com')
     layout 'mailer'
 
     def trade_proposal(trade)
@@ -8,9 +8,15 @@ class NotificationMailer < ApplicationMailer
         # Get all emails for the receiving team that want trade notifications
         recipient_emails = trade.to_team.notification_emails
 
-        # Fallback to test emails if no team emails configured
+        # Fallback to configured admin emails if no team emails configured
         if recipient_emails.empty?
-            recipient_emails = ["jamie@cellardoorsoftware.com", "mike@cellardoorsoftware.com"]
+            fallback_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+            if fallback_emails.any?
+                recipient_emails = fallback_emails
+            else
+                Rails.logger.warn("Trade #{trade.id} notification skipped: no team emails or fallback emails configured")
+                return
+            end
         end
 
         subject = if Rails.env.production?

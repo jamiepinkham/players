@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { useHistory, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 
 import {
@@ -18,13 +18,13 @@ import { Lock } from "grommet-icons";
 export default function ChangePassword() {
   const [value, setValue] = useState({ password: "", password_confirm: "" });
   const { token } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
   const auth = useAuth();
   const callback = useCallback((token, password) => {
     auth.setPassword(token, password).then(() => {
-      history.push("/sign_in");
+      navigate("/sign_in");
     });
-  });
+  }, [auth, navigate, token]);
 
   return (
     <Box align="center">

@@ -1,0 +1,2 @@
+# Convert leading bids to contracts nightly at midnight UTC
+0 0 * * * cd /app && bundle exec rake convert_bids:convert_leading >> /proc/1/fd/1 2>&1

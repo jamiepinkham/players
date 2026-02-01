@@ -4,12 +4,13 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
 
 ## Tech Stack
 
-- **Backend**: Ruby 3.1.2, Rails 6.1
+- **Backend**: Ruby 3.3.7, Rails 8.1.2
 - **Database**: PostgreSQL 16
 - **API**: GraphQL with GraphiQL (development)
 - **Authentication**: Devise with JWT tokens
 - **Admin**: RailsAdmin
-- **Frontend**: React with esbuild
+- **Frontend**: React 18, React Router 6, esbuild
+- **Node**: 20.x
 - **Deployment**: Docker + Portainer
 - **CI/CD**: GitHub Actions → GitHub Container Registry
 
@@ -483,6 +484,54 @@ The application is deployed to production using Portainer with `docker-compose.p
 - Runs with production environment variables
 - Includes restart policies
 - No asset watchers (assets precompiled in image)
+- Includes scheduler sidecar for automated tasks
+
+**Services in production:**
+- `players` - Main Rails web application
+- `scheduler` - Cron sidecar that runs scheduled tasks (converts leading bids nightly at midnight UTC)
+- `db` - PostgreSQL database
+
+#### Testing Portainer Deployment Locally
+
+Before deploying to production, you can test the Portainer configuration locally:
+
+```bash
+# 1. Edit .env.portainer.test with your test values
+cp .env.portainer.test .env.portainer.test.local
+vim .env.portainer.test.local  # Update any values you need
+
+# 2. Pull the latest image (or specify a branch/SHA)
+docker pull ghcr.io/jamiepinkham/players:main
+# Or test a specific branch:
+# docker pull ghcr.io/jamiepinkham/players:your-branch-name
+
+# 3. Start the stack
+docker compose -f docker-compose.portainer.test.yml --env-file .env.portainer.test up
+
+# 4. Run migrations
+docker compose -f docker-compose.portainer.test.yml exec players bundle exec rails db:migrate
+
+# 5. Test the application
+# Open http://localhost:3000
+# Check scheduler logs: docker compose -f docker-compose.portainer.test.yml logs scheduler
+# Test a manual cron run: docker compose -f docker-compose.portainer.test.yml exec scheduler bundle exec rake convert_bids:convert_leading
+
+# 6. Clean up when done
+docker compose -f docker-compose.portainer.test.yml down
+# Or to also remove the database volume:
+docker compose -f docker-compose.portainer.test.yml down -v
+```
+
+**Test a specific image tag:**
+```bash
+# Test your branch before deploying
+IMAGE_TAG=your-branch-name docker compose -f docker-compose.portainer.test.yml --env-file .env.portainer.test up
+```
+
+**Differences from actual Portainer deployment:**
+- Uses local networking instead of external `web` network
+- Uses separate database volume (`pgdata_portainer_test`)
+- Doesn't affect your development environment
 
 #### Initial Deployment
 
@@ -631,6 +680,31 @@ Authorization: Bearer <token>
 - `/health` - Basic health check
 - `/health/ready` - Readiness probe
 - `/health/live` - Liveness probe
+
+## Scheduled Tasks
+
+The application includes automated tasks that run on a schedule in production:
+
+### Convert Leading Bids (Nightly at Midnight UTC)
+
+The `convert_bids:convert_leading` rake task runs automatically every night at midnight UTC via the scheduler sidecar container. This task:
+- Converts leading bids that are >24 hours old to contracts
+- Processes bids for the active free agency period
+- Updates bid statuses (is_leading, is_active) for all players
+
+**Manual execution (if needed):**
+```bash
+# In development
+docker compose exec players bundle exec rake convert_bids:convert_leading
+
+# In production (via Portainer CLI or container shell)
+docker exec -it <scheduler-container-id> bundle exec rake convert_bids:convert_leading
+```
+
+**Configuration:**
+- Schedule is defined in `config/crontab`
+- Runs only in the `scheduler` sidecar (production deployment)
+- Not enabled in local development environment
 
 ## Data Models
 

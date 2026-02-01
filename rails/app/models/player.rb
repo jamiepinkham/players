@@ -35,12 +35,9 @@ class Player < ApplicationRecord
      contracts = Contract.arel_table
 
      stats_present = players[:bbref_stats].not_eq(nil)
-      #  .and(players[:bbref_stats].not_eq(''))
        .and(Arel.sql("players.bbref_stats::jsonb != '{}'::jsonb"))
-      #  .and(Arel.sql("players.bbref_stats::jsonb != ''::jsonb"))
        .and(players[:bbrefid].not_eq(nil))
        .and(players[:bbrefid].not_eq(''))
-      #  .and(Arel.sql("players.bbref_stats::jsonb != '""'::jsonb"))
        .and(Arel.sql("players.bbrefid ~ '^[a-z0-9]{5,10}$'"))
 
 
@@ -87,7 +84,7 @@ class Player < ApplicationRecord
   end
 
   def is_trade_eligible?
-    return self.contract.blank? || self.contract.summer || (self.contract.created_at < (Time.now - 3.months))
+    return self.contract.blank? || self.contract.summer || (self.contract.created_at < (Time.current - 3.months))
   end
 
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF']

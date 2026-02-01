@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../hooks/use_auth";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "graphql-hooks";
 
 import { Tabs, Tab, Box, Button, Heading, Spinner, Text } from "grommet";
@@ -29,7 +29,7 @@ const CURRENT_USER_QUERY = `
 
 export default function Profile() {
   const auth = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { loading, data, refetch } = useQuery(CURRENT_USER_QUERY);
 
   if (loading) return <Spinner size="medium" alignSelf="center" />;
@@ -86,7 +86,7 @@ export default function Profile() {
             label="Sign Out"
             onClick={() => {
               auth.signOut().then(() => {
-                history.push("/");
+                navigate("/");
               });
             }}
             alignSelf="start"

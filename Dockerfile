@@ -1,7 +1,19 @@
 ## Main Rails app
-FROM ruby:3.1.2 AS web
+FROM ruby:3.3.7 AS web
 
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
+
+# Install supercronic (cron for containers)
+ARG TARGETPLATFORM
+RUN case "$TARGETPLATFORM" in \
+      "linux/amd64") \
+        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64 ;; \
+      "linux/arm64") \
+        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64 ;; \
+    esac && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+    chmod +x "$(basename ${SUPERCRONIC_URL})" && \
+    mv "$(basename ${SUPERCRONIC_URL})" "/usr/local/bin/supercronic"
 
 # Install Dart Sass based on architecture
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -14,12 +26,12 @@ RUN ARCH=$(dpkg --print-architecture) && \
     fi
 
 # Install Node.js so ExecJS works
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 RUN npm install -g yarn
 
-# Create a non-root user
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+# Create a non-root user with a home directory
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup --home /home/appuser appuser
 
 WORKDIR /app
 
@@ -28,6 +40,9 @@ RUN gem install bundler foreman && bundle install
 
 # Copy the full app from rails/
 COPY rails/ ./
+
+# Copy crontab for scheduler sidecar
+COPY config/crontab /app/config/crontab
 
 # Set ownership and switch to non-root
 RUN chown -R appuser:appgroup /app
@@ -38,6 +53,9 @@ RUN chmod +x /usr/local/bin/web-entrypoint.sh
 
 # Switch to non-root user
 USER appuser
+
+# Set HOME environment variable
+ENV HOME=/home/appuser
 
 EXPOSE 3000
 

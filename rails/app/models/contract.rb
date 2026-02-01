@@ -9,7 +9,8 @@ class Contract < ApplicationRecord
   belongs_to :first_season, foreign_key: :first_season_id, class_name: 'Season'
   belongs_to :last_season, foreign_key: :last_season_id, class_name: 'Season'
 
-  has_and_belongs_to_many :trades
+  has_many :contract_trades, dependent: :destroy
+  has_many :trades, through: :contract_trades
 
   def first_season_with_fallback
     first_season || Season.order(:id).first
@@ -20,9 +21,9 @@ class Contract < ApplicationRecord
   end
 
   def self.search(search)
-    teams = Team.search(search)
-    players = Player.search(search)
-    Contract.where("team_id in (?) or player_id in (?)", (teams || []).collect{|t| t.id}, (players || []).collect{|p| p.id})
+    team_ids = Team.search(search).pluck(:id)
+    player_ids = Player.search_name(search).pluck(:id)
+    Contract.where(team_id: team_ids).or(Contract.where(player_id: player_ids))
   end
 
   class << self

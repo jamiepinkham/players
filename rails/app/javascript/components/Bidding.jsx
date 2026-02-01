@@ -20,7 +20,6 @@ import TeamBudgetInfo from "./TeamBudgetInfo";
 import PlaceBidComponent from "./PlaceBidComponent";
 import CurrencyFormat from "react-currency-format";
 import Moment from "react-moment";
-import { max } from "moment-timezone";
 import PlayerName from "./PlayerName";
 import EmptyState from "./EmptyState";
 import { DATA_TABLE_THEME } from "../constants/ui";
@@ -124,7 +123,10 @@ export default function BiddingConsole() {
     }
   }, [playerData, data]);
 
-  if (!data.team) return <Spinner size="medium" alignSelf="center" />;
+  if (!data.team || !data.currentSeason?.activeFreeAgencyPeriod) {
+    return <Spinner size="medium" alignSelf="center" />;
+  }
+
   const team = data.team;
   const currentSeason = data.currentSeason;
   const bids = currentSeason.activeFreeAgencyPeriod.bids

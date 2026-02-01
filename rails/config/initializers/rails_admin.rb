@@ -1,7 +1,15 @@
-require 'rails_admin/import_free_agents'
-require 'rails_admin/import_summer_draft'
-require 'rails_admin/deactivate_contracts'
-require 'rails_admin/reset_user_password'
+# Rails 8/Zeitwerk will autoload these from lib/
+# Manual requires cause Zeitwerk::NameError
+# require 'rails_admin/import_free_agents'
+# require 'rails_admin/import_summer_draft'
+# require 'rails_admin/deactivate_contracts'
+# require 'rails_admin/reset_user_password'
+
+# Ensure classes are loaded before registering
+require Rails.root.join('lib', 'rails_admin', 'import_free_agents')
+require Rails.root.join('lib', 'rails_admin', 'import_summer_draft')
+require Rails.root.join('lib', 'rails_admin', 'deactivate_contracts')
+require Rails.root.join('lib', 'rails_admin', 'reset_user_password')
 
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)

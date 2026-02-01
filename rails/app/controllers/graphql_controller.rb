@@ -14,9 +14,15 @@ class GraphqlController < ApplicationController
     }
     result = BmplFinancesSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
-  rescue => e
-    raise e unless Rails.env.development?
-    handle_error_in_development e
+  rescue StandardError => e
+    Rails.logger.error("GraphQL execution error: #{e.class} - #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+
+    if Rails.env.development?
+      handle_error_in_development(e)
+    else
+      render json: { errors: [{ message: "Internal server error" }], data: {} }, status: 500
+    end
   end
 
   private
@@ -42,9 +48,12 @@ class GraphqlController < ApplicationController
   end
 
   def handle_error_in_development(e)
-    logger.error e.message
-    logger.error e.backtrace.join("\n")
-
-    render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+    render json: {
+      errors: [{
+        message: e.message,
+        type: e.class.name
+      }],
+      data: {}
+    }, status: 500
   end
 end

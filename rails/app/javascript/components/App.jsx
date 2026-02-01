@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 import { getAuthToken, validateToken } from "../utils/auth";
 import axios from "axios";
@@ -47,7 +47,7 @@ const NOTIFICATIONS_QUERY = `
 
 export default function App(props) {
   const auth = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Query for pending trades and active bids to show notification dots
@@ -98,9 +98,9 @@ export default function App(props) {
 
   const handleOnClick = useCallback(
     (page) => {
-      history.push(`/${page}`);
+      navigate(`/${page}`);
     },
-    [history]
+    [navigate]
   );
 
   const handleAdminClick = useCallback(async () => {
@@ -109,7 +109,7 @@ export default function App(props) {
 
     if (!token) {
       alert('You must be logged in to access admin.');
-      history.push('/sign_in');
+      navigate('/sign_in');
       return;
     }
 
@@ -118,13 +118,13 @@ export default function App(props) {
 
     if (!isValid) {
       alert('Your session has expired. Please log in again.');
-      history.push('/sign_in');
+      navigate('/sign_in');
       return;
     }
 
     // Navigate to admin_login endpoint which will handle session creation and redirect
     window.location.href = `/admin_login?token=${token}`;
-  }, [history]);
+  }, [navigate]);
   return (
     <Box>
       <Header
@@ -250,22 +250,20 @@ export default function App(props) {
       </Header>
       <Box margin="small">
         <Main pad="small" fill="horizontal">
-          <Switch>
-            <Route exact path="/" component={SessionLogin} />
-            <Route exact path="/sign_in" component={SessionLogin} />
-            <Route exact path="/forgot" component={ForgotPasswordForm} />
-            <Route path="/reset/:token" component={ChangePassword} />
-            <PrivateRoute path="/player_search" component={AllPlayersListSearch} />
-            <PrivateRoute exact path="/teams" component={TeamsList} />
-            <PrivateRoute exact path="/team/:id" component={TeamComponent} />
-            <PrivateRoute exact path="/profile" component={Profile} />
-            <PrivateRoute exact path="/bidding" component={Bidding} />
-            <PrivateRoute exact path='/trade' component={TradeOfferComponent} />
-            <PrivateRoute exact path="/trades" component={CompletedTrades} />
-            <Route path="*">
-              <NoMatch />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route path="/" element={<SessionLogin />} />
+            <Route path="/sign_in" element={<SessionLogin />} />
+            <Route path="/forgot" element={<ForgotPasswordForm />} />
+            <Route path="/reset/:token" element={<ChangePassword />} />
+            <Route path="/player_search" element={<PrivateRoute><AllPlayersListSearch /></PrivateRoute>} />
+            <Route path="/teams" element={<PrivateRoute><TeamsList /></PrivateRoute>} />
+            <Route path="/team/:id" element={<PrivateRoute><TeamComponent /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/bidding" element={<PrivateRoute><Bidding /></PrivateRoute>} />
+            <Route path="/trade" element={<PrivateRoute><TradeOfferComponent /></PrivateRoute>} />
+            <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
+            <Route path="*" element={<NoMatch />} />
+          </Routes>
         </Main>
       </Box>
     </Box>
