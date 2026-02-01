@@ -52,7 +52,7 @@ class Trade < ApplicationRecord
 
     private
     def send_proposal_email
-        NotificationMailer.trade_proposal(self.clone).deliver
+        NotificationMailer.trade_proposal(self).deliver_later
     end
 
     def valid_trade_date
