@@ -1,0 +1,18 @@
+Congratulations!
+
+Your team has successfully signed <%= @player.name %>!
+
+Contract Details:
+  Player: <%= @player.name %> (<%= @player.position %>)
+  Team: <%= @team.name %>
+  Annual Salary: <%= number_to_currency(@contract.amount) %>
+  Contract Length: <%= @contract.first_season.count_seasons_to(@contract.last_season) %> years
+  First Season: <%= @contract.first_season.name %>
+  Final Season: <%= @contract.last_season.name %>
+  Total Contract Value: <%= number_to_currency(@contract.amount * @contract.first_season.count_seasons_to(@contract.last_season)) %>
+
+Your winning bid was the highest offer and remained uncontested for 24 hours.
+
+<%= @player.name %> is now under contract with <%= @team.name %> and will appear on your roster.
+
+Billy Martin Players League

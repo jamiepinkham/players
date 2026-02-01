@@ -13,6 +13,7 @@ class Trade < ApplicationRecord
     scope :accepted, -> { where(status: :accepted) }
 
     after_create :send_proposal_email
+    after_update :send_status_change_email, if: :saved_change_to_status?
 
     enum :status, {
         pending: 0,
@@ -53,6 +54,15 @@ class Trade < ApplicationRecord
     private
     def send_proposal_email
         NotificationMailer.trade_proposal(self).deliver_later
+    end
+
+    def send_status_change_email
+        case status
+        when 'accepted'
+            NotificationMailer.trade_accepted(self).deliver_later
+        when 'rejected'
+            NotificationMailer.trade_rejected(self).deliver_later
+        end
     end
 
     def valid_trade_date

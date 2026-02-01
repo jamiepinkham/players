@@ -1,0 +1,27 @@
+Trade Rejected
+
+<%= @trade.to_team.name %> has declined your trade proposal.
+
+Proposed Trade Details:
+
+<%= @trade.from_team.name %> (your team) would have sent:
+<% @trade.from_contracts.each do |contract| %>
+  - <%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year
+<% end %>
+<% if @trade.from_cash_amount.present? && @trade.from_cash_amount > 0 %>
+  - Cash: <%= number_to_currency(@trade.from_cash_amount) %>
+<% end %>
+
+<%= @trade.from_team.name %> (your team) would have received:
+<% @trade.to_contracts.each do |contract| %>
+  - <%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year
+<% end %>
+<% if @trade.to_cash_amount.present? && @trade.to_cash_amount > 0 %>
+  - Cash: <%= number_to_currency(@trade.to_cash_amount) %>
+<% end %>
+
+No players or cash have been transferred. Your roster remains unchanged.
+
+You can propose a different trade if you'd like to continue negotiations.
+
+Billy Martin Players League

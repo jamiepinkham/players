@@ -1,0 +1,21 @@
+<h2>Great News!</h2>
+
+<p>Your bid for <strong><%= @player.name %></strong> is now the leading bid!</p>
+
+<h3>Bid Details:</h3>
+<ul>
+  <li><strong>Player:</strong> <%= @player.name %> (<%= @player.position %>)</li>
+  <li><strong>Your Team:</strong> <%= @team.name %></li>
+  <li><strong>Annual Amount:</strong> <%= number_to_currency(@bid.annual_amount) %></li>
+  <li><strong>Contract Length:</strong> <%= @bid.contract_length %> years</li>
+  <li><strong>Total Value:</strong> <%= number_to_currency(@bid.total_amount) %></li>
+  <li><strong>Final Season:</strong> <%= @bid.last_season.name %></li>
+</ul>
+
+<p>If your bid remains the highest for 24 hours, the player will be automatically signed to your team.</p>
+
+<p>Keep an eye on your bids - other teams can still outbid you!</p>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>

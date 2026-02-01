@@ -1,0 +1,20 @@
+<h2>You've Been Outbid</h2>
+
+<p>Another team has submitted a higher bid for <strong><%= @player.name %></strong>.</p>
+
+<h3>Your Bid Details:</h3>
+<ul>
+  <li><strong>Player:</strong> <%= @player.name %> (<%= @player.position %>)</li>
+  <li><strong>Your Team:</strong> <%= @team.name %></li>
+  <li><strong>Your Annual Amount:</strong> <%= number_to_currency(@bid.annual_amount) %></li>
+  <li><strong>Contract Length:</strong> <%= @bid.contract_length %> years</li>
+  <li><strong>Total Value:</strong> <%= number_to_currency(@bid.total_amount) %></li>
+</ul>
+
+<p>Your bid is still active, but you'll need to submit a higher bid to win this player.</p>
+
+<p>Log in to the bidding console to increase your offer if you want to secure this player.</p>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>

@@ -27,4 +27,92 @@ class NotificationMailer < ApplicationMailer
 
         mail(to: recipient_emails, subject: subject)
     end
+
+    def bid_became_leading(bid)
+        @bid = bid
+        @player = bid.player
+        @team = bid.team
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Your bid for #{@player.name} is now leading!")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    def bid_lost_leading_status(bid)
+        @bid = bid
+        @player = bid.player
+        @team = bid.team
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Your bid for #{@player.name} has been outbid")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    def bid_converted_to_contract(contract)
+        @contract = contract
+        @player = contract.player
+        @team = contract.team
+        @bid = contract.winning_bid
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Congratulations! You signed #{@player.name}")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    private
+
+    def get_team_emails(team)
+        recipient_emails = team.notification_emails
+
+        if recipient_emails.empty?
+            fallback_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+            if fallback_emails.any?
+                recipient_emails = fallback_emails
+            else
+                Rails.logger.warn("Notification for team #{team.id} skipped: no team emails or fallback emails configured")
+            end
+        end
+
+        recipient_emails
+    end
+
+    def subject_with_env(subject)
+        Rails.env.production? ? subject : "[TEST] #{subject} [TEST]"
+    end
+
+    def trade_accepted(trade)
+        @trade = trade
+
+        # Notify both teams that the trade was accepted
+        from_team_emails = get_team_emails(@trade.from_team)
+        to_team_emails = get_team_emails(@trade.to_team)
+
+        all_emails = (from_team_emails + to_team_emails).uniq
+        return if all_emails.empty?
+
+        subject = subject_with_env("Trade Accepted: #{@trade.from_team.name} ⇄ #{@trade.to_team.name}")
+
+        mail(to: all_emails, subject: subject)
+    end
+
+    def trade_rejected(trade)
+        @trade = trade
+
+        # Only notify the team that proposed the trade
+        recipient_emails = get_team_emails(@trade.from_team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Trade Rejected by #{@trade.to_team.name}")
+
+        mail(to: recipient_emails, subject: subject)
+    end
 end
