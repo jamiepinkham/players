@@ -4,12 +4,13 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
 
 ## Tech Stack
 
-- **Backend**: Ruby 3.1.2, Rails 6.1
+- **Backend**: Ruby 3.3.7, Rails 8.1.2
 - **Database**: PostgreSQL 16
 - **API**: GraphQL with GraphiQL (development)
 - **Authentication**: Devise with JWT tokens
 - **Admin**: RailsAdmin
-- **Frontend**: React with esbuild
+- **Frontend**: React 18, React Router 6, esbuild
+- **Node**: 20.x
 - **Deployment**: Docker + Portainer
 - **CI/CD**: GitHub Actions → GitHub Container Registry
 
