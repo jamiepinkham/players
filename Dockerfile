@@ -10,7 +10,7 @@ RUN ARCH=$(dpkg --print-architecture) && \
       SUPERCRONIC_SHA1SUM=cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b; \
     elif [ "$ARCH" = "arm64" ]; then \
       SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-arm64 && \
-      SUPERCRONIC_SHA1SUM=e2714c43e7c11c093838f9e911e20930d82b78f5; \
+      SUPERCRONIC_SHA1SUM=512f6736450c56555e01b363144c3c9d23abed4c; \
     fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
     echo "${SUPERCRONIC_SHA1SUM}  $(basename ${SUPERCRONIC_URL})" | sha1sum -c - && \
