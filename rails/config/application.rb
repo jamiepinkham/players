@@ -26,8 +26,13 @@ module BmplFinances
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    # Ignore rails_admin custom actions - they're manually required in initializer
-    config.autoload_lib(ignore: %w[assets tasks rails_admin])
+    config.autoload_lib(ignore: %w[assets tasks])
+
+    # Configure Zeitwerk to ignore RailsAdmin custom actions directory
+    # These files are manually required and don't follow Zeitwerk naming conventions
+    config.before_initialize do
+      Rails.autoloaders.main.ignore(Rails.root.join('lib', 'rails_admin'))
+    end
 
     # Configuration for the application, engines, and railties goes here.
     #
