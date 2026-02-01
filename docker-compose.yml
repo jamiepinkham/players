@@ -22,6 +22,7 @@ services:
       - ./rails/lib:/app/lib
       - ./web-entrypoint.sh:/usr/local/bin/web-entrypoint.sh:ro
       - ./rails/Procfile:/app/Procfile:ro
+      - ./rails/package.json:/app/package.json:ro
 
   db:
     image: postgres:16

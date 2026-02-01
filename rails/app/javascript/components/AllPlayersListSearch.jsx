@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Text,
@@ -78,6 +78,8 @@ const AllPlayersListSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortDirection, setSortDirection] = useState('asc');
   const itemsPerPage = 25;
+  const searchInputRef = useRef(null);
+  const wasFocused = useRef(false);
 
   // Debounce search input with 300ms delay
   useEffect(() => {
@@ -87,6 +89,12 @@ const AllPlayersListSearch = () => {
 
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  // Clear name search when position or status filters change
+  useEffect(() => {
+    setSearchInput('');
+    setSearch('');
+  }, [positionFilter, statusFilter]);
 
   // Reset to page 1 when filters or sort changes
   useEffect(() => {
@@ -114,6 +122,13 @@ const AllPlayersListSearch = () => {
   };
 
   const [fetchPlayers, { loading, error, data }] = useManualQuery(PLAYERS_QUERY);
+
+  // Restore focus to search input after data loads if it was focused
+  useEffect(() => {
+    if (wasFocused.current && searchInputRef.current && !loading) {
+      searchInputRef.current.focus();
+    }
+  }, [loading, data]);
 
   // Fetch data whenever variables change
   useEffect(() => {
@@ -184,9 +199,12 @@ const AllPlayersListSearch = () => {
     <Box fill pad="medium" overflow="auto">
       <Box direction="row" gap="small" margin={{ bottom: 'small' }}>
         <TextInput
+          ref={searchInputRef}
           placeholder="Search by name"
           value={searchInput}
           onChange={(event) => setSearchInput(event.target.value)}
+          onFocus={() => wasFocused.current = true}
+          onBlur={() => wasFocused.current = false}
         />
         <Select
           placeholder="All Positions"

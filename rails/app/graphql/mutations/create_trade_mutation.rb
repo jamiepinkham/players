@@ -31,12 +31,17 @@ class Mutations::CreateTradeMutation < Mutations::BaseMutation
         end
 
         t = Trade.new
-        t.contract_ids = (to_contract_ids || []) + (from_contract_ids || [])
         t.to_team_id = to_team_id
         t.from_team_id = from_team_id
         t.from_cash_amount = from_cash
         t.to_cash_amount = to_cash
+
+        # Save trade first, then associate contracts
         if t.save
+            # Set contract_ids after trade is saved (has_many :through requirement)
+            all_contract_ids = (to_contract_ids || []) + (from_contract_ids || [])
+            t.contract_ids = all_contract_ids unless all_contract_ids.empty?
+
             {
                 trade: t,
                 errors: []

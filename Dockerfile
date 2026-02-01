@@ -18,8 +18,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
 RUN npm install -g yarn
 
-# Create a non-root user
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+# Create a non-root user with a home directory
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup --home /home/appuser appuser
 
 WORKDIR /app
 
@@ -38,6 +38,9 @@ RUN chmod +x /usr/local/bin/web-entrypoint.sh
 
 # Switch to non-root user
 USER appuser
+
+# Set HOME environment variable
+ENV HOME=/home/appuser
 
 EXPOSE 3000
 
