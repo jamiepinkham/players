@@ -3,6 +3,20 @@ FROM ruby:3.3.7 AS web
 
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
 
+# Install supercronic (cron for containers) based on architecture
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-amd64 && \
+      SUPERCRONIC_SHA1SUM=cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b; \
+    elif [ "$ARCH" = "arm64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-arm64 && \
+      SUPERCRONIC_SHA1SUM=e2714c43e7c11c093838f9e911e20930d82b78f5; \
+    fi && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+    echo "${SUPERCRONIC_SHA1SUM}  $(basename ${SUPERCRONIC_URL})" | sha1sum -c - && \
+    chmod +x "$(basename ${SUPERCRONIC_URL})" && \
+    mv "$(basename ${SUPERCRONIC_URL})" "/usr/local/bin/supercronic"
+
 # Install Dart Sass based on architecture
 RUN ARCH=$(dpkg --print-architecture) && \
     if [ "$ARCH" = "amd64" ]; then \
@@ -28,6 +42,9 @@ RUN gem install bundler foreman && bundle install
 
 # Copy the full app from rails/
 COPY rails/ ./
+
+# Copy crontab for scheduler sidecar
+COPY config/crontab /app/config/crontab
 
 # Set ownership and switch to non-root
 RUN chown -R appuser:appgroup /app
