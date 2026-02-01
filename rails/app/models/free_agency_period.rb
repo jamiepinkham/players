@@ -24,17 +24,31 @@ class FreeAgencyPeriod < ApplicationRecord
       next unless leading_bid
 
       if leading_active_bid && leading_active_bid.total_amount > leading_bid.total_amount
+        # A new bid has overtaken the current leading bid
+        # Notify the old leading bid owner they've been outbid
+        if leading_bid.id != leading_active_bid.id
+          NotificationMailer.bid_lost_leading_status(leading_bid).deliver_later
+        end
+
         # Bulk update all non-winning bids in a single query each
         player_leading_bids.where.not(id: leading_active_bid.id)
           .update_all(is_active: false, is_leading: false)
         player_active_bids.where.not(id: leading_active_bid.id)
           .update_all(is_active: false, is_leading: false)
 
-        # Update the winning bid
+        # Update the winning bid and notify them
+        was_already_leading = leading_active_bid.is_leading
         leading_active_bid.update!(is_leading: true, is_active: true)
+
+        # Only notify if they just became leading (weren't already)
+        unless was_already_leading
+          NotificationMailer.bid_became_leading(leading_active_bid).deliver_later
+        end
       else
-        # Create contract from leading bid
-        Contract.contract_from_bid(leading_bid)
+        # Leading bid is being converted to a contract
+        # Create contract and notify the winning team
+        contract = Contract.contract_from_bid(leading_bid)
+        NotificationMailer.bid_converted_to_contract(contract).deliver_later
 
         # Bulk update all bids for this player in a single query
         bids.where(player_id: player_id).update_all(is_active: false, is_leading: false)
@@ -51,16 +65,30 @@ class FreeAgencyPeriod < ApplicationRecord
       player_active_bids = bids.active.where(player_id: player_id)
 
       # Find the leading bid (max total_amount) for this player only
-      leading_bid = player_active_bids.max_by(&:total_amount)
+      new_leading_bid = player_active_bids.max_by(&:total_amount)
 
-      next unless leading_bid
+      next unless new_leading_bid
+
+      # Find the previous leading bid (if any)
+      old_leading_bid = player_active_bids.where(is_leading: true).first
+
+      # Notify if leadership changed
+      if old_leading_bid && old_leading_bid.id != new_leading_bid.id
+        # Old leading bid lost status
+        NotificationMailer.bid_lost_leading_status(old_leading_bid).deliver_later
+        # New bid became leading
+        NotificationMailer.bid_became_leading(new_leading_bid).deliver_later
+      elsif !old_leading_bid
+        # First time this bid is becoming leading
+        NotificationMailer.bid_became_leading(new_leading_bid).deliver_later
+      end
 
       # Bulk update all non-leading bids in a single query
-      player_active_bids.where.not(id: leading_bid.id)
+      player_active_bids.where.not(id: new_leading_bid.id)
         .update_all(is_active: false, is_leading: false)
 
       # Update the leading bid
-      leading_bid.update!(is_leading: true, is_active: true)
+      new_leading_bid.update!(is_leading: true, is_active: true)
     end
   end
 

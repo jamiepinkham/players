@@ -27,4 +27,65 @@ class NotificationMailer < ApplicationMailer
 
         mail(to: recipient_emails, subject: subject)
     end
+
+    def bid_became_leading(bid)
+        @bid = bid
+        @player = bid.player
+        @team = bid.team
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Your bid for #{@player.name} is now leading!")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    def bid_lost_leading_status(bid)
+        @bid = bid
+        @player = bid.player
+        @team = bid.team
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Your bid for #{@player.name} has been outbid")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    def bid_converted_to_contract(contract)
+        @contract = contract
+        @player = contract.player
+        @team = contract.team
+        @bid = contract.winning_bid
+
+        recipient_emails = get_team_emails(@team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Congratulations! You signed #{@player.name}")
+
+        mail(to: recipient_emails, subject: subject)
+    end
+
+    private
+
+    def get_team_emails(team)
+        recipient_emails = team.notification_emails
+
+        if recipient_emails.empty?
+            fallback_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+            if fallback_emails.any?
+                recipient_emails = fallback_emails
+            else
+                Rails.logger.warn("Notification for team #{team.id} skipped: no team emails or fallback emails configured")
+            end
+        end
+
+        recipient_emails
+    end
+
+    def subject_with_env(subject)
+        Rails.env.production? ? subject : "[TEST] #{subject} [TEST]"
+    end
 end

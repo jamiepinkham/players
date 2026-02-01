@@ -1,0 +1,17 @@
+Great News!
+
+Your bid for <%= @player.name %> is now the leading bid!
+
+Bid Details:
+  Player: <%= @player.name %> (<%= @player.position %>)
+  Your Team: <%= @team.name %>
+  Annual Amount: <%= number_to_currency(@bid.annual_amount) %>
+  Contract Length: <%= @bid.contract_length %> years
+  Total Value: <%= number_to_currency(@bid.total_amount) %>
+  Final Season: <%= @bid.last_season.name %>
+
+If your bid remains the highest for 24 hours, the player will be automatically signed to your team.
+
+Keep an eye on your bids - other teams can still outbid you!
+
+Billy Martin Players League

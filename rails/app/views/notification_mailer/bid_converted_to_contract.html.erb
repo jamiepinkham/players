@@ -1,0 +1,22 @@
+<h2>🎉 Congratulations!</h2>
+
+<p>Your team has successfully signed <strong><%= @player.name %></strong>!</p>
+
+<h3>Contract Details:</h3>
+<ul>
+  <li><strong>Player:</strong> <%= @player.name %> (<%= @player.position %>)</li>
+  <li><strong>Team:</strong> <%= @team.name %></li>
+  <li><strong>Annual Salary:</strong> <%= number_to_currency(@contract.amount) %></li>
+  <li><strong>Contract Length:</strong> <%= @contract.first_season.count_seasons_to(@contract.last_season) %> years</li>
+  <li><strong>First Season:</strong> <%= @contract.first_season.name %></li>
+  <li><strong>Final Season:</strong> <%= @contract.last_season.name %></li>
+  <li><strong>Total Contract Value:</strong> <%= number_to_currency(@contract.amount * @contract.first_season.count_seasons_to(@contract.last_season)) %></li>
+</ul>
+
+<p>Your winning bid was the highest offer and remained uncontested for 24 hours.</p>
+
+<p><%= @player.name %> is now under contract with <%= @team.name %> and will appear on your roster.</p>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>
