@@ -3,17 +3,17 @@
   "dependencies": {
     "@babel/core": "^7.13.10",
     "@babel/preset-react": "^7.12.13",
-    "@fontsource/fira-sans": "^4.2.2",
+    "@fontsource/fira-sans": "^5",
     "@popperjs/core": "^2.11.8",
-    "@svgr/webpack": "^5.5.0",
+    "@svgr/webpack": "^8",
     "axios": "^1.13.4",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "bootstrap": "^5.3.6",
-    "graphql-hooks": "^5.1.1",
+    "graphql-hooks": "^8",
     "grommet": "^2.17.0",
     "grommet-controls": "^3.0.1",
     "grommet-icons": "^4.5.0",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "locale-currency": "^0.0.2",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.33",
@@ -29,7 +29,7 @@
     "react-moment": "^1.1.1",
     "react-router-dom": "^5.2.0",
     "sass": "^1.88.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^6"
   },
   "devDependencies": {
     "esbuild": "^0.27.2",
