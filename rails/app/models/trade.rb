@@ -56,7 +56,7 @@ class Trade < ApplicationRecord
     end
 
     def valid_trade_date
-        if !Rails.env.development? && Date.today.month >= 8 && Date.today.month <= 11
+        if !Rails.env.development? && Date.current.month >= 8 && Date.current.month <= 11
             errors.add(:created_at, "Trades cannot be done in August - November")
         end
     end
@@ -76,7 +76,7 @@ class Trade < ApplicationRecord
             if contract.team_id != to_team_id && contract.team_id != from_team_id
                 errors.add(:contracts, "Cannot trade a contract neither team owns - #{contract.player.name}")
             end
-            if contract.created_at > Time.now - 3.months && !contract.summer
+            if contract.created_at > Time.current - 3.months && !contract.summer
                 errors.add(:contracts, "Cannot trade a contract signed in the last 3 months - #{contract.player.name}")
             end
         end

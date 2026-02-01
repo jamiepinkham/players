@@ -12,13 +12,12 @@ class Bid < ApplicationRecord
   validates :annual_amount, presence: true, numericality: true
   validates :first_season_id, presence: true
   validates :last_season_id, presence: true
-  #validate :annual_amount_is_high_enough
-  #validate :has_remaining_bids
-  #validate :team_has_enough_funds
 
-  #before_validation :sanitize_annual_amount
-  #after_validation :restore_annual_amount
-  #attr_accessor :original_annual_amount
+  # Note: Business logic validations are intentionally disabled
+  # These checks are performed at the application/UI layer in FreeAgencyPeriod model
+  # - annual_amount_is_high_enough: enforced by free_agency_period.rb minimum_contract_amount
+  # - has_remaining_bids: enforced by UI preventing bid placement when max reached
+  # - team_has_enough_funds: budget checks happen when bids are converted to contracts
 
   scope :leading, -> { where(is_leading: true) }
   scope :active, -> { where(is_active: true) }
