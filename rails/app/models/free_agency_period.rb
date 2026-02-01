@@ -7,62 +7,78 @@ class FreeAgencyPeriod < ApplicationRecord
     set_leading_bids()
   end
 
-  def convert_leading_bids()
-    leading_bids = bids.leading.order(created_at: :desc)
-    active_bids = bids.active.order(created_at: :desc)
-    leading_player_ids = leading_bids.collect { |b| b.player_id }
-    leading_player_ids.each do | player_id | 
-      leading_bid = leading_bids.where(player_id: player_id).max_by &:total_amount
-      leading_active_bid = active_bids.where(player_id: player_id).max_by &:total_amount
-      if leading_active_bid.total_amount > leading_bid.total_amount 
-        leading_bids.where(player_id: player_id).select { |b| b.id != leading_active_bid.id }.each do |b|
-          b.is_active = false
-          b.is_leading = false
-          b.save!
-        end
-        active_bids.where(player_id: player_id).select { |b| b.id != leading_active_bid.id }.each do |b|
-          b.is_active = false
-          b.is_leading = false
-          b.save!
-        end
-        leading_active_bid.is_leading = true
-        leading_active_bid.is_active = true
-        leading_active_bid.save!
+  def convert_leading_bids
+    # Get unique player IDs efficiently without loading full bid objects
+    leading_player_ids = bids.leading.distinct.pluck(:player_id)
+
+    leading_player_ids.each do |player_id|
+      # Query only this player's bids (not all bids)
+      player_leading_bids = bids.leading.where(player_id: player_id)
+      player_active_bids = bids.active.where(player_id: player_id)
+
+      # Find max total_amount for this player only
+      leading_bid = player_leading_bids.max_by(&:total_amount)
+      leading_active_bid = player_active_bids.max_by(&:total_amount)
+
+      # Skip if no bids found
+      next unless leading_bid
+
+      if leading_active_bid && leading_active_bid.total_amount > leading_bid.total_amount
+        # Bulk update all non-winning bids in a single query each
+        player_leading_bids.where.not(id: leading_active_bid.id)
+          .update_all(is_active: false, is_leading: false)
+        player_active_bids.where.not(id: leading_active_bid.id)
+          .update_all(is_active: false, is_leading: false)
+
+        # Update the winning bid
+        leading_active_bid.update!(is_leading: true, is_active: true)
       else
+        # Create contract from leading bid
         Contract.contract_from_bid(leading_bid)
-        active_bids.where(player_id: player_id).update_all(is_active: false, is_leading: false)
-        leading_bids.where(player_id: player_id).update_all(is_active: false, is_leading: false)
+
+        # Bulk update all bids for this player in a single query
+        bids.where(player_id: player_id).update_all(is_active: false, is_leading: false)
       end
     end
   end
 
-  def set_leading_bids()
-    active_bids = bids.active.order(created_at: :desc)
-    active_bid_player_ids = active_bids.collect { |b| b.player_id }
-    active_bid_player_ids.each do | player_id | 
-      leading_bid = active_bids.where(player_id: player_id).max_by &:total_amount
-      active_bids.where(player_id: player_id).select { |b| b.id != leading_bid.id }.each do |b|
-        b.is_active = false
-        b.is_leading = false
-        b.save!
-      end
-      leading_bid.is_leading = true
-      leading_bid.is_active = true
-      leading_bid.save!
+  def set_leading_bids
+    # Get unique player IDs efficiently without loading full bid objects
+    active_player_ids = bids.active.distinct.pluck(:player_id)
+
+    active_player_ids.each do |player_id|
+      # Query only this player's active bids
+      player_active_bids = bids.active.where(player_id: player_id)
+
+      # Find the leading bid (max total_amount) for this player only
+      leading_bid = player_active_bids.max_by(&:total_amount)
+
+      next unless leading_bid
+
+      # Bulk update all non-leading bids in a single query
+      player_active_bids.where.not(id: leading_bid.id)
+        .update_all(is_active: false, is_leading: false)
+
+      # Update the leading bid
+      leading_bid.update!(is_leading: true, is_active: true)
     end
   end
 
   def minimum_bid_for_player_and_season_range(player_id, first_season, last_season)
     season_count = first_season.count_seasons_to(last_season)
-    leading_active_bid = bids.where(is_leading: true).where(player_id: player_id).max_by(&:total_amount)
+
+    # Load all leading bids for this player (typically 0-1 records)
+    # max_by with total_amount calculation is unavoidable here since total_amount
+    # is computed (annual_amount * contract_length), but scope is limited to one player
+    leading_active_bid = bids.where(is_leading: true, player_id: player_id).max_by(&:total_amount)
     minimum_contract_amount = minimum_contract_amount_for_season_range(first_season, last_season)
 
     if leading_active_bid
       minimum_leading_bid_total_amount = leading_active_bid.total_amount * 1.2
       minimum_total_amount = [minimum_leading_bid_total_amount / season_count, minimum_contract_amount].max
-      return minimum_total_amount
+      minimum_total_amount
     else
-      return minimum_contract_amount
+      minimum_contract_amount
     end
   end
 
