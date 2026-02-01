@@ -4,7 +4,7 @@ ruby "3.3.7"
 gem 'dotenv-rails', '~> 3.2', groups: [:development, :test]
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.1.0'
+gem 'rails', '~> 8.1.0'
 # Use postgres as the database for Active Record
 gem 'pg', '~> 1.6'
 gem 'pg_search'
