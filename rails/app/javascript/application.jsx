@@ -15,7 +15,7 @@
 // const imagePath = (name) => images(name, true)
 
 import React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { ClientContext, GraphQLClient } from "graphql-hooks";
 import { ProvideAuth } from "./hooks/use_auth"
 import { BrowserRouter as Router } from "react-router-dom";
@@ -92,4 +92,7 @@ function AppShell() {
   );
 }
 
-render(<AppShell />, document.getElementById("app-root"));// Entry point for the build script in your package.json
+const root = createRoot(document.getElementById("app-root"));
+root.render(<AppShell />);
+
+// Entry point for the build script in your package.json
