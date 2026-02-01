@@ -1,0 +1,37 @@
+<h2>❌ Trade Rejected</h2>
+
+<p><strong><%= @trade.to_team.name %></strong> has declined your trade proposal.</p>
+
+<h3>Proposed Trade Details:</h3>
+
+<div style="margin: 20px 0;">
+  <h4><%= @trade.from_team.name %> (your team) would have sent:</h4>
+  <ul>
+    <% @trade.from_contracts.each do |contract| %>
+      <li><%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year</li>
+    <% end %>
+    <% if @trade.from_cash_amount.present? && @trade.from_cash_amount > 0 %>
+      <li><strong>Cash:</strong> <%= number_to_currency(@trade.from_cash_amount) %></li>
+    <% end %>
+  </ul>
+</div>
+
+<div style="margin: 20px 0;">
+  <h4><%= @trade.from_team.name %> (your team) would have received:</h4>
+  <ul>
+    <% @trade.to_contracts.each do |contract| %>
+      <li><%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year</li>
+    <% end %>
+    <% if @trade.to_cash_amount.present? && @trade.to_cash_amount > 0 %>
+      <li><strong>Cash:</strong> <%= number_to_currency(@trade.to_cash_amount) %></li>
+    <% end %>
+  </ul>
+</div>
+
+<p>No players or cash have been transferred. Your roster remains unchanged.</p>
+
+<p>You can propose a different trade if you'd like to continue negotiations.</p>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>

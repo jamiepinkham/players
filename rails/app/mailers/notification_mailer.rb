@@ -88,4 +88,31 @@ class NotificationMailer < ApplicationMailer
     def subject_with_env(subject)
         Rails.env.production? ? subject : "[TEST] #{subject} [TEST]"
     end
+
+    def trade_accepted(trade)
+        @trade = trade
+
+        # Notify both teams that the trade was accepted
+        from_team_emails = get_team_emails(@trade.from_team)
+        to_team_emails = get_team_emails(@trade.to_team)
+
+        all_emails = (from_team_emails + to_team_emails).uniq
+        return if all_emails.empty?
+
+        subject = subject_with_env("Trade Accepted: #{@trade.from_team.name} ⇄ #{@trade.to_team.name}")
+
+        mail(to: all_emails, subject: subject)
+    end
+
+    def trade_rejected(trade)
+        @trade = trade
+
+        # Only notify the team that proposed the trade
+        recipient_emails = get_team_emails(@trade.from_team)
+        return if recipient_emails.empty?
+
+        subject = subject_with_env("Trade Rejected by #{@trade.to_team.name}")
+
+        mail(to: recipient_emails, subject: subject)
+    end
 end

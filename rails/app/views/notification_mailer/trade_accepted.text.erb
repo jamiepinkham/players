@@ -1,0 +1,27 @@
+Trade Accepted!
+
+The trade between <%= @trade.from_team.name %> and <%= @trade.to_team.name %> has been accepted!
+
+Trade Details:
+
+<%= @trade.from_team.name %> receives:
+<% @trade.to_contracts.each do |contract| %>
+  - <%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year
+<% end %>
+<% if @trade.to_cash_amount.present? && @trade.to_cash_amount > 0 %>
+  - Cash: <%= number_to_currency(@trade.to_cash_amount) %>
+<% end %>
+
+<%= @trade.to_team.name %> receives:
+<% @trade.from_contracts.each do |contract| %>
+  - <%= contract.player.name %> (<%= contract.player.position %>) - <%= number_to_currency(contract.amount) %>/year
+<% end %>
+<% if @trade.from_cash_amount.present? && @trade.from_cash_amount > 0 %>
+  - Cash: <%= number_to_currency(@trade.from_cash_amount) %>
+<% end %>
+
+The player contracts have been transferred and team budgets have been updated.
+
+Check your team roster to see your new players!
+
+Billy Martin Players League
