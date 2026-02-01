@@ -491,6 +491,48 @@ The application is deployed to production using Portainer with `docker-compose.p
 - `scheduler` - Cron sidecar that runs scheduled tasks (converts leading bids nightly at midnight UTC)
 - `db` - PostgreSQL database
 
+#### Testing Portainer Deployment Locally
+
+Before deploying to production, you can test the Portainer configuration locally:
+
+```bash
+# 1. Edit .env.portainer.test with your test values
+cp .env.portainer.test .env.portainer.test.local
+vim .env.portainer.test.local  # Update any values you need
+
+# 2. Pull the latest image (or specify a branch/SHA)
+docker pull ghcr.io/jamiepinkham/players:main
+# Or test a specific branch:
+# docker pull ghcr.io/jamiepinkham/players:your-branch-name
+
+# 3. Start the stack
+docker compose -f docker-compose.portainer.test.yml --env-file .env.portainer.test up
+
+# 4. Run migrations
+docker compose -f docker-compose.portainer.test.yml exec players bundle exec rails db:migrate
+
+# 5. Test the application
+# Open http://localhost:3000
+# Check scheduler logs: docker compose -f docker-compose.portainer.test.yml logs scheduler
+# Test a manual cron run: docker compose -f docker-compose.portainer.test.yml exec scheduler bundle exec rake convert_bids:convert_leading
+
+# 6. Clean up when done
+docker compose -f docker-compose.portainer.test.yml down
+# Or to also remove the database volume:
+docker compose -f docker-compose.portainer.test.yml down -v
+```
+
+**Test a specific image tag:**
+```bash
+# Test your branch before deploying
+IMAGE_TAG=your-branch-name docker compose -f docker-compose.portainer.test.yml --env-file .env.portainer.test up
+```
+
+**Differences from actual Portainer deployment:**
+- Uses local networking instead of external `web` network
+- Uses separate database volume (`pgdata_portainer_test`)
+- Doesn't affect your development environment
+
 #### Initial Deployment
 
 **Step 1: Prepare Environment Variables**
