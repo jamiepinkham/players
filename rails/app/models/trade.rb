@@ -1,5 +1,6 @@
 class Trade < ApplicationRecord
-    has_and_belongs_to_many :contracts
+    has_many :contract_trades, dependent: :destroy
+    has_many :contracts, through: :contract_trades
     belongs_to :from_team, class_name: 'Team'
     belongs_to :to_team, class_name: 'Team'
 
@@ -13,11 +14,11 @@ class Trade < ApplicationRecord
 
     after_create :send_proposal_email
 
-    enum status: {
+    enum :status, {
         pending: 0,
         accepted: 1,
         rejected: 2
-    }, _prefix: true
+    }, prefix: true
 
     def pending?
         status_pending?

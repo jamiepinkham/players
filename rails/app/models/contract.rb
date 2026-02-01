@@ -9,7 +9,8 @@ class Contract < ApplicationRecord
   belongs_to :first_season, foreign_key: :first_season_id, class_name: 'Season'
   belongs_to :last_season, foreign_key: :last_season_id, class_name: 'Season'
 
-  has_and_belongs_to_many :trades
+  has_many :contract_trades, dependent: :destroy
+  has_many :trades, through: :contract_trades
 
   def first_season_with_fallback
     first_season || Season.order(:id).first
