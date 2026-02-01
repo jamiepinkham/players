@@ -10,43 +10,46 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[6.1].define(version: 2026_01_13_050000) do
-
+ActiveRecord::Schema[8.1].define(version: 2026_02_01_014811) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
-  enable_extension "plpgsql"
 
   create_table "bids", id: :serial, force: :cascade do |t|
-    t.integer "player_id"
-    t.integer "team_id"
-    t.integer "number_of_years"
     t.decimal "annual_amount"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer "contract_id"
+    t.datetime "created_at", precision: nil, null: false
+    t.integer "first_season_id"
+    t.integer "free_agency_period_id"
     t.boolean "is_active", default: true, null: false
     t.boolean "is_leading", default: false, null: false
-    t.integer "contract_id"
-    t.integer "free_agency_period_id"
-    t.integer "first_season_id"
     t.integer "last_season_id"
+    t.integer "number_of_years"
+    t.integer "player_id"
+    t.integer "team_id"
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["first_season_id"], name: "index_bids_on_first_season_id"
+    t.index ["free_agency_period_id", "team_id", "is_active"], name: "index_bids_on_period_team_active"
     t.index ["free_agency_period_id"], name: "index_bids_on_free_agency_period_id"
     t.index ["last_season_id"], name: "index_bids_on_last_season_id"
+    t.index ["player_id", "is_active"], name: "index_bids_on_player_id_and_is_active"
+    t.index ["player_id"], name: "index_bids_on_player_id"
+    t.index ["team_id"], name: "index_bids_on_team_id"
   end
 
   create_table "contracts", id: :serial, force: :cascade do |t|
-    t.decimal "amount"
-    t.integer "final_year"
-    t.integer "team_id"
-    t.integer "player_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.boolean "active", default: true
-    t.boolean "summer"
-    t.boolean "franchise"
+    t.decimal "amount"
     t.integer "bid_id"
+    t.datetime "created_at", precision: nil, null: false
+    t.integer "final_year"
     t.integer "first_season_id"
+    t.boolean "franchise"
     t.integer "last_season_id"
+    t.integer "player_id"
+    t.boolean "summer"
+    t.integer "team_id"
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["active"], name: "index_contracts_on_active"
     t.index ["bid_id"], name: "index_contracts_on_bid_id"
     t.index ["first_season_id", "last_season_id"], name: "index_contracts_on_first_season_id_and_last_season_id"
@@ -59,101 +62,112 @@ ActiveRecord::Schema[6.1].define(version: 2026_01_13_050000) do
 
   create_table "contracts_trades", force: :cascade do |t|
     t.integer "contract_id"
+    t.datetime "created_at", null: false
     t.integer "trade_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "updated_at", null: false
+    t.index ["contract_id"], name: "index_contracts_trades_on_contract_id"
+    t.index ["trade_id", "contract_id"], name: "index_contracts_trades_on_trade_id_and_contract_id", unique: true
+    t.index ["trade_id"], name: "index_contracts_trades_on_trade_id"
   end
 
   create_table "free_agency_periods", id: :serial, force: :cascade do |t|
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "end_date", precision: nil
     t.boolean "is_active"
-    t.integer "season_id"
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.integer "max_bids_for_team", default: 7
     t.integer "max_contract_length", default: 5
+    t.integer "season_id"
+    t.datetime "start_date", precision: nil
+    t.datetime "updated_at", precision: nil, null: false
+    t.index ["is_active"], name: "index_free_agency_periods_on_is_active"
     t.index ["season_id"], name: "index_free_agency_periods_on_season_id"
   end
 
   create_table "jwt_denylist", id: :serial, force: :cascade do |t|
+    t.datetime "exp", precision: nil, null: false
     t.string "jti", null: false
-    t.datetime "exp", null: false
+    t.index ["exp"], name: "index_jwt_denylist_on_exp"
     t.index ["jti"], name: "index_jwt_denylist_on_jti"
   end
 
   create_table "players", id: :serial, force: :cascade do |t|
-    t.string "name"
-    t.string "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "bbrefid"
     t.string "bbref_minors"
     t.json "bbref_stats"
+    t.string "bbrefid"
+    t.datetime "created_at", precision: nil, null: false
+    t.string "name"
+    t.string "position"
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["bbrefid"], name: "index_players_on_bbrefid"
     t.index ["name"], name: "index_players_on_name"
     t.index ["position"], name: "index_players_on_position"
   end
 
   create_table "seasons", id: :serial, force: :cascade do |t|
-    t.string "name"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "end_date", precision: nil
     t.boolean "is_active"
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "previous_season_id"
-    t.bigint "next_season_id"
     t.boolean "is_finished", default: false
+    t.string "name"
+    t.bigint "next_season_id"
+    t.bigint "previous_season_id"
+    t.datetime "start_date", precision: nil
+    t.datetime "updated_at", precision: nil, null: false
+    t.index ["is_active"], name: "index_seasons_on_is_active"
   end
 
   create_table "team_emails", force: :cascade do |t|
-    t.bigint "team_id", null: false
+    t.datetime "created_at", null: false
     t.string "email", null: false
     t.boolean "primary", default: false, null: false
     t.boolean "receive_trade_notifications", default: true, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "team_id", null: false
+    t.datetime "updated_at", null: false
     t.index ["team_id", "email"], name: "index_team_emails_on_team_id_and_email", unique: true
     t.index ["team_id"], name: "index_team_emails_on_team_id"
   end
 
   create_table "teams", id: :serial, force: :cascade do |t|
-    t.string "name"
     t.decimal "budget"
-    t.string "stadium"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "comment"
+    t.datetime "created_at", precision: nil, null: false
+    t.string "name"
+    t.string "stadium"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "trades", force: :cascade do |t|
-    t.integer "from_team_id", null: false
-    t.integer "to_team_id", null: false
+    t.datetime "created_at", null: false
     t.integer "from_cash_amount", default: 0, null: false
-    t.integer "to_cash_amount", default: 0, null: false
-    t.integer "status", default: 0, null: false
+    t.integer "from_team_id", null: false
     t.string "note"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.integer "status", default: 0, null: false
+    t.integer "to_cash_amount", default: 0, null: false
+    t.integer "to_team_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["from_team_id"], name: "index_trades_on_from_team_id"
+    t.index ["status", "from_team_id"], name: "index_trades_on_status_and_from_team_id"
+    t.index ["status", "to_team_id"], name: "index_trades_on_status_and_to_team_id"
+    t.index ["status"], name: "index_trades_on_status"
+    t.index ["to_team_id"], name: "index_trades_on_to_team_id"
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
-    t.string "username", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "current_sign_in_at", precision: nil
     t.inet "current_sign_in_ip"
-    t.inet "last_sign_in_ip"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "name"
-    t.integer "team_id"
+    t.string "encrypted_password", default: "", null: false
     t.boolean "is_admin", default: false, null: false
+    t.datetime "last_sign_in_at", precision: nil
+    t.inet "last_sign_in_ip"
+    t.string "name"
+    t.datetime "remember_created_at", precision: nil
+    t.datetime "reset_password_sent_at", precision: nil
+    t.string "reset_password_token"
+    t.integer "sign_in_count", default: 0, null: false
+    t.integer "team_id"
+    t.datetime "updated_at", precision: nil, null: false
+    t.string "username", default: "", null: false
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["team_id"], name: "index_users_on_team_id"
     t.index ["username"], name: "index_users_on_username", unique: true
