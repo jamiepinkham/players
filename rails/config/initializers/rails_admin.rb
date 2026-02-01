@@ -279,5 +279,7 @@ RailsAdmin.config do |config|
   end
 
   config.excluded_models << JwtDenylist
+  config.excluded_models << ContractTrade
+  config.excluded_models << TeamEmail
 
 end
