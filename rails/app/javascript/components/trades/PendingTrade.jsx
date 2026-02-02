@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Grid, Box, Text, Button, Spinner } from "grommet";
+import { Box, Text, Button, Spinner } from "grommet";
+import { FormUp, FormDown } from "grommet-icons";
 import PendingTradeContracts from './PendingTradeContracts';
 
 
 function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
     const [isAccepting, setIsAccepting] = useState(false);
     const [isRejecting, setIsRejecting] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     let fromContracts, fromCashAmount, fromTeamName, toContracts, toCashAmount, toTeamName;
 
     if (myTeamId === trade.fromTeam.id) {
@@ -39,47 +41,71 @@ function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
     }
 
     return (
-        <Grid
-            rows={['xsmall', 'xxxsmall']}
-            columns={['1/2', '1/2']}
-            gap='small'
-            align='center'
-            areas={[
-                { name: 'footer', start: [1, 1], end: [1, 1] },
-                { name: 'from', start: [0, 0], end: [0, 0] },
-                { name: 'to', start: [1, 0], end: [1, 0] },
-            ]}>
-            <Box gridArea='from'>
-                <Text>{fromTeamName} send</Text>
-                {fromContracts}
+        <Box
+            round="small"
+            overflow="hidden"
+            border={{ color: "border", size: "xsmall" }}
+        >
+            <Box
+                direction="row"
+                justify="between"
+                align="center"
+                pad="medium"
+                background="light-1"
+                onClick={() => setIsExpanded(!isExpanded)}
+                style={{ cursor: 'pointer' }}
+                hoverIndicator
+            >
+                <Box direction="row" gap="medium" align="center">
+                    <Text weight="bold">{fromTeamName}</Text>
+                    <Text color="text-weak">↔</Text>
+                    <Text weight="bold">{toTeamName}</Text>
+                </Box>
+                <Box direction="row" gap="small" align="center">
+                    <Text size="small" color="text-weak">
+                        {trade.fromContracts.length + trade.toContracts.length} players
+                    </Text>
+                    {isExpanded ? <FormUp /> : <FormDown />}
+                </Box>
             </Box>
-            <Box gridArea='to'>
-                <Text>{toTeamName} send</Text>
-                {toContracts}
-            </Box>
-            <Box gridArea='footer' gap='small' alignSelf='end'>
-                {trade.toTeam.id == myTeamId &&
-                    <Button
-                        pad="small"
-                        align='end'
-                        primary
-                        onClick={acceptTrade}
-                        label={isAccepting ? "Accepting..." : "Accept"}
-                        icon={isAccepting ? <Spinner size="xsmall" /> : undefined}
-                        disabled={isAccepting || isRejecting}
-                    />
-                }
-                <Button
-                    pad="small"
-                    align='end'
-                    secondary
-                    onClick={rejectTrade}
-                    label={isRejecting ? "Rejecting..." : "Reject"}
-                    icon={isRejecting ? <Spinner size="xsmall" /> : undefined}
-                    disabled={isAccepting || isRejecting}
-                />
-            </Box>
-        </Grid>
+            {isExpanded && (
+                <Box pad="small" background="light-1" gap="small">
+                    <Box direction="row" gap="small">
+                        <Box flex>
+                            <Box pad={{ bottom: "xsmall" }}>
+                                <Text weight="bold">{fromTeamName} sends</Text>
+                            </Box>
+                            {fromContracts}
+                        </Box>
+                        <Box flex>
+                            <Box pad={{ bottom: "xsmall" }}>
+                                <Text weight="bold">{toTeamName} sends</Text>
+                            </Box>
+                            {toContracts}
+                        </Box>
+                    </Box>
+                    <Box direction="row" gap="small" justify="end" pad={{ top: "small" }}>
+                        {trade.toTeam.id == myTeamId &&
+                            <Button
+                                primary
+                                size="large"
+                                onClick={acceptTrade}
+                                label={isAccepting ? "Accepting..." : "Accept"}
+                                icon={isAccepting ? <Spinner size="xsmall" /> : undefined}
+                                disabled={isAccepting || isRejecting}
+                            />
+                        }
+                        <Button
+                            size="large"
+                            onClick={rejectTrade}
+                            label={isRejecting ? "Rejecting..." : "Reject"}
+                            icon={isRejecting ? <Spinner size="xsmall" /> : undefined}
+                            disabled={isAccepting || isRejecting}
+                        />
+                    </Box>
+                </Box>
+            )}
+        </Box>
     );
 }
 

@@ -1,5 +1,6 @@
-import React from "react";
-import { Button, DataTable, Box } from "grommet";
+import React, { useState } from "react";
+import { Button, DataTable, Box, Text, Grid } from "grommet";
+import { Currency } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
 import LeadingBidComponent from "./LeadingBidComponent";
 import PlayerName from "./PlayerName";
@@ -10,157 +11,281 @@ export default function PositionPlayerStatsTable({
   position,
   onPlayerSelected,
   includeBidLink,
-  includeLeadingBid
+  includeLeadingBid,
+  showContractMinimums = false,
+  showAllBids = false,
+  defaultExpanded = false,
+  showContractAccordion = false,
+  teamId
 }) {
-  let columns = [
-    {
-      property: "name",
-      header: "Name",
-      render: (player) => (
-        <PlayerName name={player.name} bbrefid={player.bbrefid} />
-      ),
-    },
-  ];
-
-  if (includeBidLink) {
-    columns.push({
-      header: "Bid",
-      render: (player) => (
-        <Button onClick={(e) => onPlayerSelected(player)}>Bid</Button>
-      ),
-    });
-  }
-
-  if (includeLeadingBid) {
-      columns.push({
-          header: "Leading Bid",
-          render: (player) => (
-              <LeadingBidComponent player={player} />
-          )
-      })
-  }
-
   players = players.filter((player) => player.stats.length > 0);
 
-  if (position === "SP" || position === "RP") {
-    columns.push({ header: "IP", property: "innings_pitched" });
-    columns.push({ header: "ERA", property: "era" });
-    columns.push({ header: "W", property: "wins" });
-    columns.push({ header: "L", property: "losses" });
-    columns.push({ header: "SV", property: "saves" });
-    columns.push({ header: "G", property: "games" });
-    columns.push({ header: 'GS', property: "games_started" });
-    columns.push({ header: "K/9", property: "strikeout_per_nine" });
-    columns.push({ header: "BB/9", property: "walk_per_nine" });
-    columns.push({ header: "HR/9", property: "homeruns_per_nine" });
-    columns.push({ header: "WAR", property: "war"})
-
-    players.forEach((player) => {
-      player.innings_pitched = parseInt(
-        player.stats.filter((stat) => stat.title == "IP")[0]?.value,
-        10
-      );
-      player.era = parseFloat(
-        player.stats.filter((stat) => stat.title == "ERA")[0]?.value
-      );
-      player.wins = parseInt(
-        player.stats.filter((stat) => stat.title == "W")[0]?.value,
-        10
-      );
-      player.losses = parseInt(
-        player.stats.filter((stat) => stat.title == "L")[0]?.value,
-        10
-      );
-      player.saves = parseInt(
-        player.stats.filter((stat) => stat.title == "SV")[0]?.value,
-        10
-      );
-      player.games = parseInt(
-        player.stats.filter((stat) => stat.title == "G")[0]?.value,
-        10
-      );
-      player.games_started = parseInt(player.stats.filter(stat => stat.title == 'GS')[0]?.value, 10);
-      player.strikeout_per_nine = parseFloat(
-        player.stats.filter((stat) => stat.title == "SO9")[0]
-          ?.value
-      );
-      player.walk_per_nine = parseFloat(
-        player.stats.filter(
-          (stat) => stat.title == "BB9")[0]?.value
-      );
-      player.homeruns_per_nine = parseFloat(
-        player.stats.filter((stat) => stat.title == "HR9")[0]
-          ?.value
-      );
-      player.war = parseFloat(
-        player.stats.filter((stat) => stat.title == "WAR")[0]?.value
-      );
+  const formatPlayerStats = (player) => {
+    const stats = {};
+    player.stats.forEach(stat => {
+      stats[stat.title] = stat.value;
     });
-  } else {
-    columns.push({ header: "Positions", property: "position" });
-    columns.push({ header: "PA", property: "plate_appearances" });
-    columns.push({ header: "HR", property: "home_runs" });
-    columns.push({ header: "R", property: "runs" });
-    columns.push({ header: "RBI", property: "rbi" });
-    columns.push({ header: "SB", property: "stolen_bases" });
-    columns.push({ header: "AVG", property: "average" });
-    columns.push({ header: "OBP", property: "obp" });
-    columns.push({ header: "SLG", property: "slugging" });
-    columns.push({ header: "OPS", property: "ops" });
-    columns.push({ header: "WAR", property: "war" });
+    return stats;
+  };
 
-    players.forEach((player) => {
-      player.plate_appearances = parseInt(
-        player.stats.filter((stat) => stat.title == "PA")[0]?.value,
-        10
-      );
-      player.home_runs = parseInt(
-        player.stats.filter((stat) => stat.title == "HR")[0]?.value,
-        10
-      );
-      player.runs = parseInt(
-        player.stats.filter((stat) => stat.title == "R")[0]?.value,
-        10
-      );
-      player.rbi = parseInt(
-        player.stats.filter((stat) => stat.title == "RBI")[0]?.value,
-        10
-      );
-      player.stolen_bases = parseInt(
-        player.stats.filter((stat) => stat.title == "SB")[0]?.value,
-        10
-      );
-      player.average = player.stats.filter(
-        (stat) => stat.title == "BA"
-      )[0]?.value;
-      player.obp = player.stats.filter(
-        (stat) => stat.title == "OBP"
-      )[0]?.value;
-      player.slugging = player.stats.filter(
-        (stat) => stat.title == "SLG"
-      )[0]?.value;
-      player.ops = player.stats.filter(
-        (stat) => stat.title == "OPS"
-      )[0]?.value;
-      player.war = parseFloat(
-        player.stats.filter((stat) => stat.title == "WAR")[0]?.value
-      );
-    });
-  }
+  const renderPlayerLabel = (player) => {
+    const stats = formatPlayerStats(player);
 
+    const statsContent = position === "SP" || position === "RP" ? (
+      <>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">IP: {stats.IP}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">ERA: {stats.ERA}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">W: {stats.W}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">L: {stats.L}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">SV: {stats.SV}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+      </>
+    ) : (
+      <>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">PA: {stats.PA}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">HR: {stats.HR}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">R: {stats.R}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">RBI: {stats.RBI}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">AVG: {stats.BA}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">OPS: {stats.OPS}</Text></Box>
+        <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+      </>
+    );
+
+    const contractSummary = (showContractAccordion && player.contractMinimums) ? (
+      <Text size="xsmall" color="text-weak">
+        {player.contractMinimums.length > 0
+          ? `Min: ${new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(player.contractMinimums[0].amount)}`
+          : "No contract options"}
+        {` • ${player.bids ? player.bids.length : 0} ${(player.bids && player.bids.length === 1) ? 'bid' : 'bids'}`}
+      </Text>
+    ) : null;
+
+    return (
+      <Box direction="row" justify="between" align="center" pad="small" width="100%" gap="small">
+        <Box width="medium" gap="xxsmall">
+          <PlayerName name={player.name} bbrefid={player.bbrefid} bold />
+          {contractSummary}
+        </Box>
+        <Box flex direction="row" gap="large" align="center" justify="end">
+          {statsContent}
+        </Box>
+      </Box>
+    );
+  };
+
+  const [activeIndexes, setActiveIndexes] = useState(
+    defaultExpanded && players.length === 1 ? [0] : []
+  );
 
   return (
     <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
-      <DataTable
-        columns={columns}
-        data={players}
-        sortable={true}
-        fill
-        background={{
-          header: "dark-1",
-          body: ["white", "light-1"]
-        }}
-      />
+      {players.map((player, idx) => {
+          const bid = player.bids ? player.bids[0] : null;
+
+          // Check if the current team has already bid on this player
+          const hasExistingBid = teamId && player.bids?.some(bid => {
+            return String(bid.team.id) === String(teamId);
+          });
+
+          return (
+            <Box key={player.id} border={{ side: idx > 0 ? "top" : undefined, color: "border", size: "xsmall" }}>
+              <Box direction="row" align="center">
+                <Box
+                  flex
+                  onClick={() => {
+                    const newIndexes = activeIndexes.includes(idx)
+                      ? activeIndexes.filter(i => i !== idx)
+                      : [...activeIndexes, idx];
+                    setActiveIndexes(newIndexes);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {renderPlayerLabel(player)}
+                </Box>
+                {includeBidLink && (
+                  <Box pad={{ right: "small" }}>
+                    <Button
+                      primary={!hasExistingBid}
+                      size="small"
+                      label={hasExistingBid ? "Bid Placed" : "Place Bid"}
+                      icon={<Currency color={hasExistingBid ? "status-ok" : "white"} />}
+                      disabled={hasExistingBid}
+                      onClick={() => onPlayerSelected(player)}
+                      tip={hasExistingBid ? "You already have a bid on this player" : undefined}
+                    />
+                  </Box>
+                )}
+              </Box>
+              {activeIndexes.includes(idx) && (
+              <Box pad="small" background="light-1" gap="small">
+                {showContractAccordion && player.contractMinimums ? (
+                  <>
+                    {player.contractMinimums && player.contractMinimums.length > 0 && (
+                      <Box gap="xxsmall">
+                        <Text weight="bold">Contract Minimums</Text>
+                        <Text size="small" color="text-weak">
+                          {player.contractMinimums.map((minimum, idx) => (
+                            <React.Fragment key={minimum.season.id}>
+                              {idx > 0 && ' • '}
+                              {minimum.duration} {minimum.duration === 1 ? 'yr' : 'yrs'}: <CurrencyFormat
+                                value={minimum.amount}
+                                displayType={"text"}
+                                thousandSeparator={true}
+                                prefix={"$"}
+                              />
+                            </React.Fragment>
+                          ))}
+                        </Text>
+                      </Box>
+                    )}
+
+                    {player.bids && player.bids.length > 0 ? (
+                      <Box gap="xxsmall">
+                        <Text weight="bold">Current Bids ({player.bids.length})</Text>
+                        <Box gap="xxsmall">
+                          {player.bids.map((bid, idx) => {
+                            const firstYear = bid.firstSeason?.name ? parseInt(bid.firstSeason.name) : null;
+                            const lastYear = bid.lastSeason?.name ? parseInt(bid.lastSeason.name) : null;
+                            const duration = firstYear && lastYear && !isNaN(firstYear) && !isNaN(lastYear)
+                              ? lastYear - firstYear + 1
+                              : 1;
+                            return (
+                              <Box
+                                key={bid.id}
+                                direction="column"
+                                gap="xxsmall"
+                                pad={{ horizontal: "small", vertical: "xsmall" }}
+                                background={idx % 2 === 0 ? "white" : "light-1"}
+                                round="xsmall"
+                              >
+                                <Box direction="row" justify="between">
+                                  <Text weight="bold">{bid.team.name}</Text>
+                                  <Text weight="bold">
+                                    <CurrencyFormat
+                                      value={bid.annualAmount}
+                                      displayType={"text"}
+                                      thousandSeparator={true}
+                                      prefix={"$"}
+                                    />
+                                  </Text>
+                                </Box>
+                                <Box direction="row" justify="between">
+                                  <Text size="small" color="text-weak">
+                                    {duration} {duration === 1 ? 'season' : 'seasons'}
+                                  </Text>
+                                  <Text size="small" color="text-weak">
+                                    Through {bid.lastSeason?.name || 'Unknown'}
+                                  </Text>
+                                </Box>
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box gap="xxsmall">
+                        <Text weight="bold">Current Bids</Text>
+                        <Text size="small" color="text-weak">No current bids</Text>
+                      </Box>
+                    )}
+                  </>
+                ) : !showContractAccordion && showContractMinimums && player.contractMinimums && (
+                  <Box gap="xxsmall">
+                    <Text weight="bold">Contract Minimums</Text>
+                    <Text size="small" color="text-weak">
+                      {player.contractMinimums.map((minimum, idx) => (
+                        <React.Fragment key={minimum.season.id}>
+                          {idx > 0 && ' • '}
+                          {minimum.duration} {minimum.duration === 1 ? 'yr' : 'yrs'}: <CurrencyFormat
+                            value={minimum.amount}
+                            displayType={"text"}
+                            thousandSeparator={true}
+                            prefix={"$"}
+                          />
+                        </React.Fragment>
+                      ))}
+                    </Text>
+                  </Box>
+                )}
+
+                {!showContractAccordion && showAllBids && player.bids && player.bids.length > 0 ? (
+                  <Box gap="small">
+                    <Text weight="bold">Current Bids ({player.bids.length})</Text>
+                    <Box gap="xsmall">
+                      {player.bids.map((bid, idx) => {
+                        const firstYear = bid.firstSeason?.name ? parseInt(bid.firstSeason.name) : null;
+                        const lastYear = bid.lastSeason?.name ? parseInt(bid.lastSeason.name) : null;
+                        const duration = firstYear && lastYear && !isNaN(firstYear) && !isNaN(lastYear)
+                          ? lastYear - firstYear + 1
+                          : 1;
+                        return (
+                          <Box
+                            key={bid.id}
+                            direction="column"
+                            gap="xxsmall"
+                            pad="small"
+                            background={idx % 2 === 0 ? "white" : "light-1"}
+                            round="xsmall"
+                          >
+                            <Box direction="row" justify="between">
+                              <Text weight="bold">{bid.team.name}</Text>
+                              <Text weight="bold">
+                                <CurrencyFormat
+                                  value={bid.annualAmount}
+                                  displayType={"text"}
+                                  thousandSeparator={true}
+                                  prefix={"$"}
+                                />
+                              </Text>
+                            </Box>
+                            <Box direction="row" justify="between">
+                              <Text size="small" color="text-weak">
+                                {duration} {duration === 1 ? 'season' : 'seasons'}
+                              </Text>
+                              <Text size="small" color="text-weak">
+                                Through {bid.lastSeason?.name || 'Unknown'}
+                              </Text>
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                ) : !showContractAccordion && showAllBids ? (
+                  <Box gap="small">
+                    <Text weight="bold">Current Bids</Text>
+                    <Text color="text-weak">No current bids</Text>
+                  </Box>
+                ) : !showContractAccordion && bid ? (
+                  <Box gap="small">
+                    <Text weight="bold">Leading Bid</Text>
+                    <Box gap="xxsmall">
+                      <Text>
+                        <CurrencyFormat
+                          value={bid.annualAmount}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"$"}
+                        /> per year
+                      </Text>
+                      <Text>Through: {bid.lastSeason.name}</Text>
+                      <Text>Team: {bid.team.name ?? ""}</Text>
+                    </Box>
+                  </Box>
+                ) : !showContractAccordion ? (
+                  <Text color="text-weak">No current bids</Text>
+                ) : null}
+              </Box>
+              )}
+            </Box>
+          );
+        })}
     </Box>
   );
 }

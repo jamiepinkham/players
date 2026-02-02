@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "graphql-hooks";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use_auth";
 import {
   Heading,
   Box,
-  Layer,
   Spinner,
   DataTable,
-  Accordion,
-  AccordionPanel,
+  Tabs,
+  Tab,
   Text,
   Paragraph,
 } from "grommet";
@@ -17,7 +16,6 @@ import { Currency } from "grommet-icons";
 
 import PlayerLists from "./PlayerLists";
 import TeamBudgetInfo from "./TeamBudgetInfo";
-import PlaceBidComponent from "./PlaceBidComponent";
 import CurrencyFormat from "react-currency-format";
 import Moment from "react-moment";
 import PlayerName from "./PlayerName";
@@ -59,26 +57,17 @@ const BIDDING_CONSOLE_QUERY = `
   }
 `;
 
-const PLAYER_QUERY = `
-  query PlayerQuery($playerId: ID!) {
-    player(id: $playerId) {
-      id
-      name
-      bbrefid
-      position
-      bbrefLink
-      stats {
-        title
-        value
-      }
-    }
-  }
-`;
-
 export default function BiddingConsole() {
   const auth = useAuth();
   const location = useLocation();
-  const [show, setShow] = useState(null);
+  const navigate = useNavigate();
+
+  // Parse query params
+  const searchParams = new URLSearchParams(location.search);
+  const playerId = searchParams.get('player_id');
+
+  // Always start on Free Agents tab
+  const [activeTab, setActiveTab] = useState(0);
 
   // Check if user has a team assigned
   if (!auth.teamId) {
@@ -93,10 +82,6 @@ export default function BiddingConsole() {
     );
   }
 
-  // Parse query params for player_id
-  const searchParams = new URLSearchParams(location.search);
-  const playerId = searchParams.get('player_id');
-
   const { data = { team: null, currentSeason: null }, refetch: refetch } =
     useQuery(BIDDING_CONSOLE_QUERY, {
       variables: {
@@ -104,24 +89,16 @@ export default function BiddingConsole() {
       },
     });
 
-  const {
-    loading: playerLoading,
-    data: playerData = { player: null }
-  } = useQuery(PLAYER_QUERY, {
-    variables: { playerId },
-    skip: !playerId
-  });
-
-  // When player data loads, auto-open the bid layer
+  // When player_id is in URL, redirect to place bid page
   useEffect(() => {
-    if (playerData?.player && data?.currentSeason?.activeFreeAgencyPeriod) {
+    if (playerId && data?.currentSeason?.activeFreeAgencyPeriod) {
       const bids = data.currentSeason.activeFreeAgencyPeriod.bids;
       const maxBids = data.currentSeason.activeFreeAgencyPeriod.maxBidsForTeam;
       if (bids.length < maxBids) {
-        setShow(playerData.player);
+        navigate(`/bidding/${playerId}/place-bid`, { replace: true });
       }
     }
-  }, [playerData, data]);
+  }, [playerId, data, navigate]);
 
   if (!data.team || !data.currentSeason?.activeFreeAgencyPeriod) {
     return <Spinner size="medium" alignSelf="center" />;
@@ -131,10 +108,15 @@ export default function BiddingConsole() {
   const currentSeason = data.currentSeason;
   const bids = currentSeason.activeFreeAgencyPeriod.bids
   const maxBids = currentSeason.activeFreeAgencyPeriod.maxBidsForTeam
+
   function onPlayerSelected(player) {
     if (bids.length < maxBids) {
-      setShow(player);
+      navigate(`/bidding/${player.id}/place-bid`);
     }
+  }
+
+  function handleTabChange(nextIndex) {
+    setActiveTab(nextIndex);
   }
 
   return (
@@ -152,91 +134,87 @@ export default function BiddingConsole() {
         </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box margin={{ top: "medium" }}>
-        <Accordion>
-          <AccordionPanel label={`Current Bids (${bids.length} of ${maxBids} used)`}>
-            {bids.length > 0 ? (
-              <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
-                <DataTable
-                  columns={[
-                  {
-                    property: "player.name",
-                    header: "Player",
-                    render: (bid) => (
-                      <PlayerName
-                        name={bid.player.name}
-                        bbrefid={bid.player.bbrefid}
-                      />
-                    ),
-                  },
-                  {
-                    property: "amount",
-                    header: "Annual Amount",
-                    render: (bid) => (
-                      <CurrencyFormat
-                        value={bid.annualAmount}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"$"}
-                      />
-                    ),
-                  },
-                  {
-                    property: "lastSeason.name",
-                    header: "Final Season",
-                  },
-                  {
-                    property: "createAt",
-                    header: "Date placed",
-                    render: (bid) => (
-                        <Moment fromNow>{bid.createdAt}</Moment>
-                    ),
-                  },
-                  {
-                    property: "isLeading",
-                    header: "Leading",
-                    render: (bid) => (
-                      <Text>{bid.isLeading ? "yes" : "no"}</Text>
-                    ),
-                  },
-                ]}
-                data={bids}
-                background={DATA_TABLE_THEME.background}
+      <Box margin={{ top: "medium" }} round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+        <Tabs activeIndex={activeTab} onActive={handleTabChange}>
+          <Tab title="Free Agents">
+            <Box pad="small">
+              <PlayerLists onPlayerSelected={onPlayerSelected} teamId={auth.teamId} />
+            </Box>
+          </Tab>
+          <Tab title={
+            <Box direction="row" align="center" gap="xsmall">
+              <Text>Current Bids ({bids.length}/{maxBids})</Text>
+              {bids.length > 0 && (
+                <Box
+                  background="status-critical"
+                  round="full"
+                  width="8px"
+                  height="8px"
                 />
-              </Box>
-            ) : (
-              <EmptyState
-                icon={Currency}
-                title="No bids placed yet"
-                message="Select a player below to place your first bid"
-              />
-            )}
-          </AccordionPanel>
-        </Accordion>
-      </Box>
-      <Box pad="small" gap="small">
-        <Heading level={3} margin="none">
-          Players
-        </Heading>
-        <PlayerLists onPlayerSelected={onPlayerSelected} />
-        {show && (
-          <Layer
-            onEsc={() => setShow(null)}
-            onClickOutside={() => setShow(null)}
-            modal={true}
-            animation="fadeIn"
-            margin="small"
-          >
-            <PlaceBidComponent
-              player={show}
-              teamId={team.id}
-              onBidCreated={() => {
-                refetch({ teamId: team.id });
-                setShow(null);
-              }}
-            />
-          </Layer>
-        )}
+              )}
+            </Box>
+          }>
+            <Box pad="small">
+              {bids.length > 0 ? (
+                <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+                  <DataTable
+                    primaryKey="id"
+                    columns={[
+                    {
+                      property: "player.name",
+                      header: "Player",
+                      render: (bid) => (
+                        <PlayerName
+                          name={bid.player.name}
+                          bbrefid={bid.player.bbrefid}
+                        />
+                      ),
+                    },
+                    {
+                      property: "amount",
+                      header: "Annual Amount",
+                      render: (bid) => (
+                        <CurrencyFormat
+                          value={bid.annualAmount}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"$"}
+                        />
+                      ),
+                    },
+                    {
+                      property: "lastSeason.name",
+                      header: "Final Season",
+                    },
+                    {
+                      property: "createAt",
+                      header: "Date placed",
+                      render: (bid) => (
+                          <Moment fromNow>{bid.createdAt}</Moment>
+                      ),
+                    },
+                    {
+                      property: "isLeading",
+                      header: "Leading",
+                      render: (bid) => (
+                        <Text>{bid.isLeading ? "yes" : "no"}</Text>
+                      ),
+                    },
+                  ]}
+                  data={bids}
+                  background={DATA_TABLE_THEME.background}
+                  />
+                </Box>
+              ) : (
+                <EmptyState
+                  icon={Currency}
+                  title="No bids placed yet"
+                  message="Go to Free Agents tab to place your first bid"
+                />
+              )}
+            </Box>
+          </Tab>
+        </Tabs>
       </Box>
     </Box>
   );

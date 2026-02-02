@@ -1,94 +1,238 @@
 import React, { useState } from "react";
 import Moment from "react-moment";
 import { useQuery } from "graphql-hooks";
-import { List, Text, Box, Grid, Header, Select, CheckBox } from "grommet";
-import { History } from "grommet-icons";
+import { List, Text, Box, Grid, Header, Select, CheckBox, Accordion, AccordionPanel, Button, Pagination, TextInput } from "grommet";
+import { History, FormNext, FormPrevious, Search, FormClose } from "grommet-icons";
 import PendingTradeContracts from "./PendingTradeContracts";
 import LoadingState from "../LoadingState";
 import EmptyState from "../EmptyState";
 
 const TRADES_QUERY = `
-query getCompletedTrades { 
-    completedTrades { 
-        fromTeam {
-            name
-  	    }
-  	    fromContracts {
-            id
-            player {
-                name
-                bbrefid
-                position
-            }
-            amount
-            lastSeason {
+query getCompletedTrades($page: Int!, $perPage: Int!, $teamId: ID, $search: String) {
+    completedTrades(page: $page, perPage: $perPage, teamId: $teamId, search: $search) {
+        trades {
+            fromTeam {
+                id
                 name
             }
-        }
-        fromCashAmount
+            fromContracts {
+                id
+                player {
+                    name
+                    bbrefid
+                    position
+                }
+                amount
+                lastSeason {
+                    name
+                }
+            }
+            fromCashAmount
 
-        toTeam {
-            name
-        }
-        toContracts {
-            id
-            player {
+            toTeam {
+                id
                 name
-                bbrefid
-                position
-    	    }
-    	    amount
-    	    lastSeason {
-                name
-    	    }
+            }
+            toContracts {
+                id
+                player {
+                    name
+                    bbrefid
+                    position
+                }
+                amount
+                lastSeason {
+                    name
+                }
+            }
+            toCashAmount
+
+            status
+            updatedAt
         }
-        toCashAmount
-    
-        status
-        updatedAt
+        totalCount
+        totalPages
+        currentPage
+    }
+}
+`;
+
+const TEAMS_QUERY = `
+query getTeams {
+    teams {
+        id
+        name
     }
 }
 `;
 
 export default function CompletedTrades() {
-    const { loading, error, data, refetch, cacheHit } = useQuery(TRADES_QUERY);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [searchInput, setSearchInput] = useState("");
+    const [activeSearch, setActiveSearch] = useState("");
+    const itemsPerPage = 50;
 
+    const { loading: teamsLoading, data: teamsData } = useQuery(TEAMS_QUERY);
+
+    const { loading, error, data, refetch } = useQuery(TRADES_QUERY, {
+        variables: {
+            page: currentPage,
+            perPage: itemsPerPage,
+            teamId: selectedTeam?.id,
+            search: activeSearch || null
+        }
+    });
+
+    // Reset to page 1 when filters change
+    const handleTeamChange = (team) => {
+        setSelectedTeam(team);
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchInput(event.target.value);
+    };
+
+    const executeSearch = () => {
+        setActiveSearch(searchInput);
+        setCurrentPage(1);
+    };
+
+    const handleSearchKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            executeSearch();
+        }
+    };
+
+    const clearFilters = () => {
+        setSelectedTeam(null);
+        setSearchInput("");
+        setActiveSearch("");
+        setCurrentPage(1);
+    };
+
+    if (loading || teamsLoading) return <LoadingState message="Loading completed trades..." />;
     if (!data || !data.completedTrades) return <LoadingState message="Loading completed trades..." />;
-    if (data.completedTrades.length == 0) return (
-        <EmptyState
-            icon={History}
-            title="No completed trades"
-            message="There are no completed trades to display yet"
-        />
-    );
-    
+
+    const { trades, totalPages } = data.completedTrades;
+    const teams = teamsData?.teams || [];
+
+    if (trades.length === 0 && !selectedTeam && !activeSearch) {
+        return (
+            <EmptyState
+                icon={History}
+                title="No completed trades"
+                message="There are no completed trades to display yet"
+            />
+        );
+    }
+
     return (
-            <List gap="small" background={['white', 'light-2']} alignSelf="stretch" children={(item, index) => {
-                return (
-                    <Box>
-                        <Grid
-                            rows={['xsmall', 'xxxsmall']}
-                            columns={['1/2', '1/2']}
-                            gap='small'
-                            align='top'
-                            areas={[
-                                { name: 'from', start: [0, 0], end: [0, 0] },
-                                { name: 'to', start: [1, 0], end: [1, 0] },
-                            ]}>
-                            <Box gridArea='from'>
-                                <Text weight="bold">{item.fromTeam.name}</Text>
-                                <PendingTradeContracts contracts={item.fromContracts} cash={item.toCashAmount} />
-                            </Box>
-                            <Box gridArea='to'>
-                                <Text weight="bold">{item.toTeam.name}</Text>
-                                <PendingTradeContracts contracts={item.toContracts} cash={item.fromCashAmount} />
-                            </Box>
-                    </Grid>
-                    <Text weight="bold">
-                        Completed: <Moment format="MMM Do YYYY">{item.updatedAt}</Moment>
-                    </Text>
+        <Box gap="small">
+            <Box direction="row" gap="small" align="center">
+                <Box flex={{ grow: 1 }}>
+                    <Select
+                        placeholder="Filter by team"
+                        options={[{ id: null, name: "All Teams" }, ...teams]}
+                        labelKey="name"
+                        valueKey={{ key: "id", reduce: true }}
+                        value={selectedTeam?.id || null}
+                        onChange={({ option }) => handleTeamChange(option.id ? option : null)}
+                    />
                 </Box>
-                )
-            }} data={data.completedTrades} />
+                <Box flex={{ grow: 2 }}>
+                    <Box
+                        background="white"
+                        round="small"
+                        border={{ color: "border", size: "small" }}
+                    >
+                        <TextInput
+                            placeholder="Search by player name or team..."
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                            onKeyPress={handleSearchKeyPress}
+                            plain
+                        />
+                    </Box>
+                </Box>
+                <Button
+                    icon={<Search />}
+                    onClick={executeSearch}
+                    tip="Search"
+                />
+                {(selectedTeam || activeSearch) && (
+                    <Button
+                        icon={<FormClose />}
+                        onClick={clearFilters}
+                        tip="Clear all filters"
+                    />
+                )}
+            </Box>
+            {trades.length === 0 ? (
+                <Box pad="large" align="center">
+                    <EmptyState
+                        icon={History}
+                        title="No trades found"
+                        message="No trades match your current filters"
+                    />
+                </Box>
+            ) : (
+                <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+                    <Accordion multiple>
+                    {trades.map((trade, index) => (
+                        <AccordionPanel
+                            key={index}
+                            label={
+                                <Box direction="row" justify="between" align="center" pad="small" width="100%">
+                                    <Text weight="bold" size="medium">
+                                        {trade.fromTeam.name} ⇄ {trade.toTeam.name}
+                                    </Text>
+                                    <Text size="small" color="text-weak" margin={{ left: "medium" }}>
+                                        <Moment format="MMM Do YYYY">{trade.updatedAt}</Moment>
+                                    </Text>
+                                </Box>
+                            }
+                        >
+                            <Box pad="medium" background="light-1">
+                                <Grid
+                                    rows={['auto']}
+                                    columns={['1/2', '1/2']}
+                                    gap='medium'
+                                    align='top'
+                                >
+                                    <Box>
+                                        <Text weight="bold" margin={{ bottom: "small" }}>{trade.fromTeam.name} receives:</Text>
+                                        <PendingTradeContracts contracts={trade.toContracts} cash={trade.fromCashAmount} />
+                                    </Box>
+                                    <Box>
+                                        <Text weight="bold" margin={{ bottom: "small" }}>{trade.toTeam.name} receives:</Text>
+                                        <PendingTradeContracts contracts={trade.fromContracts} cash={trade.toCashAmount} />
+                                    </Box>
+                                </Grid>
+                            </Box>
+                        </AccordionPanel>
+                    ))}
+                </Accordion>
+                </Box>
+            )}
+            {trades.length > 0 && totalPages > 1 && (
+                <Box direction="row" justify="center" align="center" gap="small">
+                    <Button
+                        icon={<FormPrevious />}
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    />
+                    <Text>
+                        Page {currentPage} of {totalPages}
+                    </Text>
+                    <Button
+                        icon={<FormNext />}
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    />
+                </Box>
+            )}
+        </Box>
     );
 }

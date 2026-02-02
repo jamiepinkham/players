@@ -15,9 +15,14 @@ module Types
     field :team, Types::TeamType, null: true
     field :contract, Types::ContractType, null: true
     field :is_trade_eligible, Boolean, null: false
+    field :trade_ineligibility_reason, String, null: true
 
     def is_trade_eligible
       return object.is_trade_eligible?
+    end
+
+    def trade_ineligibility_reason
+      return object.trade_ineligibility_reason
     end
 
     def bbref_link
