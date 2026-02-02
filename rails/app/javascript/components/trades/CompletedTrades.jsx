@@ -131,7 +131,7 @@ export default function CompletedTrades() {
     return (
         <Box gap="small">
             <Box direction={{ small: "column", medium: "row" }} gap="small" align={{ small: "stretch", medium: "center" }}>
-                <Box width={{ min: "200px", max: "300px" }}>
+                <Box width="small">
                     <Select
                         placeholder="Filter by team"
                         options={[{ id: null, name: "All Teams" }, ...teams]}
@@ -141,35 +141,26 @@ export default function CompletedTrades() {
                         onChange={({ option }) => handleTeamChange(option.id ? option : null)}
                     />
                 </Box>
-                <Box flex>
-                    <Box
-                        background="white"
-                        round="small"
-                        border={{ color: "border", size: "small" }}
-                    >
-                        <TextInput
-                            placeholder="Search by player name or team..."
-                            value={searchInput}
-                            onChange={handleSearchChange}
-                            onKeyPress={handleSearchKeyPress}
-                            plain
-                        />
-                    </Box>
-                </Box>
-                <Box direction="row" gap="small" flex={false}>
-                    <Button
-                        icon={<Search />}
-                        onClick={executeSearch}
-                        tip="Search"
+                <Box flex={{ grow: 1, shrink: 1 }}>
+                    <TextInput
+                        placeholder="Search by player name or team..."
+                        value={searchInput}
+                        onChange={handleSearchChange}
+                        onKeyPress={handleSearchKeyPress}
                     />
-                    {(selectedTeam || activeSearch) && (
-                        <Button
-                            icon={<FormClose />}
-                            onClick={clearFilters}
-                            tip="Clear all filters"
-                        />
-                    )}
                 </Box>
+                <Button
+                    icon={<Search />}
+                    onClick={executeSearch}
+                    tip="Search"
+                />
+                {(selectedTeam || activeSearch) && (
+                    <Button
+                        icon={<FormClose />}
+                        onClick={clearFilters}
+                        tip="Clear all filters"
+                    />
+                )}
             </Box>
             {trades.length === 0 ? (
                 <Box pad="large" align="center">
