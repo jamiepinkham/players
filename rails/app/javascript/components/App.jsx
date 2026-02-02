@@ -120,12 +120,13 @@ export default function App(props) {
     window.location.href = `/admin_login?token=${token}`;
   }, [navigate]);
   return (
-    <Box>
+    <Box fill="vertical" direction="column">
       <Header
         background="brand"
         pad={{ horizontal: "medium", vertical: "xsmall" }}
         round={{ corner: "bottom", size: "small" }}
         elevation="small"
+        flex={false}
       >
         <Heading level="2" color="white" margin="none">BMPL</Heading>
         {auth.isSignedIn && (
@@ -141,8 +142,8 @@ export default function App(props) {
       </Header>
       <ResponsiveContext.Consumer>
         {(size) => (
-          <Box margin={isMobile(size) ? "xsmall" : "small"}>
-            <Main pad={isMobile(size) ? "xsmall" : "small"} fill="horizontal">
+          <Box flex margin={isMobile(size) ? "xsmall" : "small"}>
+            <Main pad={isMobile(size) ? "xsmall" : "small"} fill>
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />

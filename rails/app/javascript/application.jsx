@@ -32,11 +32,12 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
 const GlobalStyle = createGlobalStyle`
+  html, body, #app-root {
+    height: 100%;
+    margin: 0;
+  }
   img {
     max-width: 100%;
-  }
-  body {
-    margin: 0;
   }
   a:hover {
     opacity: 0.9;
@@ -78,10 +79,10 @@ function AppShell() {
     <ClientContext.Provider value={client}>
       <ProvideAuth>
         <Router basename="/">
-          <Grommet theme={siteTheme}>
+          <Grommet theme={siteTheme} full>
             <GlobalStyle />
-            <Box direction="column" align="center">
-              <Box width={{ max: "xxlarge" }} pad={{ horizontal: "small" }}>
+            <Box direction="column" align="center" fill="vertical">
+              <Box width={{ max: "xxlarge" }} pad={{ horizontal: "small" }} fill="vertical">
                 <App />
               </Box>
             </Box>
