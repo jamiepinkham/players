@@ -131,7 +131,7 @@ export default function CompletedTrades() {
     return (
         <Box gap="small">
             <Box direction={{ small: "column", medium: "row" }} gap="small" align={{ small: "stretch", medium: "center" }}>
-                <Box flex={{ grow: 1 }}>
+                <Box width={{ min: "200px", max: "300px" }}>
                     <Select
                         placeholder="Filter by team"
                         options={[{ id: null, name: "All Teams" }, ...teams]}
@@ -141,7 +141,7 @@ export default function CompletedTrades() {
                         onChange={({ option }) => handleTeamChange(option.id ? option : null)}
                     />
                 </Box>
-                <Box flex={{ grow: 2 }}>
+                <Box flex>
                     <Box
                         background="white"
                         round="small"
@@ -156,18 +156,20 @@ export default function CompletedTrades() {
                         />
                     </Box>
                 </Box>
-                <Button
-                    icon={<Search />}
-                    onClick={executeSearch}
-                    tip="Search"
-                />
-                {(selectedTeam || activeSearch) && (
+                <Box direction="row" gap="small" flex={false}>
                     <Button
-                        icon={<FormClose />}
-                        onClick={clearFilters}
-                        tip="Clear all filters"
+                        icon={<Search />}
+                        onClick={executeSearch}
+                        tip="Search"
                     />
-                )}
+                    {(selectedTeam || activeSearch) && (
+                        <Button
+                            icon={<FormClose />}
+                            onClick={clearFilters}
+                            tip="Clear all filters"
+                        />
+                    )}
+                </Box>
             </Box>
             {trades.length === 0 ? (
                 <Box pad="large" align="center">
