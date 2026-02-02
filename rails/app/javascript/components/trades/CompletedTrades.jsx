@@ -130,25 +130,21 @@ export default function CompletedTrades() {
 
     return (
         <Box gap="small">
-            <Box direction={{ small: "column", medium: "row" }} gap="small" align={{ small: "stretch", medium: "center" }}>
-                <Box width="small">
-                    <Select
-                        placeholder="Filter by team"
-                        options={[{ id: null, name: "All Teams" }, ...teams]}
-                        labelKey="name"
-                        valueKey={{ key: "id", reduce: true }}
-                        value={selectedTeam?.id || null}
-                        onChange={({ option }) => handleTeamChange(option.id ? option : null)}
-                    />
-                </Box>
-                <Box flex={{ grow: 1, shrink: 1 }}>
-                    <TextInput
-                        placeholder="Search by player name or team..."
-                        value={searchInput}
-                        onChange={handleSearchChange}
-                        onKeyPress={handleSearchKeyPress}
-                    />
-                </Box>
+            <Box direction={{ small: "column", medium: "row" }} gap="small">
+                <Select
+                    placeholder="Filter by team"
+                    options={[{ id: null, name: "All Teams" }, ...teams]}
+                    labelKey="name"
+                    valueKey={{ key: "id", reduce: true }}
+                    value={selectedTeam?.id || null}
+                    onChange={({ option }) => handleTeamChange(option.id ? option : null)}
+                />
+                <TextInput
+                    placeholder="Search by player name or team..."
+                    value={searchInput}
+                    onChange={handleSearchChange}
+                    onKeyPress={handleSearchKeyPress}
+                />
                 <Button
                     icon={<Search />}
                     onClick={executeSearch}
