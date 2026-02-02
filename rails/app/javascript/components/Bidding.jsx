@@ -120,7 +120,7 @@ export default function BiddingConsole() {
   }
 
   return (
-    <Box>
+    <Box gap="small">
       <Box
         pad="small"
         gap="small"
@@ -134,7 +134,7 @@ export default function BiddingConsole() {
         </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box margin={{ top: "medium" }} round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <Box margin={{ top: "medium" }} round="small" border={{ color: "border", size: "xsmall" }}>
         <Tabs activeIndex={activeTab} onActive={handleTabChange}>
           <Tab title="Free Agents">
             <Box pad="small">

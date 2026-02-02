@@ -142,8 +142,8 @@ export default function App(props) {
       </Header>
       <ResponsiveContext.Consumer>
         {(size) => (
-          <Box flex margin={isMobile(size) ? "xsmall" : "small"}>
-            <Main pad={isMobile(size) ? "xsmall" : "small"} fill>
+          <Box flex overflow="auto" margin={isMobile(size) ? "xsmall" : "small"}>
+            <Main pad={isMobile(size) ? "xsmall" : "small"} fill="horizontal">
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />

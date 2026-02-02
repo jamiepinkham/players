@@ -22,11 +22,9 @@ export default function PlayerLists({ onPlayerSelected, teamId }) {
     <Box>
       <Box
         direction="row"
-        width="100%"
         background="#666666"
         round="small"
         overflow="hidden"
-        style={{ display: 'flex' }}
       >
         {positions.map((position, idx) => (
           <Box
