@@ -126,11 +126,17 @@ export default function PendingTrades() {
     }
     return (
         <>
-            <List gap="small" alignSelf="stretch" children={(item, index) => {
-                return (
-                    <PendingTrade trade={item} myTeamId={teamId} key={item.id} onAcceptTrade={onAcceptTrade} onRejectTrade={onRejectTrade} />
-                )
-            }} data={data.trades} />
+            <Box gap="small">
+                {data.trades.map((trade) => (
+                    <PendingTrade
+                        key={trade.id}
+                        trade={trade}
+                        myTeamId={teamId}
+                        onAcceptTrade={onAcceptTrade}
+                        onRejectTrade={onRejectTrade}
+                    />
+                ))}
+            </Box>
 
             {notification && (
                 <Layer

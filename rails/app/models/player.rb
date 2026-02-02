@@ -87,6 +87,17 @@ class Player < ApplicationRecord
     return self.contract.blank? || self.contract.summer || (self.contract.created_at < (Time.current - 3.months))
   end
 
+  def trade_ineligibility_reason
+    return nil if is_trade_eligible?
+
+    if self.contract.present? && !self.contract.summer && self.contract.created_at >= (Time.current - 3.months)
+      days_remaining = ((self.contract.created_at + 3.months) - Time.current).to_i / 1.day
+      return "Signed within 3 months (#{days_remaining} days remaining)"
+    end
+
+    "Ineligible"
+  end
+
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF']
 
   def to_s

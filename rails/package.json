@@ -3,6 +3,8 @@
   "dependencies": {
     "@babel/core": "^7.13.10",
     "@babel/preset-react": "^7.12.13",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/utilities": "^3.2.2",
     "@fontsource/fira-sans": "^5",
     "@popperjs/core": "^2.11.8",
     "@svgr/webpack": "^8",

@@ -6,14 +6,14 @@ import { getCurrency } from "locale-currency";
 const currentLocale = navigator.language || "en-US";
 const localCurrency = getCurrency(currentLocale);
 
-export default function CurrencyInput({
+const CurrencyInput = React.forwardRef(({
   currency = localCurrency,
   locale = currentLocale,
   value,
   onChange,
   numberFormatOptions = {},
   ...rest
-}) {
+}, ref) => {
   const valueString = useMemo(() => `${value || ""}`, [value]);
   const { format } = useMemo(
     () =>
@@ -75,10 +75,15 @@ export default function CurrencyInput({
   );
   return (
     <TextInput
+      ref={ref}
       value={maskedValue}
       onChange={onInputChange}
       placeholder={`${format(5.55)}`}
       {...rest}
     />
   );
-}
+});
+
+CurrencyInput.displayName = 'CurrencyInput';
+
+export default CurrencyInput;

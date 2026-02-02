@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "graphql-hooks";
 import { useLocation } from "react-router-dom";
-import { Spinner, Tabs, Tab, Box, Heading, Paragraph } from "grommet";
+import { Spinner, Tabs, Tab, Box, Heading, Paragraph, Text } from "grommet";
 import { useAuth } from "../../../hooks/use_auth";
 import PendingTrades from "../PendingTrades";
-import SplitScreenTradeBuilder from "./SplitScreenTradeBuilder";
+import ClickTradeBuilder from "./ClickTradeBuilder";
 
 const TEAMS_QUERY = `
-  query TradingConsoleTeamQuery {
+  query TradingConsoleTeamQuery($teamId: ID!) {
     teams {
       id
       name
       budget
+    }
+    trades(team: $teamId) {
+      id
     }
   }
 `;
@@ -73,8 +76,10 @@ function TradeOfferComponent() {
   const {
     loading,
     error,
-    data = { teams: null }
-  } = useQuery(TEAMS_QUERY);
+    data = { teams: null, trades: [] }
+  } = useQuery(TEAMS_QUERY, {
+    variables: { teamId }
+  });
 
   const {
     loading: playerLoading,
@@ -95,28 +100,45 @@ function TradeOfferComponent() {
   }, [playerData]);
 
   if (!data.teams) return <Spinner size="medium" alignSelf="center" />;
+
+  const pendingTradesCount = data.trades?.length || 0;
+
   return (
     <Box fill>
-      <Tabs
-        activeIndex={activeIndex}
-        onActive={(index) => setActiveIndex(index)}
-        justify="start"
-      >
-        <Tab title='Pending Trades'>
-          <Box pad="medium">
-            <PendingTrades />
-          </Box>
-        </Tab>
-        <Tab title='Propose New Trade'>
-          <SplitScreenTradeBuilder
-            teams={data.teams}
-            currentTeamId={teamId}
-            initialTeamId={initialTeam?.id}
-            initialContract={initialContract}
-            onTradeSubmitted={() => window.location.reload()}
-          />
-        </Tab>
-      </Tabs>
+      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+        <Tabs
+          activeIndex={activeIndex}
+          onActive={(index) => setActiveIndex(index)}
+          justify="start"
+        >
+          <Tab title={
+            <Box direction="row" align="center" gap="xsmall">
+              <Text>Pending Trades</Text>
+              {pendingTradesCount > 0 && (
+                <Box
+                  background="status-critical"
+                  round="full"
+                  width="8px"
+                  height="8px"
+                />
+              )}
+            </Box>
+          }>
+            <Box pad="medium">
+              <PendingTrades />
+            </Box>
+          </Tab>
+          <Tab title='Propose New Trade'>
+            <ClickTradeBuilder
+              teams={data.teams}
+              currentTeamId={teamId}
+              initialTeamId={initialTeam?.id}
+              initialContract={initialContract}
+              onTradeSubmitted={() => window.location.reload()}
+            />
+          </Tab>
+        </Tabs>
+      </Box>
     </Box>
   );
 }

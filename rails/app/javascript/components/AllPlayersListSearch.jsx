@@ -210,17 +210,15 @@ const AllPlayersListSearch = () => {
           placeholder="All Positions"
           options={uniquePositions}
           value={positionFilter}
-          onChange={({ option }) => setPositionFilter(option)}
+          onChange={({ option }) => setPositionFilter(option || '')}
           clear
-          onClear={() => setPositionFilter('')}
         />
         <Select
           placeholder="All Statuses"
           options={statusOptions}
           value={statusFilter}
-          onChange={({ option }) => setStatusFilter(option)}
+          onChange={({ option }) => setStatusFilter(option || '')}
           clear
-          onClear={() => setStatusFilter('')}
         />
       </Box>
 

@@ -9,6 +9,7 @@ import PrivateRoute from "./PrivateRoute";
 import TeamsList from "./TeamsList";
 import Profile from "./Profile";
 import Bidding from "./Bidding";
+import PlaceBid from "./PlaceBid";
 import SessionLogin from "./SessionLogin";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import ChangePassword from "./ChangePassword";
@@ -260,6 +261,7 @@ export default function App(props) {
             <Route path="/team/:id" element={<PrivateRoute><TeamComponent /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/bidding" element={<PrivateRoute><Bidding /></PrivateRoute>} />
+            <Route path="/bidding/:playerId/place-bid" element={<PrivateRoute><PlaceBid /></PrivateRoute>} />
             <Route path="/trade" element={<PrivateRoute><TradeOfferComponent /></PrivateRoute>} />
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
             <Route path="*" element={<NoMatch />} />

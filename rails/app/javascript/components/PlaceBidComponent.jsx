@@ -5,10 +5,8 @@ import { useMutation, useQuery } from "graphql-hooks";
 import CurrencyFormat from "react-currency-format";
 
 import CurrencyInput from "./CurrencyInput";
-import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
-import PlayerName from "./PlayerName";
 import LoadingState from "./LoadingState";
-import { DATA_TABLE_THEME } from "../constants/ui";
+import { FormDown, FormUp } from "grommet-icons";
 
 const PLAYER_CONTRACT_MINIMUMS_QUERY = `
 query PlayerContractMimimumsQuery($playerId: ID!) {
@@ -20,6 +18,21 @@ query PlayerContractMimimumsQuery($playerId: ID!) {
         }
         amount
         duration
+      }
+      bids {
+        id
+        team {
+          id
+          name
+        }
+        annualAmount
+        firstSeason {
+          id
+          name
+        }
+        lastSeason {
+          name
+        }
       }
     }
   }
@@ -42,12 +55,12 @@ import {
   Heading,
   Select,
   Spinner,
-  DataTable,
   Button,
-  Grid,
   Form,
-  FormField,
   Text,
+  Card,
+  CardBody,
+  CardHeader,
 } from "grommet";
 
 export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
@@ -59,6 +72,8 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
     numberOfYears: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isContractDetailsExpanded, setIsContractDetailsExpanded] = useState(true);
+  const annualAmountInputRef = React.useRef(null);
   const {
     loading,
     error,
@@ -84,144 +99,212 @@ export default function PlaceBidComponent({ player, teamId, onBidCreated }) {
       return false;
     }
   }
+
+  function getAmountError() {
+    if (selectedSeasonOption.value === 0) {
+      return null;
+    }
+    if (annualAmount > 0 && annualAmount < selectedSeasonOption.minimum) {
+      return `Minimum required: ${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(selectedSeasonOption.minimum)}`;
+    }
+    return null;
+  }
   if (loading) return <LoadingState message="Loading player details..." />;
+  if (!data.player || !data.player.contractMinimums) {
+    return <LoadingState message="Loading contract details..." />;
+  }
+
   return (
-    <Box direction="column" pad="small" overflow="scroll">
-      <Box direction="row" gap="xsmall" align="center">
-        <Heading level={3} margin="none">Bidding on:</Heading>
-        <Heading level={3} margin="none">
-          <PlayerName name={player.name} bbrefid={player.bbrefid} />
-        </Heading>
-      </Box>
-      <PositionPlayerStatsTable players={[player]} position={player.position} />
-
-      <Grid
-        background="light-4"
-        pad="small"
-        rows={[
-          { count: "fit", size: "small" },
-          { count: "fit", size: "small" },
-        ]}
-        columns={["medium"]}
-        gap="small"
-        areas={[
-          { name: "minimums", start: [0, 0], end: [1, 0] },
-          { name: "fields", start: [0, 1], end: [1, 1] },
-        ]}
+    <Box direction="column" gap="small">
+      <Box
+        background="light-1"
+        round="small"
+        border={{ color: "border", size: "xsmall" }}
+        overflow="hidden"
       >
-        <Box gridArea="minimums" pad="xsmall">
-          <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
-            <DataTable
-                  pad="xsmall"
-                  margin="none"
-                  background={DATA_TABLE_THEME.background}
-                  columns={[
-                  {
-                    property: "duration",
-                    header: "Contract Length",
-                    render: (mimimum) => (
-                      <Text>{mimimum.duration + " season(s)"}</Text>
-                    )
-                  },
-                  {
-                    property: "amount",
-                    header: "Minimum Annual Amount",
-                    render: (mimimum) => (
-                      <CurrencyFormat
-                        value={mimimum.amount}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                        prefix={"$"}
-                      />
-                    ),
-                  },
-                ]}
-                data={data.player.contractMinimums}
-                />
-            </Box>
-          </Box>
-
         <Box
-          direction="column"
-          gap="xxsmall"
-          alignContent="center"
-          pad="xxsmall"
-          gridArea="fields"
+          direction="row"
+          justify="between"
+          align="center"
+          pad="medium"
+          onClick={() => setIsContractDetailsExpanded(!isContractDetailsExpanded)}
+          style={{ cursor: 'pointer' }}
+          hoverIndicator
         >
-          <Box gridArea="fields" pad="xsmall">
-                <Form pad="xxsmall">
-                  <FormField label="Duration">
-                    <Select
-                      margin="xxsmall"
-                      options={data.player.contractMinimums.map(
-                        (item, index) => {
-                          return {
-                            value: parseInt(item.season.id),
-                            label: `${
-                                (index + 1 == 1 ? 
-                                `${index + 1} season` : 
-                                `${index + 1} seasons`
-                                )}`
-                            ,
-                            minimum: parseInt(item.amount),
-                            numberOfYears: index + 1,
-                          };
-                        }
-                      )}
-                      labelKey="label"
-                      valueKey="value"
-                      value={selectedSeasonOption}
-                      onChange={(event) => {
-                        setAnnualAmount(event.option.minimum);
-                        setSelectedSeasonOption(event.option);
-                      }}
-                    />
-                  </FormField>
-                  <FormField label="Annual Amount">
-                    <CurrencyInput
-                      value={annualAmount}
-                      placeholder={""}
-                      onChange={(change) => {
-                        setAnnualAmount(parseInt(change.target.value) || 0);
-                      }}
-                    />
-                  </FormField>
-
-                  <FormField label="Total Contract Value">
-                    <CurrencyInput
-                      value={annualAmount * selectedSeasonOption.numberOfYears}
-                      disabled={true}
-                      placeholder={""}
-                    />
-                  </FormField>
-                </Form>
-                <Box align="end">
-                  <Button
-                    onClick={async () => {
-                        setIsSubmitting(true);
-                        try {
-                            let bid = {
-                                teamId: teamId,
-                                playerId: player.id,
-                                annualAmount: annualAmount,
-                                finalSeasonId: selectedSeasonOption.value,
-                            };
-                            await createBidMutation({variables: {"input": bid}})
-                            // Dispatch custom event to notify App component to refresh notifications
-                            window.dispatchEvent(new CustomEvent('bidPlaced'));
-                            onBidCreated()
-                        } finally {
-                            setIsSubmitting(false);
-                        }
-                    }}
-                    disabled={!isValidBid() || isSubmitting}
-                    icon={isSubmitting ? <Spinner size="xsmall" /> : undefined}
-                    label={isSubmitting ? "Placing..." : "Place Bid"}
-                  />
-                </Box>
-              </Box>
+          <Text weight="bold">Contract Details</Text>
+          {isContractDetailsExpanded ? <FormUp /> : <FormDown />}
         </Box>
-      </Grid>
+        {isContractDetailsExpanded && (
+          <Box
+            pad="medium"
+            border={{ side: "top", color: "border", size: "xsmall" }}
+            gap="medium"
+          >
+            <Form gap="medium">
+                  <Box direction="row" align="center" gap="medium">
+                    <Box width="140px">
+                      <Text weight="bold">Final Season:</Text>
+                    </Box>
+                    <Box flex background="white" round="xsmall" border={{ color: "border", size: "small" }}>
+                      <Select
+                        placeholder="Select final season"
+                        plain
+                        options={data.player.contractMinimums.map(
+                          (item, index) => {
+                            return {
+                              value: parseInt(item.season.id),
+                              label: `${item.season.name} - ${item.duration} ${item.duration === 1 ? 'season' : 'seasons'}`,
+                              minimum: parseInt(item.amount),
+                              numberOfYears: index + 1,
+                            };
+                          }
+                        )}
+                        labelKey="label"
+                        valueKey="value"
+                        value={selectedSeasonOption.value > 0 ? selectedSeasonOption : undefined}
+                        onChange={(event) => {
+                          setAnnualAmount(event.option.minimum);
+                          setSelectedSeasonOption(event.option);
+                          // Focus the annual amount input after selecting duration
+                          setTimeout(() => {
+                            annualAmountInputRef.current?.focus();
+                          }, 100);
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box gap="xxsmall" opacity={selectedSeasonOption.value > 0 ? 1 : 0.5}>
+                    <Box direction="row" align="center" gap="medium">
+                      <Box width="140px">
+                        <Text weight="bold">Annual Amount:</Text>
+                      </Box>
+                      <Box flex background="white" round="xsmall" border={{ color: "border", size: "small" }} style={{ overflow: "hidden" }}>
+                        <CurrencyInput
+                          ref={annualAmountInputRef}
+                          value={annualAmount}
+                          placeholder={""}
+                          plain
+                          disabled={selectedSeasonOption.value === 0}
+                          onChange={(change) => {
+                            setAnnualAmount(parseInt(change.target.value) || 0);
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    <Box direction="row" gap="medium" pad={{ left: "156px" }}>
+                      {selectedSeasonOption.value > 0 ? (
+                        <>
+                          <Text size="small" color="text-weak">
+                            Minimum: {new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(selectedSeasonOption.minimum)}
+                          </Text>
+                          {getAmountError() && (
+                            <Text size="small" color="status-error">{getAmountError()}</Text>
+                          )}
+                        </>
+                      ) : (
+                        <Text size="small" color="text-weak">Select a duration first</Text>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Card
+                    background="light-2"
+                    pad="small"
+                    margin={{ top: "small" }}
+                    opacity={selectedSeasonOption.value > 0 && annualAmount > 0 ? 1 : 0.5}
+                  >
+                    <CardHeader pad="none">
+                      <Text weight="bold" size="medium">Bid Summary</Text>
+                    </CardHeader>
+                    <CardBody pad={{ top: "xsmall" }} gap="xsmall">
+                      <Box direction="row" justify="between">
+                        <Text>Contract Length:</Text>
+                        <Text weight="bold">
+                          {selectedSeasonOption.numberOfYears > 0
+                            ? `${selectedSeasonOption.numberOfYears} ${selectedSeasonOption.numberOfYears === 1 ? 'season' : 'seasons'}`
+                            : '—'}
+                        </Text>
+                      </Box>
+                      <Box direction="row" justify="between">
+                        <Text>Annual Amount:</Text>
+                        <Text weight="bold">
+                          {annualAmount > 0 ? (
+                            <CurrencyFormat
+                              value={annualAmount}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"$"}
+                            />
+                          ) : '—'}
+                        </Text>
+                      </Box>
+                      <Box
+                        direction="row"
+                        justify="between"
+                        pad={{ top: "xsmall" }}
+                        border={{ side: "top", color: "border" }}
+                        margin={{ top: "xsmall" }}
+                      >
+                        <Text weight="bold" size="large">Total Contract Value:</Text>
+                        <Text weight="bold" size="large" color={selectedSeasonOption.value > 0 && annualAmount > 0 ? "brand" : "text-weak"}>
+                          {selectedSeasonOption.value > 0 && annualAmount > 0 ? (
+                            <CurrencyFormat
+                              value={annualAmount * selectedSeasonOption.numberOfYears}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"$"}
+                            />
+                          ) : '—'}
+                        </Text>
+                      </Box>
+                    </CardBody>
+                  </Card>
+                  <Box direction="row" gap="small" justify="end" margin={{ top: "small" }}>
+                    <Button
+                      label="Cancel"
+                      size="large"
+                      onClick={onBidCreated}
+                    />
+                    <Button
+                      primary
+                      size="large"
+                      onClick={async () => {
+                          setIsSubmitting(true);
+                          try {
+                              let bid = {
+                                  teamId: teamId,
+                                  playerId: player.id,
+                                  annualAmount: annualAmount,
+                                  finalSeasonId: selectedSeasonOption.value,
+                              };
+                              await createBidMutation({variables: {"input": bid}})
+                              // Dispatch custom event to notify App component to refresh notifications
+                              window.dispatchEvent(new CustomEvent('bidPlaced'));
+                              onBidCreated()
+                          } finally {
+                              setIsSubmitting(false);
+                          }
+                      }}
+                      disabled={!isValidBid() || isSubmitting}
+                      icon={isSubmitting ? <Spinner size="xsmall" /> : undefined}
+                      label={isSubmitting ? "Placing..." : "Place Bid"}
+                    />
+                  </Box>
+                </Form>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

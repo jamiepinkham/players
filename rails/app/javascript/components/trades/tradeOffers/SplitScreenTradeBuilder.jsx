@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useMutation } from "graphql-hooks";
-import { Grid, Box, Text, Heading, Select, Layer, Button } from "grommet";
+import { Box, Text, Heading, Select, Layer, Button } from "grommet";
+import { FormUp, FormDown } from "grommet-icons";
 import SelectableContractList from "./SelectableContractList";
 import TradeSummary from "./TradeSummary";
 import CurrencyInput from "../../CurrencyInput";
@@ -23,6 +24,8 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
   const [toCash, setToCash] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [isYourTeamExpanded, setIsYourTeamExpanded] = useState(true);
+  const [isPartnerTeamExpanded, setIsPartnerTeamExpanded] = useState(true);
 
   const [createTradeMutation] = useMutation(CREATE_TRADE_MUTATION);
 
@@ -144,106 +147,108 @@ function SplitScreenTradeBuilder({ teams, currentTeamId, initialTeamId, initialC
 
   return (
     <>
-      <Grid
-        rows={['auto', 'auto', 'auto', 'auto']}
-        columns={['1/2', '1/2']}
-        gap='medium'
-        pad='medium'
-        areas={[
-          { name: 'summaryPanel', start: [0, 0], end: [1, 0] },
-          { name: 'leftTeamHeader', start: [0, 1], end: [0, 1] },
-          { name: 'rightTeamHeader', start: [1, 1], end: [1, 1] },
-          { name: 'leftCash', start: [0, 2], end: [0, 2] },
-          { name: 'rightCash', start: [1, 2], end: [1, 2] },
-          { name: 'leftPlayers', start: [0, 3], end: [0, 3] },
-          { name: 'rightPlayers', start: [1, 3], end: [1, 3] },
-        ]}
-      >
+      <Box gap="small">
         {/* Summary Panel - Top */}
-        <Box gridArea='summaryPanel'>
-          <TradeSummary
-            fromTeam={fromTeam}
-            fromContracts={fromContracts}
-            fromCash={fromCash}
-            toTeam={toTeam}
-            toContracts={toContracts}
-            toCash={toCash}
-            validation={validation}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-          />
-        </Box>
+        <TradeSummary
+          fromTeam={fromTeam}
+          fromContracts={fromContracts}
+          fromCash={fromCash}
+          toTeam={toTeam}
+          toContracts={toContracts}
+          toCash={toCash}
+          validation={validation}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
 
-        {/* Row 1: Team Headers */}
-        <Box gridArea='leftTeamHeader' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Your Team:</Text>
-          <Text>{fromTeam?.name || 'Your Team'} - Budget: ${fromTeam?.budget?.toLocaleString() || '0'}</Text>
-        </Box>
-
-        <Box gridArea='rightTeamHeader' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Trade Partner:</Text>
-          <Select
-            options={availableTeams}
-            labelKey={(option) => `${option.name} - Budget: $${option.budget?.toLocaleString() || '0'}`}
-            valueKey={{ key: 'id', reduce: true }}
-            value={toTeam?.id}
-            onChange={({ option }) => handleTeamChange(option)}
-            placeholder='Select team...'
-          />
-        </Box>
-
-        {/* Row 2: Cash Inputs */}
-        <Box gridArea='leftCash' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-          <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
-          <CurrencyInput
-            value={fromCash}
-            onChange={(event) => {
-              setFromCash(parseInt(event.target.value) || 0);
-            }}
-            placeholder='Enter amount'
-          />
-        </Box>
-
-        {toTeam ? (
-          <Box gridArea='rightCash' pad='small' background='light-2' round='small' height='xsmall' justify='center'>
-            <Text weight='bold' margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
-            <CurrencyInput
-              value={toCash}
-              onChange={(event) => {
-                setToCash(parseInt(event.target.value) || 0);
-              }}
-              placeholder='Enter amount'
-            />
+        {/* Side by Side Layout */}
+        <Box direction="row" gap="small">
+          {/* Your Team - Left */}
+          <Box flex>
+            <Box
+              round="small"
+              overflow="hidden"
+              border={{ color: "border", size: "xsmall" }}
+            >
+              <Box pad="small" background="light-1" gap="xsmall">
+                <Text weight="bold">{fromTeam?.name || 'Your Team'}</Text>
+                <Box
+                  background="white"
+                  round="xsmall"
+                  border={{ color: "border", size: "xsmall" }}
+                  pad="small"
+                >
+                  <Text size="small" margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
+                  <CurrencyInput
+                    value={fromCash}
+                    onChange={(event) => {
+                      setFromCash(parseInt(event.target.value) || 0);
+                    }}
+                    placeholder='Enter amount'
+                  />
+                </Box>
+              </Box>
+              <Box pad="xsmall" background="light-1">
+                <SelectableContractList
+                  team={fromTeam}
+                  selectedContracts={fromContracts}
+                  onToggle={handleFromToggle}
+                />
+              </Box>
+            </Box>
           </Box>
-        ) : (
-          <Box gridArea='rightCash' align='center' justify='center' pad='small' background='light-2' round='small'>
-            <Text color='text-weak' size='small'>Select a trade partner</Text>
-          </Box>
-        )}
 
-        {/* Row 3: Player Rosters */}
-        <Box gridArea='leftPlayers'>
-          <SelectableContractList
-            team={fromTeam}
-            selectedContracts={fromContracts}
-            onToggle={handleFromToggle}
-          />
+          {/* Trade Partner - Right */}
+          <Box flex>
+            <Box
+              round="small"
+              overflow="hidden"
+              border={{ color: "border", size: "xsmall" }}
+            >
+              <Box pad="small" background="light-1" gap="xsmall">
+                <Select
+                  options={availableTeams}
+                  labelKey={(option) => option.name}
+                  valueKey={{ key: 'id', reduce: true }}
+                  value={toTeam?.id}
+                  onChange={({ option }) => handleTeamChange(option)}
+                  placeholder='Select trade partner...'
+                />
+                {toTeam && (
+                  <Box
+                    background="white"
+                    round="xsmall"
+                    border={{ color: "border", size: "xsmall" }}
+                    pad="small"
+                  >
+                    <Text size="small" margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
+                    <CurrencyInput
+                      value={toCash}
+                      onChange={(event) => {
+                        setToCash(parseInt(event.target.value) || 0);
+                      }}
+                      placeholder='Enter amount'
+                    />
+                  </Box>
+                )}
+              </Box>
+              {toTeam ? (
+                <Box pad="xsmall" background="light-1">
+                  <SelectableContractList
+                    team={toTeam}
+                    selectedContracts={toContracts}
+                    onToggle={handleToToggle}
+                  />
+                </Box>
+              ) : (
+                <Box pad="medium" align="center" background="light-1">
+                  <Text color='text-weak' size='small'>Select a trade partner</Text>
+                </Box>
+              )}
+            </Box>
+          </Box>
         </Box>
-
-        {toTeam ? (
-          <Box gridArea='rightPlayers'>
-            <SelectableContractList
-              team={toTeam}
-              selectedContracts={toContracts}
-              onToggle={handleToToggle}
-            />
-          </Box>
-        ) : (
-          <Box gridArea='rightPlayers' align='center' justify='center' pad='large'>
-            <Text color='text-weak'>Select a trade partner to view their roster</Text>
-          </Box>
-        )}
-      </Grid>
+      </Box>
 
     {notification && (
       <Layer
