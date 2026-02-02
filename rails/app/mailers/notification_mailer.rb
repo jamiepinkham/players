@@ -68,27 +68,6 @@ class NotificationMailer < ApplicationMailer
         mail(to: recipient_emails, subject: subject)
     end
 
-    private
-
-    def get_team_emails(team)
-        recipient_emails = team.notification_emails
-
-        if recipient_emails.empty?
-            fallback_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
-            if fallback_emails.any?
-                recipient_emails = fallback_emails
-            else
-                Rails.logger.warn("Notification for team #{team.id} skipped: no team emails or fallback emails configured")
-            end
-        end
-
-        recipient_emails
-    end
-
-    def subject_with_env(subject)
-        Rails.env.production? ? subject : "[TEST] #{subject} [TEST]"
-    end
-
     def trade_accepted(trade)
         @trade = trade
 
@@ -114,5 +93,26 @@ class NotificationMailer < ApplicationMailer
         subject = subject_with_env("Trade Rejected by #{@trade.to_team.name}")
 
         mail(to: recipient_emails, subject: subject)
+    end
+
+    private
+
+    def get_team_emails(team)
+        recipient_emails = team.notification_emails
+
+        if recipient_emails.empty?
+            fallback_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+            if fallback_emails.any?
+                recipient_emails = fallback_emails
+            else
+                Rails.logger.warn("Notification for team #{team.id} skipped: no team emails or fallback emails configured")
+            end
+        end
+
+        recipient_emails
+    end
+
+    def subject_with_env(subject)
+        Rails.env.production? ? subject : "[TEST] #{subject} [TEST]"
     end
 end
