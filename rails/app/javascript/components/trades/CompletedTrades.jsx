@@ -130,7 +130,11 @@ export default function CompletedTrades() {
 
     return (
         <Box gap="small">
-            <Box direction={{ small: "column", medium: "row" }} gap="small">
+            <Grid
+                columns={{ small: ["auto"], medium: ["small", "flex", "auto", "auto"] }}
+                gap="small"
+                align="center"
+            >
                 <Select
                     placeholder="Filter by team"
                     options={[{ id: null, name: "All Teams" }, ...teams]}
@@ -157,7 +161,7 @@ export default function CompletedTrades() {
                         tip="Clear all filters"
                     />
                 )}
-            </Box>
+            </Grid>
             {trades.length === 0 ? (
                 <Box pad="large" align="center">
                     <EmptyState
