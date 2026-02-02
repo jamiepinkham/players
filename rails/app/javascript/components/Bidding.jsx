@@ -134,10 +134,10 @@ export default function BiddingConsole() {
         </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box margin={{ top: "medium" }} round="small" border={{ color: "border", size: "xsmall" }}>
+      <Box round="small" border={{ color: "border", size: "xsmall" }}>
         <Tabs activeIndex={activeTab} onActive={handleTabChange}>
           <Tab title="Free Agents">
-            <Box pad="small" style={{ minHeight: "600px" }}>
+            <Box pad="small">
               <PlayerLists onPlayerSelected={onPlayerSelected} teamId={auth.teamId} />
             </Box>
           </Tab>
@@ -154,7 +154,7 @@ export default function BiddingConsole() {
               )}
             </Box>
           }>
-            <Box pad="small" style={{ minHeight: "600px" }}>
+            <Box pad="small">
               {bids.length > 0 ? (
                 <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
                   <DataTable
