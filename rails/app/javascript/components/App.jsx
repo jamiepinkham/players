@@ -140,10 +140,10 @@ export default function App(props) {
           />
         )}
       </Header>
-      <Box flex overflow={{ vertical: "auto" }}>
+      <Box flex overflow={{ vertical: "auto" }} style={{ minHeight: 0 }}>
         <ResponsiveContext.Consumer>
           {(size) => (
-            <Main pad={isMobile(size) ? "small" : "medium"}>
+            <Main pad={isMobile(size) ? "small" : "medium"} fill>
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />
