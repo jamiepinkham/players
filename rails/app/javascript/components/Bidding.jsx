@@ -137,7 +137,7 @@ export default function BiddingConsole() {
       <Box margin={{ top: "medium" }} round="small" border={{ color: "border", size: "xsmall" }}>
         <Tabs activeIndex={activeTab} onActive={handleTabChange}>
           <Tab title="Free Agents">
-            <Box pad="small">
+            <Box pad="small" style={{ minHeight: "600px" }}>
               <PlayerLists onPlayerSelected={onPlayerSelected} teamId={auth.teamId} />
             </Box>
           </Tab>
@@ -154,7 +154,7 @@ export default function BiddingConsole() {
               )}
             </Box>
           }>
-            <Box pad="small">
+            <Box pad="small" style={{ minHeight: "600px" }}>
               {bids.length > 0 ? (
                 <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
                   <DataTable

@@ -100,7 +100,11 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
   }, [refetchPlayers]);
 
   let { players } = data;
-  if (!players) return <Spinner size="medium" alignSelf="center" />;
+  if (!players) return (
+    <Box align="center" justify="center" style={{ minHeight: "400px" }}>
+      <Spinner size="medium" />
+    </Box>
+  );
 
   // Get active bids and merge with players
   const activeBids = data?.currentSeason?.activeFreeAgencyPeriod?.bids || [];
