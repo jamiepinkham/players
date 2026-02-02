@@ -3,7 +3,7 @@ import { Box, Layer, Button, Nav, Anchor } from 'grommet';
 import { Menu, Close, List, Currency, Sync, History, Search, UserSettings, UserAdmin } from 'grommet-icons';
 
 /**
- * MobileNav - Mobile navigation component with hamburger menu
+ * HamburgerNav - Navigation component with hamburger menu
  * Displays a hamburger icon that opens a slide-out drawer with navigation items
  *
  * @param {Function} handleOnClick - Navigation click handler
@@ -13,7 +13,7 @@ import { Menu, Close, List, Currency, Sync, History, Search, UserSettings, UserA
  * @param {boolean} hasPendingTrades - Whether there are pending trades (for notification dot)
  * @param {boolean} hasActiveBids - Whether there are active bids (for notification dot)
  */
-const MobileNav = ({
+const HamburgerNav = ({
   handleOnClick,
   handleAdminClick,
   currentPath,
@@ -216,4 +216,4 @@ const MobileNav = ({
   );
 };
 
-export default MobileNav;
+export default HamburgerNav;

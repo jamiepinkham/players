@@ -20,7 +20,7 @@ import AllPlayersListSearch from "./AllPlayersListSearch";
 
 import { Box, Header, Heading, Main, ResponsiveContext } from "grommet";
 
-import MobileNav from "./MobileNav";
+import HamburgerNav from "./HamburgerNav";
 import { isMobile } from "../utils/responsive";
 
 const NOTIFICATIONS_QUERY = `
@@ -129,7 +129,7 @@ export default function App(props) {
       >
         <Heading level="2" color="white" margin="none">BMPL</Heading>
         {auth.isSignedIn && (
-          <MobileNav
+          <HamburgerNav
             handleOnClick={handleOnClick}
             handleAdminClick={handleAdminClick}
             currentPath={location.pathname}
