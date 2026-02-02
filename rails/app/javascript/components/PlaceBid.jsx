@@ -101,7 +101,7 @@ export default function PlaceBid() {
   const isPitcher = player.position === "SP" || player.position === "RP";
 
   return (
-    <Box>
+    <Box flex overflow="auto" gap="small">
       <Box direction="row" align="center" gap="small" margin={{ bottom: "small" }}>
         <Button
           icon={<Previous />}
