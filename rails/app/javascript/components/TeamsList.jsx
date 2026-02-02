@@ -85,6 +85,7 @@ function TeamsList() {
       ]}
       data={data.teams}
       sortable={true}
+      responsive
       fill
       background={DATA_TABLE_THEME.background}
       />

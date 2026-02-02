@@ -89,7 +89,7 @@ function TeamComponent(props) {
           size: "xsmall",
         }}
       >
-        <Box direction="row" justify="between" align="center">
+        <Box direction={{ small: "column", medium: "row" }} justify="between" align={{ small: "start", medium: "center" }} gap="xsmall">
           <Box gap="xxsmall">
             <Heading level="3" margin="none">
               {team.name}
@@ -167,6 +167,7 @@ function TeamComponent(props) {
           ]}
           data={team.currentContracts}
           sortable={true}
+          responsive
           fill
           background={DATA_TABLE_THEME.background}
         />

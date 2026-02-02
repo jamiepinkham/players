@@ -18,7 +18,7 @@ import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./AllPlayersListSearch";
 
-import { Box, Header, Heading, Nav, Anchor, Main } from "grommet";
+import { Box, Header, Heading, Nav, Anchor, Main, ResponsiveContext } from "grommet";
 
 import {
   Currency,
@@ -29,6 +29,9 @@ import {
   Search,
   History
 } from "grommet-icons";
+
+import MobileNav from "./MobileNav";
+import { isMobile } from "../utils/responsive";
 
 const NOTIFICATIONS_QUERY = `
   query NotificationsQuery($teamId: ID!) {
@@ -127,16 +130,28 @@ export default function App(props) {
     window.location.href = `/admin_login?token=${token}`;
   }, [navigate]);
   return (
-    <Box>
-      <Header
-        background="brand"
-        pad={{ horizontal: "medium", vertical: "xsmall" }}
-        round={{ corner: "bottom", size: "small" }}
-        elevation="small"
-      >
-        <Heading level="2" color="white" margin="none">BMPL</Heading>
-        {auth.isSignedIn && (
-          <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
+    <ResponsiveContext.Consumer>
+      {(size) => (
+        <Box>
+          <Header
+            background="brand"
+            pad={{ horizontal: isMobile(size) ? "small" : "medium", vertical: "xsmall" }}
+            round={{ corner: "bottom", size: "small" }}
+            elevation="small"
+          >
+            <Heading level="2" color="white" margin="none">BMPL</Heading>
+            {auth.isSignedIn && isMobile(size) && (
+              <MobileNav
+                handleOnClick={handleOnClick}
+                handleAdminClick={handleAdminClick}
+                currentPath={location.pathname}
+                isAdmin={auth.isAdmin}
+                hasPendingTrades={hasPendingTrades}
+                hasActiveBids={hasActiveBids}
+              />
+            )}
+            {auth.isSignedIn && !isMobile(size) && (
+              <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
             <Box
               border={location.pathname.startsWith("/team") ? { side: "bottom", color: "white", size: "small" } : undefined}
             >
@@ -246,11 +261,11 @@ export default function App(props) {
                 onClick={handleAdminClick}
               />
             )}
-          </Nav>
-        )}
-      </Header>
-      <Box margin="small">
-        <Main pad="small" fill="horizontal">
+              </Nav>
+            )}
+          </Header>
+          <Box margin={isMobile(size) ? "xsmall" : "small"}>
+            <Main pad={isMobile(size) ? "xsmall" : "small"} fill="horizontal">
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />
@@ -266,9 +281,11 @@ export default function App(props) {
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
             <Route path="*" element={<NoMatch />} />
           </Routes>
-        </Main>
-      </Box>
-    </Box>
+            </Main>
+          </Box>
+        </Box>
+      )}
+    </ResponsiveContext.Consumer>
   );
 }
 

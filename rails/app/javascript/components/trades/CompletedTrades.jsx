@@ -130,7 +130,7 @@ export default function CompletedTrades() {
 
     return (
         <Box gap="small">
-            <Box direction="row" gap="small" align="center">
+            <Box direction={{ small: "column", medium: "row" }} gap="small" align="center">
                 <Box flex={{ grow: 1 }}>
                     <Select
                         placeholder="Filter by team"
@@ -197,7 +197,7 @@ export default function CompletedTrades() {
                             <Box pad="medium" background="light-1">
                                 <Grid
                                     rows={['auto']}
-                                    columns={['1/2', '1/2']}
+                                    columns={{ small: ['full'], medium: ['1/2', '1/2'] }}
                                     gap='medium'
                                     align='top'
                                 >

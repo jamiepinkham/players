@@ -81,7 +81,7 @@ function AppShell() {
           <Grommet theme={siteTheme}>
             <GlobalStyle />
             <Box direction="column" align="center">
-              <Box width="xxlarge">
+              <Box width={{ max: "xxlarge" }} pad={{ horizontal: "small" }}>
                 <App />
               </Box>
             </Box>

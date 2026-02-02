@@ -117,9 +117,9 @@ export default function PlaceBid() {
         margin={{ bottom: "small" }}
       >
         <Box
-          direction="row"
+          direction={{ small: "column", medium: "row" }}
           justify="between"
-          align="center"
+          align={{ small: "start", medium: "center" }}
           pad="medium"
           gap="small"
           background="light-1"
@@ -127,7 +127,7 @@ export default function PlaceBid() {
           style={{ cursor: 'pointer' }}
         >
             <PlayerName name={player.name} bbrefid={player.bbrefid} bold />
-            <Box direction="row" gap="large" align="center">
+            <Box direction="row" gap={{ small: "small", medium: "large" }} align="center" wrap>
               {isPitcher ? (
                 <>
                   <Box pad={{ horizontal: "small" }}><Text weight="bold">IP: {stats.IP}</Text></Box>

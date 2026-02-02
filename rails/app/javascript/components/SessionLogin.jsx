@@ -52,7 +52,7 @@ function SessionLogin() {
         }}
         round="small"
         pad="medium">
-        <Card pad="medium" background="light-5">
+        <Card pad={{ small: "small", medium: "medium" }} background="light-5" width={{ max: "medium" }}>
           <CardHeader pad="medium">Please sign in to continue</CardHeader>
           <CardBody>
             <Form

@@ -82,6 +82,7 @@ const PlayerPositionSearchTable = ({ position }) => {
         <DataTable
           placeholder={loading ? "Loading" : ""}
           sortable={false}
+          responsive
           fill
           background={DATA_TABLE_THEME.background}
         primaryKey="id"

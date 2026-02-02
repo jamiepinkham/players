@@ -202,6 +202,7 @@ export default function BiddingConsole() {
                     },
                   ]}
                   data={bids}
+                  responsive
                   background={DATA_TABLE_THEME.background}
                   />
                 </Box>

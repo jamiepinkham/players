@@ -300,6 +300,7 @@ const AllPlayersListSearch = () => {
           },
         ]}
         data={players}
+        responsive
         background={DATA_TABLE_THEME.background}
         />
       </Box>

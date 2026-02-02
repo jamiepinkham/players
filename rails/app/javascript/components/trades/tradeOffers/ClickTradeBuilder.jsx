@@ -289,7 +289,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
               </Text>
             </Box>
           ) : (
-            <Box direction="row" gap="large">
+            <Box direction={{ small: "column", medium: "row" }} gap={{ small: "small", medium: "large" }}>
               {/* Sending column */}
               <Box flex gap="xsmall">
                 <Box pad="small">
@@ -372,7 +372,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
       </Box>
 
       {/* Three column layout */}
-      <Box direction="row" gap="small">
+      <Box direction={{ small: "column", medium: "row" }} gap="small">
         {/* Your Roster - Left */}
         <Box flex basis="1/3">
           <Box
