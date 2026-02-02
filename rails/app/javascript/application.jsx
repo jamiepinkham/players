@@ -81,8 +81,8 @@ function AppShell() {
         <Router basename="/">
           <Grommet theme={siteTheme} full>
             <GlobalStyle />
-            <Box direction="column" align="center" fill="vertical">
-              <Box width={{ max: "xxlarge" }} pad={{ horizontal: "small" }} fill="vertical">
+            <Box direction="column" fill>
+              <Box width="100%" style={{ maxWidth: "1536px", margin: "0 auto" }} pad={{ horizontal: "small" }} fill>
                 <App />
               </Box>
             </Box>
