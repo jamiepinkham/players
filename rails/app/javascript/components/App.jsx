@@ -18,17 +18,7 @@ import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./AllPlayersListSearch";
 
-import { Box, Header, Heading, Nav, Anchor, Main, ResponsiveContext } from "grommet";
-
-import {
-  Currency,
-  List,
-  Sync,
-  UserSettings,
-  UserAdmin,
-  Search,
-  History
-} from "grommet-icons";
+import { Box, Header, Heading, Main, ResponsiveContext } from "grommet";
 
 import MobileNav from "./MobileNav";
 import { isMobile } from "../utils/responsive";
@@ -130,140 +120,27 @@ export default function App(props) {
     window.location.href = `/admin_login?token=${token}`;
   }, [navigate]);
   return (
-    <ResponsiveContext.Consumer>
-      {(size) => (
-        <Box>
-          <Header
-            background="brand"
-            pad={{ horizontal: isMobile(size) ? "small" : "medium", vertical: "xsmall" }}
-            round={{ corner: "bottom", size: "small" }}
-            elevation="small"
-          >
-            <Heading level="2" color="white" margin="none">BMPL</Heading>
-            {auth.isSignedIn && isMobile(size) && (
-              <MobileNav
-                handleOnClick={handleOnClick}
-                handleAdminClick={handleAdminClick}
-                currentPath={location.pathname}
-                isAdmin={auth.isAdmin}
-                hasPendingTrades={hasPendingTrades}
-                hasActiveBids={hasActiveBids}
-              />
-            )}
-            {auth.isSignedIn && !isMobile(size) && (
-              <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
-            <Box
-              border={location.pathname.startsWith("/team") ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<List />}
-                hoverIndicator
-                label="Teams"
-                color="white"
-                onClick={() => handleOnClick("teams")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/bidding" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={
-                  <Box style={{ position: 'relative' }}>
-                    <Currency />
-                    {hasActiveBids && (
-                      <Box
-                        background="status-error"
-                        round="full"
-                        style={{
-                          position: 'absolute',
-                          top: '-4px',
-                          right: '-4px',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                      />
-                    )}
-                  </Box>
-                }
-                hoverIndicator
-                label="Bidding"
-                color="white"
-                onClick={() => handleOnClick("bidding")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/trade" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={
-                  <Box style={{ position: 'relative' }}>
-                    <Sync />
-                    {hasPendingTrades && (
-                      <Box
-                        background="status-error"
-                        round="full"
-                        style={{
-                          position: 'absolute',
-                          top: '-4px',
-                          right: '-4px',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                      />
-                    )}
-                  </Box>
-                }
-                hoverIndicator
-                label="Trade"
-                color="white"
-                onClick={() => handleOnClick("trade")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/trades" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<History />}
-                hoverIndicator
-                label="All Trades"
-                color="white"
-                onClick={() => handleOnClick("trades")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/player_search" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                hoverIndicator
-                icon={<Search />}
-                label="Player Search"
-                color="white"
-                onClick={() => handleOnClick("player_search")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/profile" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<UserSettings />}
-                hoverIndicator
-                label="Settings"
-                color="white"
-                onClick={() => handleOnClick("profile")}
-              />
-            </Box>
-            {auth.isAdmin && (
-              <Anchor
-                icon={<UserAdmin />}
-                hoverIndicator
-                label="Admin"
-                color="white"
-                onClick={handleAdminClick}
-              />
-            )}
-              </Nav>
-            )}
-          </Header>
+    <Box>
+      <Header
+        background="brand"
+        pad={{ horizontal: "medium", vertical: "xsmall" }}
+        round={{ corner: "bottom", size: "small" }}
+        elevation="small"
+      >
+        <Heading level="2" color="white" margin="none">BMPL</Heading>
+        {auth.isSignedIn && (
+          <MobileNav
+            handleOnClick={handleOnClick}
+            handleAdminClick={handleAdminClick}
+            currentPath={location.pathname}
+            isAdmin={auth.isAdmin}
+            hasPendingTrades={hasPendingTrades}
+            hasActiveBids={hasActiveBids}
+          />
+        )}
+      </Header>
+      <ResponsiveContext.Consumer>
+        {(size) => (
           <Box margin={isMobile(size) ? "xsmall" : "small"}>
             <Main pad={isMobile(size) ? "xsmall" : "small"} fill="horizontal">
           <Routes>
@@ -281,11 +158,11 @@ export default function App(props) {
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
             <Route path="*" element={<NoMatch />} />
           </Routes>
-            </Main>
-          </Box>
-        </Box>
-      )}
-    </ResponsiveContext.Consumer>
+        </Main>
+      </Box>
+        )}
+      </ResponsiveContext.Consumer>
+    </Box>
   );
 }
 

@@ -50,11 +50,30 @@ const MobileNav = ({
     />
   );
 
+  const hasNotifications = hasPendingTrades || hasActiveBids;
+
   return (
     <>
-      {/* Hamburger Icon */}
+      {/* Hamburger Icon with Notification Dot */}
       <Button
-        icon={<Menu color="white" />}
+        icon={
+          <Box style={{ position: 'relative' }}>
+            <Menu color="white" />
+            {hasNotifications && (
+              <Box
+                background="status-error"
+                round="full"
+                style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  width: '10px',
+                  height: '10px',
+                }}
+              />
+            )}
+          </Box>
+        }
         onClick={toggleMenu}
         plain
         hoverIndicator
