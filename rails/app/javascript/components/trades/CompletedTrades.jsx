@@ -130,7 +130,7 @@ export default function CompletedTrades() {
 
     return (
         <Box gap="small">
-            <Box direction={{ small: "column", medium: "row" }} gap="small" align="center">
+            <Box direction={{ small: "column", medium: "row" }} gap="small" align={{ small: "stretch", medium: "center" }}>
                 <Box flex={{ grow: 1 }}>
                     <Select
                         placeholder="Filter by team"

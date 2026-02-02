@@ -102,14 +102,6 @@ export default function PlaceBid() {
 
   return (
     <Box gap="small">
-      <Box direction="row" align="center" gap="small" margin={{ bottom: "small" }}>
-        <Button
-          icon={<Previous />}
-          label="Back to Free Agents"
-          onClick={() => navigate('/bidding')}
-          plain
-        />
-      </Box>
       <Box
         round="small"
         overflow="hidden"

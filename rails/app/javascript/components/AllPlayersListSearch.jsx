@@ -197,7 +197,7 @@ const AllPlayersListSearch = () => {
 
   return (
     <Box gap="small">
-      <Box direction="row" gap="small" margin={{ bottom: 'small' }}>
+      <Box direction={{ small: "column", medium: "row" }} gap="small" margin={{ bottom: 'small' }}>
         <TextInput
           ref={searchInputRef}
           placeholder="Search by name"
