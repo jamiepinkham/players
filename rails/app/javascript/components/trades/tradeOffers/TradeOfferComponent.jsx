@@ -104,7 +104,7 @@ function TradeOfferComponent() {
   const pendingTradesCount = data.trades?.length || 0;
 
   return (
-    <Box fill>
+    <Box>
       <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
         <Tabs
           activeIndex={activeIndex}

@@ -196,7 +196,7 @@ const AllPlayersListSearch = () => {
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
   return (
-    <Box fill pad="medium" overflow="auto">
+    <Box gap="small">
       <Box direction="row" gap="small" margin={{ bottom: 'small' }}>
         <TextInput
           ref={searchInputRef}

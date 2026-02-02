@@ -37,7 +37,7 @@ export default function Profile() {
   const user = data?.currentUser;
 
   return (
-    <Box direction="column" gap="medium" flex overflow="auto">
+    <Box direction="column" gap="medium">
       <Box
         background="light-1"
         pad="medium"

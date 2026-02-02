@@ -140,10 +140,10 @@ export default function App(props) {
           />
         )}
       </Header>
-      <ResponsiveContext.Consumer>
-        {(size) => (
-          <Box flex overflow="auto" margin={isMobile(size) ? "xsmall" : "small"}>
-            <Main pad={isMobile(size) ? "xsmall" : "small"} fill="horizontal">
+      <Box flex overflow={{ vertical: "auto" }}>
+        <ResponsiveContext.Consumer>
+          {(size) => (
+            <Main pad={isMobile(size) ? "small" : "medium"}>
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />
@@ -159,10 +159,10 @@ export default function App(props) {
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
             <Route path="*" element={<NoMatch />} />
           </Routes>
-        </Main>
+            </Main>
+          )}
+        </ResponsiveContext.Consumer>
       </Box>
-        )}
-      </ResponsiveContext.Consumer>
     </Box>
   );
 }

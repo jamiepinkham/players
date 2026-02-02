@@ -76,7 +76,7 @@ function TeamComponent(props) {
   }
 
   return (
-    <Box flex overflow="auto" gap="small">
+    <Box gap="small">
       <Box
         gap="small"
         pad="small"

@@ -120,7 +120,7 @@ export default function BiddingConsole() {
   }
 
   return (
-    <Box gap="small" flex overflow="auto">
+    <Box gap="small">
       <Box
         pad="small"
         gap="small"
