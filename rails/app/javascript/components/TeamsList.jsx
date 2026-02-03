@@ -27,7 +27,7 @@ function TeamsList() {
   if (loading) return <LoadingState message="Loading teams..." />;
 
   return (
-    <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+    <Box round="small" border={{ color: "border", size: "xsmall" }}>
       <DataTable
       columns={[
         {
@@ -86,7 +86,6 @@ function TeamsList() {
       data={data.teams}
       sortable={true}
       responsive
-      fill
       background={DATA_TABLE_THEME.background}
       />
     </Box>

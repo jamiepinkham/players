@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { Box, Layer, Button, Nav, Anchor } from 'grommet';
-import { Menu, Close, List, Currency, Sync, History, Search, UserSettings, UserAdmin } from 'grommet-icons';
+import { Box, Layer, Button, Nav, Anchor, Text } from 'grommet';
+import { Menu, Close, List, Currency, Sync, History, Search, UserSettings, UserAdmin, FormDown, FormUp, Logout } from 'grommet-icons';
+import { useQuery } from 'graphql-hooks';
+import { useAuth } from '../hooks/use_auth';
+import { useNavigate } from 'react-router-dom';
+
+const TEAMS_QUERY = `
+  query TeamsQuery {
+    teams {
+      id
+      name
+    }
+  }
+`;
 
 /**
  * HamburgerNav - Navigation component with hamburger menu
@@ -22,17 +34,36 @@ const HamburgerNav = ({
   hasActiveBids
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showTeamsDropdown, setShowTeamsDropdown] = useState(false);
+  const auth = useAuth();
+  const navigate = useNavigate();
 
-  const toggleMenu = () => setShowMenu(!showMenu);
+  const { data } = useQuery(TEAMS_QUERY);
+  const teams = data?.teams || [];
+
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
+    if (showMenu) {
+      setShowTeamsDropdown(false);
+    }
+  };
 
   const handleNavClick = (page) => {
     handleOnClick(page);
     setShowMenu(false);
+    setShowTeamsDropdown(false);
   };
 
   const handleAdminNavClick = () => {
     handleAdminClick();
     setShowMenu(false);
+  };
+
+  const handleSignOut = () => {
+    auth.signOut().then(() => {
+      setShowMenu(false);
+      navigate("/");
+    });
   };
 
   // Notification dot component
@@ -82,7 +113,7 @@ const HamburgerNav = ({
       {/* Slide-out Drawer */}
       {showMenu && (
         <Layer
-          position="right"
+          position="left"
           full="vertical"
           modal
           onClickOutside={toggleMenu}
@@ -92,11 +123,10 @@ const HamburgerNav = ({
             fill="vertical"
             width="medium"
             background="brand"
-            pad="medium"
-            gap="small"
+            overflow={{ vertical: 'auto' }}
           >
             {/* Close Button */}
-            <Box direction="row" justify="end">
+            <Box direction="row" justify="start" pad="medium" flex={false}>
               <Button
                 icon={<Close color="white" />}
                 onClick={toggleMenu}
@@ -106,19 +136,58 @@ const HamburgerNav = ({
             </Box>
 
             {/* Navigation Items */}
-            <Nav gap="small">
-              <Box
-                pad="small"
-                background={currentPath.startsWith("/team") ? { color: "white", opacity: 0.2 } : undefined}
-                round="xsmall"
-              >
-                <Anchor
-                  icon={<List />}
-                  label="Teams"
-                  color="white"
-                  onClick={() => handleNavClick("teams")}
-                />
-              </Box>
+            <Box pad={{ horizontal: "medium", bottom: "medium" }} overflow={{ vertical: 'auto' }}>
+              <Nav gap="small">
+                <Box>
+                  <Box
+                    pad="small"
+                    background={currentPath.startsWith("/team") ? { color: "white", opacity: 0.2 } : undefined}
+                    round="xsmall"
+                    onClick={() => setShowTeamsDropdown(!showTeamsDropdown)}
+                    hoverIndicator={{ color: "white", opacity: 0.1 }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <Box direction="row" align="center" gap="small">
+                      <List color="white" />
+                      <Text color="white">Teams</Text>
+                      {showTeamsDropdown ? <FormUp color="white" size="small" /> : <FormDown color="white" size="small" />}
+                    </Box>
+                  </Box>
+                  {showTeamsDropdown && (
+                    <Box
+                      pad={{ left: "medium", top: "xsmall" }}
+                      gap="xsmall"
+                    >
+                      <Box
+                        pad="xsmall"
+                        background={currentPath === "/teams" ? { color: "white", opacity: 0.2 } : undefined}
+                        round="xsmall"
+                        hoverIndicator={{ color: "white", opacity: 0.1 }}
+                      >
+                        <Anchor
+                          label="All Teams"
+                          color="white"
+                          onClick={() => handleNavClick("teams")}
+                        />
+                      </Box>
+                      {teams.map((team) => (
+                        <Box
+                          key={team.id}
+                          pad="xsmall"
+                          background={currentPath === `/team/${team.id}` ? { color: "white", opacity: 0.2 } : undefined}
+                          round="xsmall"
+                          hoverIndicator={{ color: "white", opacity: 0.1 }}
+                        >
+                          <Anchor
+                            label={team.name}
+                            color="white"
+                            onClick={() => handleNavClick(`team/${team.id}`)}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
 
               <Box
                 pad="small"
@@ -208,7 +277,20 @@ const HamburgerNav = ({
                   />
                 </Box>
               )}
+
+              <Box
+                pad="small"
+                round="xsmall"
+              >
+                <Anchor
+                  icon={<Logout />}
+                  label="Sign Out"
+                  color="white"
+                  onClick={handleSignOut}
+                />
+              </Box>
             </Nav>
+            </Box>
           </Box>
         </Layer>
       )}

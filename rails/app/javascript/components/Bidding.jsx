@@ -122,20 +122,16 @@ export default function BiddingConsole() {
   return (
     <Box gap="medium">
       <Box
-        pad="small"
-        gap="small"
+        pad="medium"
         round="small"
         background="light-1"
         border={{ color: "border", size: "xsmall" }}
         elevation="small"
         flex={false}
       >
-        <Heading level={3} margin="none">
-          {team.name} Bidding Console
-        </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box round="small" border={{ color: "border", size: "xsmall" }} flex>
+      <Box flex>
         <Tabs activeIndex={activeTab} onActive={handleTabChange}>
           <Tab title="Free Agents">
             <Box pad="small">

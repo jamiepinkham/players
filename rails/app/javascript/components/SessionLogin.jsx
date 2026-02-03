@@ -45,16 +45,18 @@ function SessionLogin() {
     return (
       <Box
         align="center"
+        justify="center"
         background={{
           image: `url(${sliding})`,
           size: 'cover',
           position: 'center'
         }}
         round="small"
-        pad="medium">
-        <Card pad={{ small: "small", medium: "medium" }} background="light-5" width={{ max: "medium" }}>
+        pad="medium"
+        height={{ min: "large" }}>
+        <Card background="light-5" width={{ max: "medium" }}>
           <CardHeader pad="medium">Please sign in to continue</CardHeader>
-          <CardBody>
+          <CardBody pad="medium">
             <Form
               value={value}
               onChange={(nextValue) => setValue(nextValue)}
@@ -80,7 +82,7 @@ function SessionLogin() {
                   value={value.password}
                 />
               </FormField>
-              <Box direction="column" pad="xxsmall" justify="center">
+              <Box direction="column" justify="center">
                 <Box
                   pad="small"
                   wrap

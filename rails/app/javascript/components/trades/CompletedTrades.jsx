@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Moment from "react-moment";
 import { useQuery } from "graphql-hooks";
 import { List, Text, Box, Grid, Header, Select, CheckBox, Accordion, AccordionPanel, Button, Pagination, TextInput } from "grommet";
-import { History, FormNext, FormPrevious, Search, FormClose } from "grommet-icons";
+import { History, FormNext, FormPrevious, Search as SearchIcon, FormClose } from "grommet-icons";
 import PendingTradeContracts from "./PendingTradeContracts";
 import LoadingState from "../LoadingState";
 import EmptyState from "../EmptyState";
@@ -105,8 +105,7 @@ export default function CompletedTrades() {
         }
     };
 
-    const clearFilters = () => {
-        setSelectedTeam(null);
+    const clearSearch = () => {
         setSearchInput("");
         setActiveSearch("");
         setCurrentPage(1);
@@ -130,38 +129,63 @@ export default function CompletedTrades() {
 
     return (
         <Box gap="small">
-            <Grid
-                columns={{ small: ["auto"], medium: ["small", "flex", "auto", "auto"] }}
-                gap="small"
-                align="center"
-            >
-                <Select
-                    placeholder="Filter by team"
-                    options={[{ id: null, name: "All Teams" }, ...teams]}
-                    labelKey="name"
-                    valueKey={{ key: "id", reduce: true }}
-                    value={selectedTeam?.id || null}
-                    onChange={({ option }) => handleTeamChange(option.id ? option : null)}
-                />
-                <TextInput
-                    placeholder="Search by player name or team..."
-                    value={searchInput}
-                    onChange={handleSearchChange}
-                    onKeyPress={handleSearchKeyPress}
-                />
-                <Button
-                    icon={<Search />}
-                    onClick={executeSearch}
-                    tip="Search"
-                />
-                {(selectedTeam || activeSearch) && (
-                    <Button
-                        icon={<FormClose />}
-                        onClick={clearFilters}
-                        tip="Clear all filters"
+            <Box direction="row-responsive" gap="small" pad={{ bottom: 'small' }} style={{ minHeight: '60px' }}>
+                <Box width={{ min: "150px", max: "200px" }}>
+                    <Select
+                        placeholder="Filter by team"
+                        options={[{ id: null, name: "All Teams" }, ...teams]}
+                        labelKey="name"
+                        valueKey={{ key: "id", reduce: true }}
+                        value={selectedTeam?.id || null}
+                        onChange={({ option }) => handleTeamChange(option.id ? option : null)}
                     />
-                )}
-            </Grid>
+                </Box>
+                <Box flex direction="row" align="center" gap="xsmall">
+                    <Box flex style={{ position: 'relative' }}>
+                        <TextInput
+                            placeholder="Search by player name or team..."
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                            onKeyPress={handleSearchKeyPress}
+                        />
+                        {searchInput && (
+                            <Button
+                                icon={<FormClose />}
+                                onClick={clearSearch}
+                                plain
+                                style={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)'
+                                }}
+                            />
+                        )}
+                    </Box>
+                    <Button
+                        icon={<SearchIcon color="white" />}
+                        onClick={executeSearch}
+                        primary
+                        label="Search"
+                    />
+                </Box>
+            </Box>
+
+            <Box direction="row" justify="between" align="center" pad={{ vertical: 'small', bottom: 'small' }} style={{ minHeight: '48px' }}>
+                <Text size="small" color="dark-4">
+                    Showing {trades.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+                    {Math.min(currentPage * itemsPerPage, data.completedTrades.totalCount)} of {data.completedTrades.totalCount} trades
+                </Text>
+                {totalPages > 1 ? (
+                    <Pagination
+                        numberItems={data.completedTrades.totalCount}
+                        page={currentPage}
+                        step={itemsPerPage}
+                        onChange={({ page }) => setCurrentPage(page)}
+                    />
+                ) : <Box />}
+            </Box>
+
             {trades.length === 0 ? (
                 <Box pad="large" align="center">
                     <EmptyState
@@ -171,60 +195,36 @@ export default function CompletedTrades() {
                     />
                 </Box>
             ) : (
-                <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
-                    <Accordion multiple>
-                    {trades.map((trade, index) => (
-                        <AccordionPanel
-                            key={index}
-                            label={
-                                <Box direction="row" justify="between" align="center" pad="small" width="100%">
-                                    <Text weight="bold" size="medium">
-                                        {trade.fromTeam.name} ⇄ {trade.toTeam.name}
-                                    </Text>
-                                    <Text size="small" color="text-weak" margin={{ left: "medium" }}>
-                                        <Moment format="MMM Do YYYY">{trade.updatedAt}</Moment>
-                                    </Text>
-                                </Box>
-                            }
-                        >
-                            <Box pad="medium" background="light-1">
-                                <Grid
-                                    rows={['auto']}
-                                    columns={{ small: ['full'], medium: ['1/2', '1/2'] }}
-                                    gap='medium'
-                                    align='top'
-                                >
-                                    <Box>
-                                        <Text weight="bold" margin={{ bottom: "small" }}>{trade.fromTeam.name} receives:</Text>
-                                        <PendingTradeContracts contracts={trade.toContracts} cash={trade.fromCashAmount} />
-                                    </Box>
-                                    <Box>
-                                        <Text weight="bold" margin={{ bottom: "small" }}>{trade.toTeam.name} receives:</Text>
-                                        <PendingTradeContracts contracts={trade.fromContracts} cash={trade.toCashAmount} />
-                                    </Box>
-                                </Grid>
+                <Accordion multiple>
+                {trades.map((trade, index) => (
+                    <AccordionPanel
+                        key={index}
+                        label={
+                            <Box direction="row" justify="between" align="center" pad="small" width="100%">
+                                <Text weight="bold" size="medium">
+                                    {trade.fromTeam.name} ⇄ {trade.toTeam.name}
+                                </Text>
+                                <Text size="small" color="text-weak" margin={{ left: "medium" }}>
+                                    <Moment format="MMM Do YYYY">{trade.updatedAt}</Moment>
+                                </Text>
                             </Box>
-                        </AccordionPanel>
-                    ))}
-                </Accordion>
-                </Box>
-            )}
-            {trades.length > 0 && totalPages > 1 && (
-                <Box direction="row" justify="center" align="center" gap="small">
-                    <Button
-                        icon={<FormPrevious />}
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    />
-                    <Text>
-                        Page {currentPage} of {totalPages}
-                    </Text>
-                    <Button
-                        icon={<FormNext />}
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    />
-                </Box>
+                        }
+                    >
+                        <Box pad="medium" background="light-1">
+                            <Box direction="row-responsive" gap='medium'>
+                                <Box flex>
+                                    <Text weight="bold" margin={{ bottom: "small" }}>{trade.fromTeam.name} receives:</Text>
+                                    <PendingTradeContracts contracts={trade.toContracts} cash={trade.fromCashAmount} />
+                                </Box>
+                                <Box flex>
+                                    <Text weight="bold" margin={{ bottom: "small" }}>{trade.toTeam.name} receives:</Text>
+                                    <PendingTradeContracts contracts={trade.fromContracts} cash={trade.toCashAmount} />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </AccordionPanel>
+                ))}
+            </Accordion>
             )}
         </Box>
     );

@@ -164,5 +164,30 @@ export default {
         border-radius: 4px 4px 0 0;
       `
     }
+  },
+  pagination: {
+    button: {
+      extend: `
+        color: #111827;
+        & svg {
+          stroke: #111827;
+          fill: #111827;
+        }
+        &:hover:not(:disabled) {
+          color: #1D4ED8;
+          & svg {
+            stroke: #1D4ED8;
+            fill: #1D4ED8;
+          }
+        }
+        &:disabled {
+          color: #9CA3AF;
+          & svg {
+            stroke: #9CA3AF;
+            fill: #9CA3AF;
+          }
+        }
+      `
+    }
   }
 };

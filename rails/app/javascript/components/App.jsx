@@ -18,7 +18,8 @@ import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./AllPlayersListSearch";
 
-import { Box, Header, Heading, Main, ResponsiveContext } from "grommet";
+import { Box, Header, Heading, Main, ResponsiveContext, Text, Button } from "grommet";
+import { Logout } from "grommet-icons";
 
 import HamburgerNav from "./HamburgerNav";
 import { isMobile } from "../utils/responsive";
@@ -38,11 +39,31 @@ const NOTIFICATIONS_QUERY = `
   }
 `;
 
+const TEAM_NAME_QUERY = `
+  query TeamNameQuery($id: ID!) {
+    team(id: $id) {
+      name
+    }
+  }
+`;
+
+const MY_TEAM_QUERY = `
+  query MyTeamQuery($id: ID!) {
+    team(id: $id) {
+      name
+    }
+  }
+`;
+
 
 export default function App(props) {
   const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Extract team ID from URL if on team page
+  const teamMatch = location.pathname.match(/^\/team\/(\d+)$/);
+  const viewingTeamId = teamMatch ? teamMatch[1] : null;
 
   // Query for pending trades and active bids to show notification dots
   // Poll every 10 seconds to keep dots updated
@@ -50,6 +71,18 @@ export default function App(props) {
     variables: { teamId: auth.teamId },
     skip: !auth.teamId || !auth.isSignedIn,
     skipCache: true,
+  });
+
+  // Query for team name when viewing a team page
+  const { data: teamData } = useQuery(TEAM_NAME_QUERY, {
+    variables: { id: viewingTeamId },
+    skip: !viewingTeamId,
+  });
+
+  // Query for current user's team name
+  const { data: myTeamData } = useQuery(MY_TEAM_QUERY, {
+    variables: { id: auth.teamId },
+    skip: !auth.teamId,
   });
 
   // Poll every 30 seconds to catch any missed updates
@@ -119,6 +152,28 @@ export default function App(props) {
     // Navigate to admin_login endpoint which will handle session creation and redirect
     window.location.href = `/admin_login?token=${token}`;
   }, [navigate]);
+
+  const handleSignOut = useCallback(() => {
+    auth.signOut().then(() => {
+      navigate("/");
+    });
+  }, [auth, navigate]);
+
+  // Get page title based on current path
+  const getPageTitle = () => {
+    if (location.pathname === "/teams") return "Teams";
+    if (location.pathname.startsWith("/team/")) return teamData?.team?.name || "Team";
+    if (location.pathname === "/bidding") return myTeamData?.team?.name ? `${myTeamData.team.name} Bidding` : "Bidding";
+    if (location.pathname.includes("/place-bid")) return "Place Bid";
+    if (location.pathname === "/trade") return "Trade";
+    if (location.pathname === "/trades") return "All Trades";
+    if (location.pathname === "/player_search") return "Player Search";
+    if (location.pathname === "/profile") return myTeamData?.team?.name ? `${myTeamData.team.name} Settings` : "Settings";
+    return null;
+  };
+
+  const pageTitle = getPageTitle();
+
   return (
     <Box fill="vertical" direction="column">
       <Header
@@ -127,23 +182,43 @@ export default function App(props) {
         round={{ corner: "bottom", size: "small" }}
         elevation="small"
         flex={false}
+        justify="between"
       >
-        <Heading level="2" color="white" margin="none">BMPL</Heading>
+        <Box direction="row" align="center" gap="small">
+          {auth.isSignedIn && (
+            <HamburgerNav
+              handleOnClick={handleOnClick}
+              handleAdminClick={handleAdminClick}
+              currentPath={location.pathname}
+              isAdmin={auth.isAdmin}
+              hasPendingTrades={hasPendingTrades}
+              hasActiveBids={hasActiveBids}
+            />
+          )}
+          <Heading level="2" color="white" margin="none">BMPL</Heading>
+          {pageTitle && (
+            <>
+              <Text color="white" size="large" weight="normal"> / </Text>
+              <Text color="white" size="large">{pageTitle}</Text>
+            </>
+          )}
+        </Box>
         {auth.isSignedIn && (
-          <HamburgerNav
-            handleOnClick={handleOnClick}
-            handleAdminClick={handleAdminClick}
-            currentPath={location.pathname}
-            isAdmin={auth.isAdmin}
-            hasPendingTrades={hasPendingTrades}
-            hasActiveBids={hasActiveBids}
+          <Button
+            icon={<Logout color="white" />}
+            label={<Text color="white">Sign Out</Text>}
+            onClick={handleSignOut}
+            plain
+            hoverIndicator
           />
         )}
       </Header>
       <Box flex overflow={{ vertical: "auto" }} style={{ minHeight: 0 }}>
         <ResponsiveContext.Consumer>
-          {(size) => (
-            <Main pad={isMobile(size) ? "small" : "medium"} fill>
+          {(size) => {
+            const isAuthPage = ["/", "/sign_in", "/forgot"].includes(location.pathname) || location.pathname.startsWith("/reset/");
+            return (
+              <Main pad={isAuthPage ? "none" : (isMobile(size) ? "small" : "medium")} fill>
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />
@@ -160,7 +235,8 @@ export default function App(props) {
             <Route path="*" element={<NoMatch />} />
           </Routes>
             </Main>
-          )}
+            );
+          }}
         </ResponsiveContext.Consumer>
       </Box>
     </Box>
