@@ -3,7 +3,7 @@ require 'json'
 require 'open3'
 
 namespace :stats do
-  desc 'Import stats for free agents from FanGraphs (via pybaseball)'
+  desc 'Import stats for free agents from Baseball Reference (WAR from FanGraphs via pybaseball)'
   task import: :environment do
     # Get the season (current by default, or specified via SEASON_ID)
     if ENV['SEASON_ID']
@@ -40,9 +40,9 @@ namespace :stats do
     puts ""
 
     # ========================================
-    # Fetch stats from FanGraphs via pybaseball
+    # Fetch stats from Baseball Reference via pybaseball
     # ========================================
-    puts "Fetching stats from FanGraphs (#{year})..."
+    puts "Fetching stats from Baseball Reference (#{year})..."
 
     python_script = Rails.root.join('lib', 'scripts', 'fetch_fangraphs_stats.py')
 
@@ -57,7 +57,7 @@ namespace :stats do
     stdout.force_encoding('UTF-8')
 
     unless status.success?
-      puts "ERROR: Failed to fetch stats from FanGraphs"
+      puts "ERROR: Failed to fetch stats from Baseball Reference"
       puts stderr
       exit 1
     end
@@ -91,7 +91,9 @@ namespace :stats do
     updated_count = 0
     skipped_count = 0
     matched_count = 0
+    no_war_count = 0
     unmatched_bbrefids = []
+    no_war_players = []
 
     players.each do |player|
       bbref_id = player.bbrefid
@@ -217,6 +219,12 @@ namespace :stats do
         next
       end
 
+      # Check if WAR is missing (FanGraphs lookup failed)
+      if combined_stats['WAR'].nil? || combined_stats['WAR'] == ''
+        no_war_count += 1
+        no_war_players << { name: player.name, bbrefid: bbref_id }
+      end
+
       # Save or update PlayerStat
       player_stat = PlayerStat.find_or_initialize_by(player_id: player.id, season_id: current_season.id)
 
@@ -235,15 +243,30 @@ namespace :stats do
     puts "✓ Import complete!"
     puts "  #{saved_count} new player stat records created"
     puts "  #{updated_count} existing records updated"
-    puts "  #{matched_count} players matched to FanGraphs"
+    puts "  #{matched_count} players matched to Baseball Reference"
     puts "  #{skipped_count} players skipped (no stats found)"
+
+    if no_war_count > 0
+      puts ""
+      puts "  ⚠️  #{no_war_count} players missing WAR (FanGraphs lookup failed via Chadwick Register):"
+      no_war_players.first(10).each do |p|
+        puts "    - #{p[:name]} (#{p[:bbrefid]})"
+      end
+      if no_war_count > 10
+        puts "    ... and #{no_war_count - 10} more"
+      end
+      puts "  These players have counting stats but no WAR - still eligible for free agency"
+    end
 
     if unmatched_bbrefids.any?
       puts ""
-      puts "  Unmatched BBRef IDs (first 10):"
+      puts "  ⚠️  #{unmatched_bbrefids.count} players not found in Baseball Reference (first 10):"
       unmatched_bbrefids.first(10).each do |bbref_id|
         player = Player.find_by(bbrefid: bbref_id)
         puts "    - #{bbref_id} (#{player&.name || 'unknown'})"
+      end
+      if unmatched_bbrefids.count > 10
+        puts "    ... and #{unmatched_bbrefids.count - 10} more"
       end
     end
 
