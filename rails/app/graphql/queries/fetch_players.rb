@@ -19,7 +19,7 @@ module Queries
             end
 
             # Get all players matching criteria
-            players = players_query.includes(:leading_bid, contract: [:last_season, :team], :player_stats)
+            players = players_query.includes(:leading_bid, :player_stats, contract: [:last_season, :team])
                 .to_a
 
             # Sort by stats if sort_by is provided
