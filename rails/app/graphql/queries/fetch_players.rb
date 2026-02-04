@@ -1,9 +1,15 @@
 module Queries
     class FetchPlayers < Queries::BaseQuery
-        type [Types::PlayerType], null: false
+        type Types::PaginatedPlayersType, null: false
         argument :position, String, required: true
+        argument :page, Integer, required: false, default_value: 1
+        argument :per_page, Integer, required: false, default_value: 25
+        argument :search, String, required: false
+        argument :sort_by, String, required: false
+        argument :sort_direction, String, required: false, default_value: "desc"
 
-        def resolve(position:)
+        def resolve(position:, page:, per_page:, search: nil, sort_by: nil, sort_direction: "desc")
+            # Base query for unsigned players
             unsigned_player_ids = Player.select(:id)
                 .joins('LEFT JOIN contracts active ON players.id = active.player_id and active.active = true')
                 .where.not(bbref_stats: nil)
@@ -12,7 +18,48 @@ module Queries
                 .having('count(active.id) = 0')
                 .lookup_by_position(position)
 
-            Player.includes(:leading_bid, contract: [:last_season, :team]).where(id: unsigned_player_ids)
+            # Apply search filter
+            if search.present?
+                unsigned_player_ids = unsigned_player_ids.where("lower(name) LIKE ?", "%#{Player.sanitize_sql_like(search.downcase)}%")
+            end
+
+            # Get all players matching criteria
+            players = Player.includes(:leading_bid, contract: [:last_season, :team])
+                .where(id: unsigned_player_ids)
+                .to_a
+
+            # Sort by stats if sort_by is provided
+            if sort_by.present?
+                players.sort_by! do |player|
+                    begin
+                        stats = player.bbref_stats
+                        # Parse JSON if it's a string
+                        stats = JSON.parse(stats) if stats.is_a?(String)
+                        stat_value = stats&.dig(sort_by) || stats&.[](sort_by)
+                        # Convert to float, default to 0 if nil or invalid
+                        stat_value.to_f
+                    rescue JSON::ParserError, TypeError
+                        0.0
+                    end
+                end
+                players.reverse! if sort_direction.downcase == "desc"
+            end
+
+            # Calculate pagination metadata
+            total_count = players.length
+            total_pages = (total_count.to_f / per_page).ceil
+            offset = (page - 1) * per_page
+            paginated_players = players[offset, per_page] || []
+
+            {
+                players: paginated_players,
+                total_count: total_count,
+                total_pages: total_pages,
+                current_page: page,
+                per_page: per_page,
+                has_next_page: page < total_pages,
+                has_previous_page: page > 1
+            }
         end
     end
 

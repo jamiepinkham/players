@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, DataTable, Spinner, Box, TextInput, Select, Text } from "grommet";
+import { Button, DataTable, Spinner, Box, TextInput, Select, Text, Pagination } from "grommet";
 import { Search, FormClose, User, Ascend, Descend } from "grommet-icons";
 
 import { useQuery } from "graphql-hooks";
@@ -8,24 +8,29 @@ import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
 import EmptyState from "./EmptyState";
 
 const POSITION_PLAYER_LIST_QUERY = `
-  query PositionPlayerListQuery($position: String!, $teamId: ID!) {
-    players(position: $position) {
-        id
-        name
-        bbrefid
-        position
-        stats {
-            title
-            value
-        }
-        contractMinimums {
-            season {
-                name
-                id
+  query PositionPlayerListQuery($position: String!, $teamId: ID!, $page: Int!, $perPage: Int!, $search: String, $sortBy: String, $sortDirection: String) {
+    players(position: $position, page: $page, perPage: $perPage, search: $search, sortBy: $sortBy, sortDirection: $sortDirection) {
+        players {
+            id
+            name
+            bbrefid
+            position
+            stats {
+                title
+                value
             }
-            amount
-            duration
+            contractMinimums {
+                season {
+                    name
+                    id
+                }
+                amount
+                duration
+            }
         }
+        totalCount
+        totalPages
+        currentPage
     }
     currentSeason {
       activeFreeAgencyPeriod {
@@ -54,6 +59,8 @@ const POSITION_PLAYER_LIST_QUERY = `
 
 export default function PositionPlayerList({ position, onPlayerSelected, teamId }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
 
   const defaultSortStat = position === "SP" || position === "RP" ? "IP" : "PA";
   const [sortBy, setSortBy] = useState(defaultSortStat);
@@ -76,7 +83,13 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
   useEffect(() => {
     const newDefaultSort = position === "SP" || position === "RP" ? "IP" : "PA";
     setSortBy(newDefaultSort);
+    setCurrentPage(1);
   }, [position]);
+
+  // Reset to page 1 when search or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortBy, sortDirection]);
 
   const { data = { players: null }, refetch: refetchPlayers } = useQuery(
     POSITION_PLAYER_LIST_QUERY,
@@ -84,6 +97,11 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
       variables: {
         position,
         teamId,
+        page: currentPage,
+        perPage: itemsPerPage,
+        search: searchTerm || null,
+        sortBy: sortBy,
+        sortDirection: sortDirection,
       },
     }
   );
@@ -99,8 +117,13 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
     };
   }, [refetchPlayers]);
 
-  let { players } = data;
-  if (!players) return <Spinner size="medium" alignSelf="center" />;
+  if (!data.players) return (
+    <Box align="center" justify="center" style={{ minHeight: "400px" }}>
+      <Spinner size="medium" />
+    </Box>
+  );
+
+  const { players, totalCount, totalPages } = data.players;
 
   // Get active bids and merge with players
   const activeBids = data?.currentSeason?.activeFreeAgencyPeriod?.bids || [];
@@ -109,31 +132,18 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
     bids: activeBids.filter(bid => bid.player.id === player.id)
   }));
 
-  // Filter players by search term
-  let filteredPlayers = searchTerm
-    ? playersWithBids.filter((player) =>
-        player.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : playersWithBids;
-
-  // Sort players based on selected stat
-  filteredPlayers = [...filteredPlayers].sort((a, b) => {
-    const aStats = formatPlayerStats(a);
-    const bStats = formatPlayerStats(b);
-    const aValue = parseFloat(aStats[sortBy]) || 0;
-    const bValue = parseFloat(bStats[sortBy]) || 0;
-
-    return sortDirection === "desc" ? bValue - aValue : aValue - bValue;
-  });
+  // Calculate display range
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalCount);
 
   return (
     <Box gap="small">
-      <Box direction="row" justify="end" align="center" gap="small">
+      <Box direction="row" align="center" gap="small">
         <Box
           background="white"
           round="small"
           border={{ color: "border", size: "small" }}
-          style={{ flex: 1 }}
+          flex
         >
           <TextInput
             placeholder="Search by name..."
@@ -150,10 +160,8 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
             tip="Clear search"
           />
         )}
-      </Box>
-      <Box direction="row" align="center" gap="small" pad="small" background="light-2" round="small" border={{ color: "border", size: "xsmall" }}>
         <Text weight="bold">Sort by:</Text>
-        <Box flex background="white" round="xsmall" border={{ color: "border", size: "small" }}>
+        <Box width={{ min: "100px" }} background="white" round="xsmall" border={{ color: "border", size: "small" }}>
           <Select
             plain
             options={sortableStats}
@@ -167,21 +175,36 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
           tip={sortDirection === "desc" ? "Descending" : "Ascending"}
         />
       </Box>
-      {filteredPlayers.length === 0 ? (
+      {playersWithBids.length === 0 ? (
         <EmptyState
           icon={User}
           title={searchTerm ? "No players found" : "No free agents"}
           message={searchTerm ? `No ${position} players match "${searchTerm}"` : `No ${position} players are currently available`}
         />
       ) : (
-        <PositionPlayerStatsTable
-          players={filteredPlayers}
-          position={position}
-          onPlayerSelected={onPlayerSelected}
-          showContractAccordion={true}
-          includeBidLink={true}
-          teamId={teamId}
-        />
+        <>
+          <Box direction="row" justify="between" align="center" pad={{ vertical: 'small' }}>
+            <Text size="small" color="dark-4">
+              Showing {startIndex + 1}-{endIndex} of {totalCount} players
+            </Text>
+            {totalPages > 1 && (
+              <Pagination
+                numberItems={totalCount}
+                page={currentPage}
+                step={itemsPerPage}
+                onChange={({ page }) => setCurrentPage(page)}
+              />
+            )}
+          </Box>
+          <PositionPlayerStatsTable
+            players={playersWithBids}
+            position={position}
+            onPlayerSelected={onPlayerSelected}
+            showContractAccordion={true}
+            includeBidLink={true}
+            teamId={teamId}
+          />
+        </>
       )}
     </Box>
   );

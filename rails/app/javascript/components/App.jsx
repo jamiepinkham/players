@@ -18,17 +18,11 @@ import TradeOfferComponent from "./trades/tradeOffers/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./AllPlayersListSearch";
 
-import { Box, Header, Heading, Nav, Anchor, Main } from "grommet";
+import { Box, Header, Heading, Main, ResponsiveContext, Text, Button } from "grommet";
+import { Logout } from "grommet-icons";
 
-import {
-  Currency,
-  List,
-  Sync,
-  UserSettings,
-  UserAdmin,
-  Search,
-  History
-} from "grommet-icons";
+import HamburgerNav from "./HamburgerNav";
+import { isMobile } from "../utils/responsive";
 
 const NOTIFICATIONS_QUERY = `
   query NotificationsQuery($teamId: ID!) {
@@ -45,11 +39,31 @@ const NOTIFICATIONS_QUERY = `
   }
 `;
 
+const TEAM_NAME_QUERY = `
+  query TeamNameQuery($id: ID!) {
+    team(id: $id) {
+      name
+    }
+  }
+`;
+
+const MY_TEAM_QUERY = `
+  query MyTeamQuery($id: ID!) {
+    team(id: $id) {
+      name
+    }
+  }
+`;
+
 
 export default function App(props) {
   const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Extract team ID from URL if on team page
+  const teamMatch = location.pathname.match(/^\/team\/(\d+)$/);
+  const viewingTeamId = teamMatch ? teamMatch[1] : null;
 
   // Query for pending trades and active bids to show notification dots
   // Poll every 10 seconds to keep dots updated
@@ -57,6 +71,18 @@ export default function App(props) {
     variables: { teamId: auth.teamId },
     skip: !auth.teamId || !auth.isSignedIn,
     skipCache: true,
+  });
+
+  // Query for team name when viewing a team page
+  const { data: teamData } = useQuery(TEAM_NAME_QUERY, {
+    variables: { id: viewingTeamId },
+    skip: !viewingTeamId,
+  });
+
+  // Query for current user's team name
+  const { data: myTeamData } = useQuery(MY_TEAM_QUERY, {
+    variables: { id: auth.teamId },
+    skip: !auth.teamId,
   });
 
   // Poll every 30 seconds to catch any missed updates
@@ -126,131 +152,73 @@ export default function App(props) {
     // Navigate to admin_login endpoint which will handle session creation and redirect
     window.location.href = `/admin_login?token=${token}`;
   }, [navigate]);
+
+  const handleSignOut = useCallback(() => {
+    auth.signOut().then(() => {
+      navigate("/");
+    });
+  }, [auth, navigate]);
+
+  // Get page title based on current path
+  const getPageTitle = () => {
+    if (location.pathname === "/teams") return "Teams";
+    if (location.pathname.startsWith("/team/")) return teamData?.team?.name || "Team";
+    if (location.pathname === "/bidding") return myTeamData?.team?.name ? `${myTeamData.team.name} Bidding` : "Bidding";
+    if (location.pathname.includes("/place-bid")) return "Place Bid";
+    if (location.pathname === "/trade") return "Trade";
+    if (location.pathname === "/trades") return "All Trades";
+    if (location.pathname === "/player_search") return "Player Search";
+    if (location.pathname === "/profile") return myTeamData?.team?.name ? `${myTeamData.team.name} Settings` : "Settings";
+    return null;
+  };
+
+  const pageTitle = getPageTitle();
+
   return (
-    <Box>
+    <Box fill="vertical" direction="column">
       <Header
         background="brand"
         pad={{ horizontal: "medium", vertical: "xsmall" }}
         round={{ corner: "bottom", size: "small" }}
         elevation="small"
+        flex={false}
+        justify="between"
       >
-        <Heading level="2" color="white" margin="none">BMPL</Heading>
+        <Box direction="row" align="center" gap="small">
+          {auth.isSignedIn && (
+            <HamburgerNav
+              handleOnClick={handleOnClick}
+              handleAdminClick={handleAdminClick}
+              currentPath={location.pathname}
+              isAdmin={auth.isAdmin}
+              hasPendingTrades={hasPendingTrades}
+              hasActiveBids={hasActiveBids}
+            />
+          )}
+          <Heading level="2" color="white" margin="none">BMPL</Heading>
+          {pageTitle && (
+            <>
+              <Text color="white" size="large" weight="normal"> / </Text>
+              <Text color="white" size="large">{pageTitle}</Text>
+            </>
+          )}
+        </Box>
         {auth.isSignedIn && (
-          <Nav direction="row" pad={{ horizontal: "small", vertical: "none" }}>
-            <Box
-              border={location.pathname.startsWith("/team") ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<List />}
-                hoverIndicator
-                label="Teams"
-                color="white"
-                onClick={() => handleOnClick("teams")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/bidding" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={
-                  <Box style={{ position: 'relative' }}>
-                    <Currency />
-                    {hasActiveBids && (
-                      <Box
-                        background="status-error"
-                        round="full"
-                        style={{
-                          position: 'absolute',
-                          top: '-4px',
-                          right: '-4px',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                      />
-                    )}
-                  </Box>
-                }
-                hoverIndicator
-                label="Bidding"
-                color="white"
-                onClick={() => handleOnClick("bidding")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/trade" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={
-                  <Box style={{ position: 'relative' }}>
-                    <Sync />
-                    {hasPendingTrades && (
-                      <Box
-                        background="status-error"
-                        round="full"
-                        style={{
-                          position: 'absolute',
-                          top: '-4px',
-                          right: '-4px',
-                          width: '8px',
-                          height: '8px',
-                        }}
-                      />
-                    )}
-                  </Box>
-                }
-                hoverIndicator
-                label="Trade"
-                color="white"
-                onClick={() => handleOnClick("trade")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/trades" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<History />}
-                hoverIndicator
-                label="All Trades"
-                color="white"
-                onClick={() => handleOnClick("trades")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/player_search" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                hoverIndicator
-                icon={<Search />}
-                label="Player Search"
-                color="white"
-                onClick={() => handleOnClick("player_search")}
-              />
-            </Box>
-            <Box
-              border={location.pathname === "/profile" ? { side: "bottom", color: "white", size: "small" } : undefined}
-            >
-              <Anchor
-                icon={<UserSettings />}
-                hoverIndicator
-                label="Settings"
-                color="white"
-                onClick={() => handleOnClick("profile")}
-              />
-            </Box>
-            {auth.isAdmin && (
-              <Anchor
-                icon={<UserAdmin />}
-                hoverIndicator
-                label="Admin"
-                color="white"
-                onClick={handleAdminClick}
-              />
-            )}
-          </Nav>
+          <Button
+            icon={<Logout color="white" />}
+            label={<Text color="white">Sign Out</Text>}
+            onClick={handleSignOut}
+            plain
+            hoverIndicator
+          />
         )}
       </Header>
-      <Box margin="small">
-        <Main pad="small" fill="horizontal">
+      <Box flex overflow={{ vertical: "auto" }} style={{ minHeight: 0 }}>
+        <ResponsiveContext.Consumer>
+          {(size) => {
+            const isAuthPage = ["/", "/sign_in", "/forgot"].includes(location.pathname) || location.pathname.startsWith("/reset/");
+            return (
+              <Main pad={isAuthPage ? "none" : (isMobile(size) ? "small" : "medium")} fill>
           <Routes>
             <Route path="/" element={<SessionLogin />} />
             <Route path="/sign_in" element={<SessionLogin />} />
@@ -266,7 +234,10 @@ export default function App(props) {
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
             <Route path="*" element={<NoMatch />} />
           </Routes>
-        </Main>
+            </Main>
+            );
+          }}
+        </ResponsiveContext.Consumer>
       </Box>
     </Box>
   );

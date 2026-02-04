@@ -52,6 +52,7 @@ function TeamContractList({ team, onContractChecked }) {
     <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
       <DataTable
         primaryKey='id'
+        responsive
         background={DATA_TABLE_THEME.background}
       data={
         data.team.currentContracts.sort((lhs, rhs) => {

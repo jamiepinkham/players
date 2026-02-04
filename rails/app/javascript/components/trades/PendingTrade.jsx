@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, Button, Spinner } from "grommet";
-import { FormUp, FormDown } from "grommet-icons";
+import { FormUp, FormDown, Currency } from "grommet-icons";
 import PendingTradeContracts from './PendingTradeContracts';
 
 
@@ -65,6 +65,9 @@ function PendingTrade({ trade, myTeamId, onAcceptTrade, onRejectTrade }) {
                     <Text size="small" color="text-weak">
                         {trade.fromContracts.length + trade.toContracts.length} players
                     </Text>
+                    {(trade.fromCashAmount > 0 || trade.toCashAmount > 0) && (
+                        <Currency size="small" color="status-ok" />
+                    )}
                     {isExpanded ? <FormUp /> : <FormDown />}
                 </Box>
             </Box>
