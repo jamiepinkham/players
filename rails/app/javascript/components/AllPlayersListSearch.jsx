@@ -33,7 +33,6 @@ query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $pos
       bbrefMinors
       name
       position
-      bbrefStats
       stats {
         title
         value
