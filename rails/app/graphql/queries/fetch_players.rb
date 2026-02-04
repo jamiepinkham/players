@@ -9,36 +9,30 @@ module Queries
         argument :sort_direction, String, required: false, default_value: "desc"
 
         def resolve(position:, page:, per_page:, search: nil, sort_by: nil, sort_direction: "desc")
-            # Base query for unsigned players
-            unsigned_player_ids = Player.select(:id)
-                .joins('LEFT JOIN contracts active ON players.id = active.player_id and active.active = true')
-                .where.not(bbref_stats: nil)
-                .where('bbref_stats::TEXT <> \'"{}"\'')\
-                .group(:id)
-                .having('count(active.id) = 0')
+            # Base query for free agents
+            players_query = Player.where(is_free_agent: true)
                 .lookup_by_position(position)
 
             # Apply search filter
             if search.present?
-                unsigned_player_ids = unsigned_player_ids.where("lower(name) LIKE ?", "%#{Player.sanitize_sql_like(search.downcase)}%")
+                players_query = players_query.where("lower(name) LIKE ?", "%#{Player.sanitize_sql_like(search.downcase)}%")
             end
 
             # Get all players matching criteria
-            players = Player.includes(:leading_bid, contract: [:last_season, :team])
-                .where(id: unsigned_player_ids)
+            players = players_query.includes(:leading_bid, contract: [:last_season, :team], :player_stats)
                 .to_a
 
             # Sort by stats if sort_by is provided
             if sort_by.present?
+                current_season = Season.current
                 players.sort_by! do |player|
                     begin
-                        stats = player.bbref_stats
-                        # Parse JSON if it's a string
-                        stats = JSON.parse(stats) if stats.is_a?(String)
-                        stat_value = stats&.dig(sort_by) || stats&.[](sort_by)
+                        # Get stats from player_stats table
+                        player_stat = player.player_stats.find { |ps| ps.season_id == current_season&.id }
+                        stat_value = player_stat&.stats&.dig(sort_by)
                         # Convert to float, default to 0 if nil or invalid
                         stat_value.to_f
-                    rescue JSON::ParserError, TypeError
+                    rescue TypeError
                         0.0
                     end
                 end
@@ -132,24 +126,6 @@ module Queries
             # Apply status filtering in Ruby to have accurate contract data
             if status.present?
                 filtered_players = filtered_players.select do |player|
-                    # Check if player has valid stats
-                    has_valid_stats = false
-                    if player.bbref_stats.present? && player.bbrefid.present? && player.bbrefid != ''
-                        # Check if stats are not empty
-                        stats_not_empty = if player.bbref_stats.is_a?(Hash)
-                            !player.bbref_stats.empty?
-                        elsif player.bbref_stats.is_a?(String)
-                            player.bbref_stats != '{}' && player.bbref_stats.strip != ''
-                        else
-                            false
-                        end
-
-                        # Check if bbrefid matches pattern
-                        if stats_not_empty && player.bbrefid.match?(/^[a-z0-9]{5,10}$/)
-                            has_valid_stats = true
-                        end
-                    end
-
                     has_contract = player.contract.present?
 
                     case status
@@ -157,11 +133,11 @@ module Queries
                         # Has an active contract for current season
                         has_contract
                     when 'Free Agent'
-                        # Has valid stats but NO active contract
-                        !has_contract && has_valid_stats
+                        # Use is_free_agent flag (set by system based on stats validation)
+                        player.is_free_agent?
                     when 'Ineligible'
-                        # No valid stats AND no active contract
-                        !has_contract && !has_valid_stats
+                        # Not a free agent and no active contract
+                        !player.is_free_agent? && !has_contract
                     else
                         true
                     end
