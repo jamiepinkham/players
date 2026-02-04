@@ -94,6 +94,11 @@ namespace :season do
         puts "   ✓ Created new free agency period (ID: #{fa_period.id})"
       end
 
+      # Step 6: Free agent status is handled by Contract callbacks
+      # For season switch, use separate rake tasks:
+      #   - season:preview_free_agents (preview eligible players)
+      #   - season:promote_free_agents (promote after stats verified)
+
       puts "\n" + "=" * 80
       puts "✅ Season switch complete!"
       puts "=" * 80
@@ -107,15 +112,7 @@ namespace :season do
     active_contracts_count = Contract.where(active: true).count
     puts "   • Active contracts: #{active_contracts_count}"
 
-    free_agents_count = Player
-      .left_outer_joins(:contracts)
-      .where(contracts: { active: [nil, false] })
-      .where.not(bbref_stats: nil)
-      .where("bbref_stats::text != '{}'")
-      .where.not(bbrefid: [nil, ''])
-      .where("bbrefid ~ '^[a-z0-9]{5,10}'")
-      .distinct
-      .count
+    free_agents_count = Player.where(is_free_agent: true).count
     puts "   • Free agents: #{free_agents_count}"
 
     active_fa = FreeAgencyPeriod.where(is_active: true).includes(:season).first
@@ -134,7 +131,7 @@ namespace :season do
 
     puts "\n📝 Next Steps:"
     puts "   1. Test the application"
-    puts "   2. Import updated player stats: rails admin:import_free_agents"
+    puts "   2. Verify target_stat_year is set correctly for #{next_season.name}"
     puts "   3. Notify team owners that the new season has started"
     puts "   4. Monitor for any issues"
     puts ""
