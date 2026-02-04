@@ -291,5 +291,6 @@ RailsAdmin.config do |config|
   config.excluded_models << JwtDenylist
   config.excluded_models << ContractTrade
   config.excluded_models << TeamEmail
+  config.excluded_models << PlayerStat
 
 end
