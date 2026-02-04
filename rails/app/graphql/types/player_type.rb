@@ -5,7 +5,7 @@ module Types
     field :bbrefid, String, null: true
     field :bbref_minors, String, null: true
     field :bbref_link, String, null: false
-    field :stats, GraphQL::Types::JSON, null: true do
+    field :stats, [Types::StatType], null: true do
       argument :year, Integer, required: false, default_value: nil
     end
     field :available_stat_years, [Integer], null: false
@@ -61,19 +61,22 @@ module Types
     end
 
     def stats(year:)
-      return {} if object.bbrefid.blank?
+      return [] if object.bbrefid.blank?
 
       # Default to current season's target stat year if no year provided
       stat_year = year || Season.current&.target_stat_year
-      return {} unless stat_year
+      return [] unless stat_year
 
       # Find the season for this year
       season = Season.find_by(target_stat_year: stat_year)
-      return {} unless season
+      return [] unless season
 
       # Query PlayerStat from database
       player_stat = PlayerStat.find_by(player: object, season: season)
-      player_stat&.stats || {}
+      stats_hash = player_stat&.stats || {}
+
+      # Convert hash to array of { title:, value: } objects
+      stats_hash.map { |key, value| { title: key, value: value } }
     end
 
     def available_stat_years
