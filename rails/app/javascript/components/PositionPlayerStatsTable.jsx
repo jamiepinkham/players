@@ -89,9 +89,9 @@ export default function PositionPlayerStatsTable({
           const bid = player.bids ? player.bids[0] : null;
 
           // Check if the current team has already bid on this player
-          const hasExistingBid = teamId && player.bids?.some(bid => {
+          const hasExistingBid = player.hasMyTeamBid || (teamId && player.bids?.some(bid => {
             return String(bid.team.id) === String(teamId);
-          });
+          }));
 
           return (
             <Box key={player.id} border={{ side: idx > 0 ? "top" : undefined, color: "border", size: "xsmall" }}>
