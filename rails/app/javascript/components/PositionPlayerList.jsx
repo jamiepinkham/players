@@ -29,7 +29,7 @@ const POSITION_PLAYER_LIST_QUERY = `
     }
     currentSeason {
       activeFreeAgencyPeriod {
-        bids(teamId: $teamId, active: true) {
+        allBids: bids(active: true) {
           id
           player {
             id
@@ -45,6 +45,12 @@ const POSITION_PLAYER_LIST_QUERY = `
           }
           lastSeason {
             name
+          }
+        }
+        myTeamBids: bids(teamId: $teamId, active: true) {
+          id
+          player {
+            id
           }
         }
       }
@@ -102,11 +108,16 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
   let { players } = data;
   if (!players) return <Spinner size="medium" alignSelf="center" />;
 
-  // Get active bids and merge with players
-  const activeBids = data?.currentSeason?.activeFreeAgencyPeriod?.bids || [];
+  // Get all active bids (for displaying) and merge with players
+  const allActiveBids = data?.currentSeason?.activeFreeAgencyPeriod?.allBids || [];
+  const myTeamBidPlayerIds = new Set(
+    (data?.currentSeason?.activeFreeAgencyPeriod?.myTeamBids || []).map(bid => bid.player.id)
+  );
+
   const playersWithBids = players.map(player => ({
     ...player,
-    bids: activeBids.filter(bid => bid.player.id === player.id)
+    bids: allActiveBids.filter(bid => bid.player.id === player.id),
+    hasMyTeamBid: myTeamBidPlayerIds.has(player.id)
   }));
 
   // Filter players by search term
