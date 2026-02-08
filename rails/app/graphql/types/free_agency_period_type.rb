@@ -11,7 +11,7 @@ module Types
     field :max_contract_length, Integer, null: false
     field :max_bids_for_team, Integer, null: false
 
-    def bids(team_id:, active:)
+    def bids(team_id: nil, active:)
       if team_id
         Bid.where(free_agency_period_id: object.id, team_id: team_id, is_active: active)
       else

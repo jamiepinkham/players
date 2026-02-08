@@ -3,8 +3,8 @@ import { useMutation, useQuery } from "graphql-hooks";
 import { Box, Text, Heading, Select, Layer, Button, Spinner, TextInput, Collapsible } from "grommet";
 import { Close, Add, Search, FormDown, FormUp } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
-import CurrencyInput from "../../CurrencyInput";
-import PlayerName from "../../PlayerName";
+import CurrencyInput from "../common/CurrencyInput";
+import PlayerName from "../players/PlayerName";
 
 const CREATE_TRADE_MUTATION = `
 mutation CreateTrade($input: CreateTradeMutationInput!) {

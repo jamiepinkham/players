@@ -4,8 +4,8 @@ import { List, Text, Box, Layer, Button } from "grommet";
 import { Sync } from "grommet-icons";
 import { useAuth } from "../../hooks/use_auth";
 import PendingTrade from "./PendingTrade";
-import LoadingState from "../LoadingState";
-import EmptyState from "../EmptyState";
+import LoadingState from "../common/LoadingState";
+import EmptyState from "../common/EmptyState";
 
 const TRADES_QUERY = `
     query getMyPendingTrades($teamId: ID!) {

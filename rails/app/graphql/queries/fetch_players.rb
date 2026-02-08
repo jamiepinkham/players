@@ -13,7 +13,7 @@ module Queries
             unsigned_player_ids = Player.select(:id)
                 .joins('LEFT JOIN contracts active ON players.id = active.player_id and active.active = true')
                 .where.not(bbref_stats: nil)
-                .where('bbref_stats::TEXT <> \'"{}"\'')\
+                .where("bbref_stats::TEXT <> '{}'")
                 .group(:id)
                 .having('count(active.id) = 0')
                 .lookup_by_position(position)

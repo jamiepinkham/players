@@ -5,7 +5,7 @@ import { Search, FormClose, User, Ascend, Descend } from "grommet-icons";
 import { useQuery } from "graphql-hooks";
 
 import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
-import EmptyState from "./EmptyState";
+import EmptyState from "../common/EmptyState";
 
 const POSITION_PLAYER_LIST_QUERY = `
   query PositionPlayerListQuery($position: String!, $teamId: ID!, $page: Int!, $perPage: Int!, $search: String, $sortBy: String, $sortDirection: String) {
@@ -34,7 +34,7 @@ const POSITION_PLAYER_LIST_QUERY = `
     }
     currentSeason {
       activeFreeAgencyPeriod {
-        bids(teamId: $teamId, active: true) {
+        allBids: bids(active: true) {
           id
           player {
             id
@@ -50,6 +50,12 @@ const POSITION_PLAYER_LIST_QUERY = `
           }
           lastSeason {
             name
+          }
+        }
+        myTeamBids: bids(teamId: $teamId, active: true) {
+          id
+          player {
+            id
           }
         }
       }
@@ -125,11 +131,16 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
 
   const { players, totalCount, totalPages } = data.players;
 
-  // Get active bids and merge with players
-  const activeBids = data?.currentSeason?.activeFreeAgencyPeriod?.bids || [];
+  // Get all active bids (for displaying) and merge with players
+  const allActiveBids = data?.currentSeason?.activeFreeAgencyPeriod?.allBids || [];
+  const myTeamBidPlayerIds = new Set(
+    (data?.currentSeason?.activeFreeAgencyPeriod?.myTeamBids || []).map(bid => bid.player.id)
+  );
+
   const playersWithBids = players.map(player => ({
     ...player,
-    bids: activeBids.filter(bid => bid.player.id === player.id)
+    bids: allActiveBids.filter(bid => bid.player.id === player.id),
+    hasMyTeamBid: myTeamBidPlayerIds.has(player.id)
   }));
 
   // Calculate display range
