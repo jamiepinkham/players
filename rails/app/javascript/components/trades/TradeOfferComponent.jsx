@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "graphql-hooks";
 import { useLocation } from "react-router-dom";
 import { Spinner, Tabs, Tab, Box, Heading, Paragraph, Text } from "grommet";
-import { useAuth } from "../../../hooks/use_auth";
-import PendingTrades from "../PendingTrades";
+import { useAuth } from "../../hooks/use_auth";
+import PendingTrades from "./PendingTrades";
 import ClickTradeBuilder from "./ClickTradeBuilder";
 
 const TEAMS_QUERY = `

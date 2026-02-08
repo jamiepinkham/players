@@ -4,8 +4,8 @@ import { useQuery } from "graphql-hooks";
 import CurrencyFormat from "react-currency-format";
 
 import { DataTable, Anchor, Box } from "grommet";
-import LoadingState from "./LoadingState";
-import { DATA_TABLE_THEME } from "../constants/ui";
+import LoadingState from "../common/LoadingState";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 const LIST_TEAMS_QUERY = `
   query ListTeamsQuery {

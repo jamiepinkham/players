@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 
 import {
   Box,

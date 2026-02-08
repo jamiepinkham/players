@@ -1,11 +1,11 @@
 import React from "react";
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "graphql-hooks";
 
 import { Tabs, Tab, Box, Button, Heading, Spinner, Text } from "grommet";
 
-import ResetPasswordForm from "./ResetPasswordForm";
+import ResetPasswordForm from "../auth/ResetPasswordForm";
 import UpdateUsernameForm from "./UpdateUsernameForm";
 
 const CURRENT_USER_QUERY = `

@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 import { Box, Text } from "grommet";
 
 const PrivateRoute = ({ children }) => {

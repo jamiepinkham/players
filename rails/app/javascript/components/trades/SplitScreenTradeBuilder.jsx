@@ -4,7 +4,7 @@ import { Box, Text, Heading, Select, Layer, Button } from "grommet";
 import { FormUp, FormDown } from "grommet-icons";
 import SelectableContractList from "./SelectableContractList";
 import TradeSummary from "./TradeSummary";
-import CurrencyInput from "../../CurrencyInput";
+import CurrencyInput from "../common/CurrencyInput";
 
 const CREATE_TRADE_MUTATION = `
 mutation CreateTrade($input: CreateTradeMutationInput!) {

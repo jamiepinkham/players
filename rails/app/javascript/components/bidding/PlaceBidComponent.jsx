@@ -4,8 +4,8 @@ import { useMutation, useQuery } from "graphql-hooks";
 
 import CurrencyFormat from "react-currency-format";
 
-import CurrencyInput from "./CurrencyInput";
-import LoadingState from "./LoadingState";
+import CurrencyInput from "../common/CurrencyInput";
+import LoadingState from "../common/LoadingState";
 import { FormDown, FormUp } from "grommet-icons";
 
 const PLAYER_CONTRACT_MINIMUMS_QUERY = `

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "graphql-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 import {
   Heading,
   Box,
@@ -15,12 +15,12 @@ import {
 import { Currency } from "grommet-icons";
 
 import PlayerLists from "./PlayerLists";
-import TeamBudgetInfo from "./TeamBudgetInfo";
+import TeamBudgetInfo from "../teams/TeamBudgetInfo";
 import CurrencyFormat from "react-currency-format";
 import Moment from "react-moment";
-import PlayerName from "./PlayerName";
-import EmptyState from "./EmptyState";
-import { DATA_TABLE_THEME } from "../constants/ui";
+import PlayerName from "../players/PlayerName";
+import EmptyState from "../common/EmptyState";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 const BIDDING_CONSOLE_QUERY = `
   query BiddingConsoleQuery($teamId: ID!) {

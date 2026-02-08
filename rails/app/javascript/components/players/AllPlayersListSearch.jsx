@@ -11,11 +11,11 @@ import {
 } from 'grommet';
 import { FormUp, FormDown } from 'grommet-icons';
 import { useManualQuery } from 'graphql-hooks';
-import { useAuth } from '../hooks/use_auth';
+import { useAuth } from '../../hooks/use_auth';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
-import LoadingState from './LoadingState';
-import { DATA_TABLE_THEME } from '../constants/ui';
+import LoadingState from '../common/LoadingState';
+import { DATA_TABLE_THEME } from '../../constants/ui';
 
 const PLAYERS_QUERY = `
 query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $position: String, $status: String, $sortDirection: String) {
