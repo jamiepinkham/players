@@ -27,7 +27,11 @@ class FreeAgencyPeriod < ApplicationRecord
         # A new bid has overtaken the current leading bid
         # Notify the old leading bid owner they've been outbid
         if leading_bid.id != leading_active_bid.id
-          NotificationMailer.bid_lost_leading_status(leading_bid).deliver_later
+          begin
+            NotificationMailer.bid_lost_leading_status(leading_bid).deliver_now
+          rescue => e
+            Rails.logger.error "Failed to send bid_lost_leading_status email for bid #{leading_bid.id}: #{e.message}"
+          end
         end
 
         # Bulk update all non-winning bids in a single query each
@@ -42,13 +46,21 @@ class FreeAgencyPeriod < ApplicationRecord
 
         # Only notify if they just became leading (weren't already)
         unless was_already_leading
-          NotificationMailer.bid_became_leading(leading_active_bid).deliver_later
+          begin
+            NotificationMailer.bid_became_leading(leading_active_bid).deliver_now
+          rescue => e
+            Rails.logger.error "Failed to send bid_became_leading email for bid #{leading_active_bid.id}: #{e.message}"
+          end
         end
       else
         # Leading bid is being converted to a contract
         # Create contract and notify the winning team
         contract = Contract.contract_from_bid(leading_bid)
-        NotificationMailer.bid_converted_to_contract(contract).deliver_later
+        begin
+          NotificationMailer.bid_converted_to_contract(contract).deliver_now
+        rescue => e
+          Rails.logger.error "Failed to send bid_converted_to_contract email for contract #{contract.id}: #{e.message}"
+        end
 
         # Bulk update all bids for this player in a single query
         bids.where(player_id: player_id).update_all(is_active: false, is_leading: false)
@@ -75,12 +87,24 @@ class FreeAgencyPeriod < ApplicationRecord
       # Notify if leadership changed
       if old_leading_bid && old_leading_bid.id != new_leading_bid.id
         # Old leading bid lost status
-        NotificationMailer.bid_lost_leading_status(old_leading_bid).deliver_later
+        begin
+          NotificationMailer.bid_lost_leading_status(old_leading_bid).deliver_now
+        rescue => e
+          Rails.logger.error "Failed to send bid_lost_leading_status email for bid #{old_leading_bid.id}: #{e.message}"
+        end
         # New bid became leading
-        NotificationMailer.bid_became_leading(new_leading_bid).deliver_later
+        begin
+          NotificationMailer.bid_became_leading(new_leading_bid).deliver_now
+        rescue => e
+          Rails.logger.error "Failed to send bid_became_leading email for bid #{new_leading_bid.id}: #{e.message}"
+        end
       elsif !old_leading_bid
         # First time this bid is becoming leading
-        NotificationMailer.bid_became_leading(new_leading_bid).deliver_later
+        begin
+          NotificationMailer.bid_became_leading(new_leading_bid).deliver_now
+        rescue => e
+          Rails.logger.error "Failed to send bid_became_leading email for bid #{new_leading_bid.id}: #{e.message}"
+        end
       end
 
       # Bulk update all non-leading bids in a single query
