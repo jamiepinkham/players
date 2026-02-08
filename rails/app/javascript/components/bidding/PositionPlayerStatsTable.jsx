@@ -3,8 +3,8 @@ import { Button, DataTable, Box, Text, Grid } from "grommet";
 import { Currency } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
 import LeadingBidComponent from "./LeadingBidComponent";
-import PlayerName from "./PlayerName";
-import { DATA_TABLE_THEME } from "../constants/ui";
+import PlayerName from "../players/PlayerName";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 export default function PositionPlayerStatsTable({
   players,

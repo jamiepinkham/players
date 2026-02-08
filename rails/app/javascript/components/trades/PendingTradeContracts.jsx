@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "grommet";
 import CurrencyFormat from "react-currency-format";
-import PlayerName from "../PlayerName";
+import PlayerName from "../players/PlayerName";
 
 export default function PendingTradeContracts({ contracts, cash }) {
     if (contracts.length === 0 && (!cash || cash === 0)) {

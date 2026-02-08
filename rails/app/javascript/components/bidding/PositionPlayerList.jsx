@@ -5,7 +5,7 @@ import { Search, FormClose, User, Ascend, Descend } from "grommet-icons";
 import { useQuery } from "graphql-hooks";
 
 import PositionPlayerStatsTable from "./PositionPlayerStatsTable";
-import EmptyState from "./EmptyState";
+import EmptyState from "../common/EmptyState";
 
 const POSITION_PLAYER_LIST_QUERY = `
   query PositionPlayerListQuery($position: String!, $teamId: ID!) {

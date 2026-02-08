@@ -8,9 +8,9 @@ import { MailOption } from "grommet-icons";
 
 import TeamBudgetInfo from "./TeamBudgetInfo";
 import { Link } from "react-router-dom";
-import PlayerName from "./PlayerName";
-import LoadingState from "./LoadingState";
-import { DATA_TABLE_THEME } from "../constants/ui";
+import PlayerName from "../players/PlayerName";
+import LoadingState from "../common/LoadingState";
+import { DATA_TABLE_THEME } from "../../constants/ui";
 
 const TEAM_QUERY = `
   query TeamQuery($id: ID!) {

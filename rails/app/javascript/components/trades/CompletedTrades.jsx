@@ -4,8 +4,8 @@ import { useQuery } from "graphql-hooks";
 import { List, Text, Box, Grid, Header, Select, CheckBox, Accordion, AccordionPanel, Button, Pagination, TextInput } from "grommet";
 import { History, FormNext, FormPrevious, Search, FormClose } from "grommet-icons";
 import PendingTradeContracts from "./PendingTradeContracts";
-import LoadingState from "../LoadingState";
-import EmptyState from "../EmptyState";
+import LoadingState from "../common/LoadingState";
+import EmptyState from "../common/EmptyState";
 
 const TRADES_QUERY = `
 query getCompletedTrades($page: Int!, $perPage: Int!, $teamId: ID, $search: String) {

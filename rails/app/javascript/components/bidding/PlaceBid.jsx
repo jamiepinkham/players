@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "graphql-hooks";
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 import { Box, Heading, Spinner, Button, Text } from "grommet";
 import { Previous, FormUp, FormDown } from "grommet-icons";
 import PlaceBidComponent from "./PlaceBidComponent";
-import PlayerName from "./PlayerName";
+import PlayerName from "../players/PlayerName";
 import CurrencyFormat from "react-currency-format";
 
 const PLAYER_QUERY = `

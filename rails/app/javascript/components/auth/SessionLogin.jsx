@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 
-import { useAuth } from "../hooks/use_auth";
+import { useAuth } from "../../hooks/use_auth";
 
 import {
   Box,
@@ -18,7 +18,7 @@ import {
 
 import { CircleQuestion } from "grommet-icons";
 
-import sliding from "../images/sliding.jpg";
+import sliding from "../../images/sliding.jpg";
 
 function SessionLogin() {
   const auth = useAuth();

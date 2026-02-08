@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Tab, Tabs, Text } from "grommet";
 import { User } from "grommet-icons";
 import PositionPlayerList from "./PositionPlayerList";
-import EmptyState from "./EmptyState";
+import EmptyState from "../common/EmptyState";
 
 export default function PlayerLists({ onPlayerSelected, teamId }) {
   const positions = ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF"];
