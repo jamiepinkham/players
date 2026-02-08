@@ -1,0 +1,16 @@
+Bid Conversion Job Summary
+
+Season: <%= @season_name %>
+Free Agency Active: <%= @fa_active ? 'Yes' : 'No' %>
+
+Results:
+  Contracts Created: <%= @results[:contracts_created] %>
+  Bids Outbid: <%= @results[:bids_outbid] %>
+  New Leading Bids: <%= @results[:new_leading_bids] %>
+  Email Failures: <%= @results[:email_failures] %>
+
+<% if @results[:email_failures] > 0 %>
+⚠️ Warning: Some email notifications failed to send. Check logs for details.
+<% end %>
+
+Billy Martin Players League

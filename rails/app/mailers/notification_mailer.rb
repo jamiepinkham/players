@@ -95,6 +95,32 @@ class NotificationMailer < ApplicationMailer
         mail(to: recipient_emails, subject: subject)
     end
 
+    def bid_conversion_summary(results, season_name, fa_active)
+        @results = results
+        @season_name = season_name
+        @fa_active = fa_active
+
+        admin_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+        return if admin_emails.empty?
+
+        subject = subject_with_env("Bid Conversion Job Summary - #{season_name}")
+
+        mail(to: admin_emails, subject: subject)
+    end
+
+    def bid_conversion_alert(active_bid_count, leading_bid_count, season_name)
+        @active_bid_count = active_bid_count
+        @leading_bid_count = leading_bid_count
+        @season_name = season_name
+
+        admin_emails = ENV.fetch('FALLBACK_NOTIFICATION_EMAILS', '').split(',').map(&:strip).reject(&:blank?)
+        return if admin_emails.empty?
+
+        subject = subject_with_env("ALERT: Bids found during inactive FA - #{season_name}")
+
+        mail(to: admin_emails, subject: subject)
+    end
+
     private
 
     def get_team_emails(team)
