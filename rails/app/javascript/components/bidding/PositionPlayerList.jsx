@@ -31,6 +31,7 @@ const POSITION_PLAYER_LIST_QUERY = `
       activeFreeAgencyPeriod {
         allBids: bids(active: true) {
           id
+          isLeading
           player {
             id
           }
@@ -116,7 +117,7 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
 
   const playersWithBids = players.map(player => ({
     ...player,
-    bids: allActiveBids.filter(bid => bid.player.id === player.id),
+    bids: allActiveBids.filter(bid => bid.player.id === player.id && bid.isLeading),
     hasMyTeamBid: myTeamBidPlayerIds.has(player.id)
   }));
 
