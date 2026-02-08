@@ -47,6 +47,7 @@ gem 'rack-timeout', '~> 0.7'
 gem 'graphql', '~> 2.5'
 gem 'graphiql-rails', '~> 1.10', group: :development
 gem 'nokogiri', '~> 1.19'
+gem 'solid_queue', '~> 1.1'
 
 gem "foreman", "~> 0.90.0"
 gem "net-smtp"

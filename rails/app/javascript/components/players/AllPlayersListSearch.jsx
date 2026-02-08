@@ -33,7 +33,6 @@ query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $pos
       bbrefMinors
       name
       position
-      bbrefStats
       stats {
         title
         value
@@ -196,30 +195,36 @@ const AllPlayersListSearch = () => {
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
   return (
-    <Box fill pad="medium" overflow="auto">
-      <Box direction="row" gap="small" margin={{ bottom: 'small' }}>
-        <TextInput
-          ref={searchInputRef}
-          placeholder="Search by name"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          onFocus={() => wasFocused.current = true}
-          onBlur={() => wasFocused.current = false}
-        />
-        <Select
-          placeholder="All Positions"
-          options={uniquePositions}
-          value={positionFilter}
-          onChange={({ option }) => setPositionFilter(option || '')}
-          clear
-        />
-        <Select
-          placeholder="All Statuses"
-          options={statusOptions}
-          value={statusFilter}
-          onChange={({ option }) => setStatusFilter(option || '')}
-          clear
-        />
+    <Box gap="small">
+      <Box direction={{ small: "column", medium: "row" }} gap="small" margin={{ bottom: 'small' }}>
+        <Box flex>
+          <TextInput
+            ref={searchInputRef}
+            placeholder="Search by name"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            onFocus={() => wasFocused.current = true}
+            onBlur={() => wasFocused.current = false}
+          />
+        </Box>
+        <Box width={{ min: "150px", max: "200px" }}>
+          <Select
+            placeholder="All Positions"
+            options={uniquePositions}
+            value={positionFilter}
+            onChange={({ option }) => setPositionFilter(option || '')}
+            clear
+          />
+        </Box>
+        <Box width={{ min: "150px", max: "200px" }}>
+          <Select
+            placeholder="All Statuses"
+            options={statusOptions}
+            value={statusFilter}
+            onChange={({ option }) => setStatusFilter(option || '')}
+            clear
+          />
+        </Box>
       </Box>
 
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'small' }}>
@@ -300,6 +305,7 @@ const AllPlayersListSearch = () => {
           },
         ]}
         data={players}
+        responsive
         background={DATA_TABLE_THEME.background}
         />
       </Box>

@@ -2,54 +2,49 @@ import React from "react";
 
 import CurrencyFormat from "react-currency-format";
 
-import { Box, Grid, Text } from "grommet";
+import { Box, Text } from "grommet";
 
 function TeamBudgetInfo({ team }) {
-  const StatBox = ({ label, value }) => (
-    <Box>
-      <Text size="small" color="text-weak">{label}</Text>
-      <Text weight="bold">{value}</Text>
-    </Box>
-  );
-
   return (
-    <Grid columns={{ count: 3, size: "auto" }} gap="small">
-      <StatBox
-        label="Budget"
-        value={<CurrencyFormat
-          value={team.budget}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />}
-      />
-      <StatBox
-        label="Payroll"
-        value={<CurrencyFormat
-          value={team.currentPayroll}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />}
-      />
-      <StatBox
-        label="Available"
-        value={<CurrencyFormat
-          value={team.availableCash}
-          displayType={"text"}
-          thousandSeparator={true}
-          prefix={"$"}
-        />}
-      />
-      <StatBox
-        label="Players"
-        value={team.totalPlayers}
-      />
-      <StatBox
-        label="Unsalaried"
-        value={team.unsalariedPlayers}
-      />
-    </Grid>
+    <Box>
+      <Text size="medium" style={{ lineHeight: '1.8' }}>
+        <Text color="text-weak">Budget: </Text>
+        <Text weight="bold">
+          <CurrencyFormat
+            value={team.budget}
+            displayType={"text"}
+            thousandSeparator={true}
+            prefix={"$"}
+          />
+        </Text>
+        {"  |  "}
+        <Text color="text-weak">Payroll: </Text>
+        <Text weight="bold">
+          <CurrencyFormat
+            value={team.currentPayroll}
+            displayType={"text"}
+            thousandSeparator={true}
+            prefix={"$"}
+          />
+        </Text>
+        {"  |  "}
+        <Text color="text-weak">Available: </Text>
+        <Text weight="bold">
+          <CurrencyFormat
+            value={team.availableCash}
+            displayType={"text"}
+            thousandSeparator={true}
+            prefix={"$"}
+          />
+        </Text>
+        {"  |  "}
+        <Text color="text-weak">Players: </Text>
+        <Text weight="bold">{team.totalPlayers}</Text>
+        {"  |  "}
+        <Text color="text-weak">Unsalaried: </Text>
+        <Text weight="bold">{team.unsalariedPlayers}</Text>
+      </Text>
+    </Box>
   );
 }
 

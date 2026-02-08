@@ -1,0 +1,2 @@
+# Python dependencies for stats import
+pybaseball==2.2.7

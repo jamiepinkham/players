@@ -22,11 +22,9 @@ export default function PlayerLists({ onPlayerSelected, teamId }) {
     <Box>
       <Box
         direction="row"
-        width="100%"
         background="#666666"
         round="small"
         overflow="hidden"
-        style={{ display: 'flex' }}
       >
         {positions.map((position, idx) => (
           <Box
@@ -36,14 +34,14 @@ export default function PlayerLists({ onPlayerSelected, teamId }) {
             hoverIndicator={{ background: "#555555" }}
             align="center"
             justify="center"
-            pad={{ horizontal: "medium", vertical: "small" }}
+            pad={{ horizontal: "small", vertical: "xsmall" }}
             onClick={() => onActive(idx)}
             style={{
               cursor: 'pointer',
               borderRight: idx < positions.length - 1 ? '1px solid #444444' : 'none'
             }}
           >
-            <Text color="white" weight={index === idx ? "bold" : "normal"}>
+            <Text color="white" weight={index === idx ? "bold" : "normal"} size="small">
               {position}
             </Text>
           </Box>

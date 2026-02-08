@@ -75,23 +75,24 @@ namespace :season do
       puts "   ✓ #{current_season.name} marked inactive"
       puts "   ✓ #{next_season.name} marked active"
 
-      # Step 5: Create free agency period for new season
+      # Step 5: Create free agency period for new season (inactive by default)
       puts "\nStep 5: Creating free agency period for #{next_season.name}..."
 
       # Check if one already exists
       existing_fa = next_season.free_agency_periods.first
       if existing_fa
-        existing_fa.update!(is_active: true)
-        puts "   ✓ Activated existing free agency period (ID: #{existing_fa.id})"
+        puts "   ✓ Free agency period already exists (ID: #{existing_fa.id})"
+        puts "   ℹ️  Status: #{existing_fa.is_active? ? 'ACTIVE' : 'INACTIVE'}"
       else
         # Use the season's start and end dates
+        # Note: is_active defaults to false - admins activate when ready
         fa_period = next_season.free_agency_periods.create!(
-          is_active: true,
+          is_active: false,
           max_bids_for_team: 7,
           start_date: next_season.start_date,
           end_date: next_season.end_date
         )
-        puts "   ✓ Created new free agency period (ID: #{fa_period.id})"
+        puts "   ✓ Created new free agency period (ID: #{fa_period.id}, inactive)"
       end
 
       puts "\n" + "=" * 80
@@ -107,15 +108,7 @@ namespace :season do
     active_contracts_count = Contract.where(active: true).count
     puts "   • Active contracts: #{active_contracts_count}"
 
-    free_agents_count = Player
-      .left_outer_joins(:contracts)
-      .where(contracts: { active: [nil, false] })
-      .where.not(bbref_stats: nil)
-      .where("bbref_stats::text != '{}'")
-      .where.not(bbrefid: [nil, ''])
-      .where("bbrefid ~ '^[a-z0-9]{5,10}'")
-      .distinct
-      .count
+    free_agents_count = Player.where(is_free_agent: true).count
     puts "   • Free agents: #{free_agents_count}"
 
     active_fa = FreeAgencyPeriod.where(is_active: true).includes(:season).first
@@ -134,7 +127,7 @@ namespace :season do
 
     puts "\n📝 Next Steps:"
     puts "   1. Test the application"
-    puts "   2. Import updated player stats: rails admin:import_free_agents"
+    puts "   2. Activate free agency period when ready (via Rails Admin or console)"
     puts "   3. Notify team owners that the new season has started"
     puts "   4. Monitor for any issues"
     puts ""
