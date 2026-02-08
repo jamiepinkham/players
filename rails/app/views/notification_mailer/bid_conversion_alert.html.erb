@@ -1,0 +1,21 @@
+<h2>⚠️ ALERT: Bids Found During Inactive Free Agency</h2>
+
+<p><strong>Season:</strong> <%= @season_name %></p>
+<p style="color: red;"><strong>Free Agency Status:</strong> INACTIVE</p>
+
+<h3>Issue:</h3>
+<p>The bid conversion job found active or leading bids, but the free agency period is marked as inactive.</p>
+
+<h3>Bid Counts:</h3>
+<ul>
+  <li><strong>Active Bids:</strong> <%= @active_bid_count %></li>
+  <li><strong>Leading Bids:</strong> <%= @leading_bid_count %></li>
+</ul>
+
+<p><strong>Action Required:</strong> Please review the free agency period status and resolve any inconsistencies.</p>
+
+<p>The bid conversion job was aborted to prevent unintended contract creation.</p>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>
