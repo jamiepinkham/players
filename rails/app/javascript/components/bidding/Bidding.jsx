@@ -36,6 +36,7 @@ const BIDDING_CONSOLE_QUERY = `
     currentSeason {
       activeFreeAgencyPeriod {
             id
+            isActive
             maxBidsForTeam
             bids(teamId: $teamId, active: true) {
                 id
@@ -91,26 +92,42 @@ export default function BiddingConsole() {
 
   // When player_id is in URL, redirect to place bid page
   useEffect(() => {
-    if (playerId && data?.currentSeason?.activeFreeAgencyPeriod) {
-      const bids = data.currentSeason.activeFreeAgencyPeriod.bids;
-      const maxBids = data.currentSeason.activeFreeAgencyPeriod.maxBidsForTeam;
+    const fap = data?.currentSeason?.activeFreeAgencyPeriod;
+    if (playerId && fap && fap.isActive) {
+      const bids = fap.bids;
+      const maxBids = fap.maxBidsForTeam;
       if (bids.length < maxBids) {
         navigate(`/bidding/${playerId}/place-bid`, { replace: true });
       }
     }
   }, [playerId, data, navigate]);
 
-  if (!data.team || !data.currentSeason?.activeFreeAgencyPeriod) {
+  if (!data.team || !data.currentSeason) {
     return <Spinner size="medium" alignSelf="center" />;
   }
 
   const team = data.team;
   const currentSeason = data.currentSeason;
-  const bids = currentSeason.activeFreeAgencyPeriod.bids
-  const maxBids = currentSeason.activeFreeAgencyPeriod.maxBidsForTeam
+  const freeAgencyPeriod = currentSeason.activeFreeAgencyPeriod;
+
+  // Show empty state if no active free agency period
+  if (!freeAgencyPeriod || !freeAgencyPeriod.isActive) {
+    return (
+      <Box pad="large" align="center">
+        <EmptyState
+          icon={Currency}
+          title="Free Agency Not Active"
+          message="There is currently no active free agency period. Check back later when free agency opens."
+        />
+      </Box>
+    );
+  }
+
+  const bids = freeAgencyPeriod.bids;
+  const maxBids = freeAgencyPeriod.maxBidsForTeam;
 
   function onPlayerSelected(player) {
-    if (bids.length < maxBids) {
+    if (freeAgencyPeriod?.isActive && bids.length < maxBids) {
       navigate(`/bidding/${player.id}/place-bid`);
     }
   }
