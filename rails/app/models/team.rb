@@ -4,6 +4,14 @@ class Team < ApplicationRecord
   has_many :bids, -> { includes :player }
   has_many :team_emails, dependent: :destroy
 
+  def to_s
+    name || "Team ##{id}"
+  end
+
+  def rails_admin_label
+    to_s
+  end
+
   # Get all email addresses for trade notifications
   def notification_emails
     team_emails.for_trade_notifications.pluck(:email)

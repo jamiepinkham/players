@@ -2,6 +2,14 @@ class FreeAgencyPeriod < ApplicationRecord
   belongs_to :season
   has_many :bids
 
+  def to_s
+    "#{season&.name || 'Unknown Season'} Free Agency#{' (active)' if is_active}"
+  end
+
+  def rails_admin_label
+    to_s
+  end
+
   def convert_bids
     convert_leading_bids()
     set_leading_bids()

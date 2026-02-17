@@ -41,4 +41,12 @@ class Bid < ApplicationRecord
   def total_amount
     contract_length * annual_amount
   end
+
+  def to_s
+    "#{player&.name || 'Unknown Player'} - #{team&.name || 'Unknown Team'} - $#{(total_amount / 1_000_000.0).round(1)}M"
+  end
+
+  def rails_admin_label
+    to_s
+  end
 end

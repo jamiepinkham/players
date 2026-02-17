@@ -4,13 +4,12 @@ FROM ruby:3.3.7 AS web
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
 
 # Install supercronic (cron for containers)
-ARG TARGETPLATFORM
-RUN case "$TARGETPLATFORM" in \
-      "linux/amd64") \
-        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64 ;; \
-      "linux/arm64") \
-        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64 ;; \
-    esac && \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64; \
+    elif [ "$ARCH" = "arm64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64; \
+    fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
     chmod +x "$(basename ${SUPERCRONIC_URL})" && \
     mv "$(basename ${SUPERCRONIC_URL})" "/usr/local/bin/supercronic"
