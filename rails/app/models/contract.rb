@@ -44,4 +44,12 @@ class Contract < ApplicationRecord
           return contract
       end
   end
+
+  def to_s
+    "#{player&.name || 'Unknown Player'} - #{team&.name || 'Unknown Team'}#{' (inactive)' unless active}"
+  end
+
+  def rails_admin_label
+    to_s
+  end
 end

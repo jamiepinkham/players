@@ -92,4 +92,12 @@ class User < ApplicationRecord
     recoverable.send_reset_password_instructions if recoverable.persisted?
     recoverable
   end
+
+  def to_s
+    username
+  end
+
+  def rails_admin_label
+    username
+  end
 end

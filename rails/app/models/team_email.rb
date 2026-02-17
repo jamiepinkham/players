@@ -13,6 +13,18 @@ class TeamEmail < ApplicationRecord
 
   before_validation :downcase_email
 
+  def to_s
+    email
+  end
+
+  def rails_admin_label
+    to_s
+  end
+
+  def custom_label
+    to_s
+  end
+
   private
 
   def downcase_email

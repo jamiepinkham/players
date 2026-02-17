@@ -6,6 +6,14 @@ class Season < ApplicationRecord
     belongs_to :previous_season, class_name: 'Season', optional: true
     has_one :next_season, class_name: 'Season', foreign_key: 'previous_season_id'
 
+    def to_s
+        name || "Season ##{id}"
+    end
+
+    def rails_admin_label
+        to_s
+    end
+
     def self.current
         Season.where(is_active: true).first
     end
