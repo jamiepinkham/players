@@ -75,13 +75,39 @@ class Contract < ApplicationRecord
           contract = Contract.new
           contract.player_id = bid.player_id
           contract.team_id = bid.team_id
-          contract.amount = bid.annual_amount
+          contract.first_season = bid.first_season
+          contract.last_season = bid.last_season
+
+          # Check if player had contract with this team that expired in the previous season
+          previous_season = bid.first_season.previous_season
+          had_expiring_contract = false
+
+          if previous_season.present?
+            had_expiring_contract = Contract.where(
+              player_id: bid.player_id,
+              team_id: bid.team_id,
+              last_season_id: previous_season.id
+            ).exists?
+          end
+
+          # Get league minimum for this contract length from free agency period
+          minimum_annual = bid.free_agency_period.minimum_contract_amount_for_season_range(
+            bid.first_season,
+            bid.last_season
+          )
+
+          # Apply 15% home team discount if re-signing after contract expiration, but not below league minimum
+          if had_expiring_contract
+            discounted_amount = bid.annual_amount * 0.85
+            contract.amount = [discounted_amount, minimum_annual].max
+          else
+            contract.amount = bid.annual_amount
+          end
+
           contract.active = true
           contract.summer = false
           contract.franchise = false
           contract.winning_bid = bid
-          contract.first_season = bid.first_season
-          contract.last_season = bid.last_season
           contract.save!
           bid.contract = contract
           bid.save(:validate => false)
