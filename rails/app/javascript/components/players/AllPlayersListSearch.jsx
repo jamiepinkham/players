@@ -12,6 +12,7 @@ import {
 import { FormUp, FormDown } from 'grommet-icons';
 import { useManualQuery } from 'graphql-hooks';
 import { useAuth } from '../../hooks/use_auth';
+import { Link } from 'react-router-dom';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
 import LoadingState from '../common/LoadingState';
@@ -32,11 +33,8 @@ query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $pos
       bbrefid
       bbrefMinors
       name
-      position
-      stats {
-        title
-        value
-      }
+      positions
+      isFreeAgent
       contract {
         firstSeason { name }
         lastSeason { name }
@@ -196,7 +194,7 @@ const AllPlayersListSearch = () => {
 
   return (
     <Box gap="small">
-      <Box direction={{ small: "column", medium: "row" }} gap="small" margin={{ bottom: 'small' }}>
+      <Box direction="row-responsive" gap="small" margin={{ bottom: 'small' }}>
         <Box flex>
           <TextInput
             ref={searchInputRef}
@@ -249,20 +247,20 @@ const AllPlayersListSearch = () => {
             property: 'name',
             header: renderSortableHeader('Name'),
             primary: true,
-            render: (player) => <PlayerName name={player.name} bbrefid={player.bbrefid} bold />,
+            render: (player) => (
+              <PlayerName playerId={player.id} name={player.name} bbrefid={player.bbrefid} bold />
+            ),
           },
           {
-            property: 'position',
+            property: 'positions',
             header: "Position",
-            render: (player) => <Text>{player.position}</Text>,
+            render: (player) => <Text>{player.positions?.join(', ') || ''}</Text>,
           },
           {
             property: 'contract',
             header: "Contract Status",
             align: 'end',
             render: (player) => {
-              const hasStats = player.stats && player.stats.length > 0;
-
               if (player.contract) {
                 return (
                   <Text>
@@ -274,7 +272,7 @@ const AllPlayersListSearch = () => {
                     /> - Ends: {player.contract.lastSeason?.name || '?'}
                   </Text>
                 );
-              } else if (hasStats) {
+              } else if (player.isFreeAgent) {
                 return <Text>Free Agent</Text>;
               } else {
                 return <Text color="status-critical">Ineligible</Text>;
@@ -286,17 +284,15 @@ const AllPlayersListSearch = () => {
             header: "Action",
             align: 'end',
             render: (player) => {
-              const hasStats = player.stats && player.stats.length > 0;
-
               if (!hasTeam) {
                 return <Text color="dark-5">N/A</Text>;
               }
 
               if (player.contract) {
                 return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
-              } else if (hasStats && hasActiveFAPeriod) {
+              } else if (player.isFreeAgent && hasActiveFAPeriod) {
                 return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
-              } else if (hasStats && !hasActiveFAPeriod) {
+              } else if (player.isFreeAgent && !hasActiveFAPeriod) {
                 return <Text color="dark-5">Bid (N/A)</Text>;
               } else {
                 return <Text color="dark-5">N/A</Text>;

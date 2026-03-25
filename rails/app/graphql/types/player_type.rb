@@ -9,13 +9,14 @@ module Types
       argument :year, Integer, required: false, default_value: nil
     end
     field :available_stat_years, [Integer], null: false
-    field :position, String, null: true
+    field :positions, [String], null: true
     field :bids, [Types::BidType], null: true do
       argument :leading, Boolean, required: false, default_value: false
     end
     field :contract_minimums, [Types::ContractMinimumType], null: false
     field :team, Types::TeamType, null: true
     field :contract, Types::ContractType, null: true
+    field :contracts, [Types::ContractType], null: false
     field :is_free_agent, Boolean, null: false
     field :is_trade_eligible, Boolean, null: false
     field :trade_ineligibility_reason, String, null: true
@@ -67,13 +68,9 @@ module Types
       stat_year = year || Season.current&.target_stat_year
       return [] unless stat_year
 
-      # Find the season for this year
-      season = Season.find_by(target_stat_year: stat_year)
-      return [] unless season
-
-      # Query PlayerStat from database
-      player_stat = PlayerStat.find_by(player: object, season: season)
-      stats_hash = player_stat&.stats || {}
+      # Fetch stats from cache (via StatsFetcher)
+      stats_hash = StatsFetcher.fetch_for_player(object, stat_year)
+      return [] if stats_hash.blank?
 
       # Convert hash to array of { title:, value: } objects
       stats_hash.map { |key, value| { title: key, value: value } }
@@ -82,8 +79,20 @@ module Types
     def available_stat_years
       return [] if object.bbrefid.blank?
 
-      # Return years from PlayerStat records for this player
-      object.player_stats.joins(:season).pluck('seasons.target_stat_year').sort.reverse
+      # Only return years <= current season's target stat year (don't show future seasons)
+      current_target_year = Season.current&.target_stat_year
+      return [] unless current_target_year
+
+      Season.where.not(target_stat_year: nil)
+            .where('target_stat_year <= ?', current_target_year)
+            .pluck(:target_stat_year)
+            .sort
+            .reverse
+    end
+
+    def contracts
+      # Return all contracts for this player, ordered by most recent first
+      object.contracts.order(created_at: :desc)
     end
   end
 end

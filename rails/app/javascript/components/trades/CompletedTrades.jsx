@@ -18,9 +18,10 @@ query getCompletedTrades($page: Int!, $perPage: Int!, $teamId: ID, $search: Stri
             fromContracts {
                 id
                 player {
+                    id
                     name
                     bbrefid
-                    position
+                    positions
                 }
                 amount
                 lastSeason {
@@ -36,9 +37,10 @@ query getCompletedTrades($page: Int!, $perPage: Int!, $teamId: ID, $search: Stri
             toContracts {
                 id
                 player {
+                    id
                     name
                     bbrefid
-                    position
+                    positions
                 }
                 amount
                 lastSeason {
@@ -214,11 +216,11 @@ export default function CompletedTrades() {
                             <Box direction="row-responsive" gap='medium'>
                                 <Box flex>
                                     <Text weight="bold" margin={{ bottom: "small" }}>{trade.fromTeam.name} receives:</Text>
-                                    <PendingTradeContracts contracts={trade.toContracts} cash={trade.fromCashAmount} />
+                                    <PendingTradeContracts contracts={trade.fromContracts} cash={trade.fromCashAmount} />
                                 </Box>
                                 <Box flex>
                                     <Text weight="bold" margin={{ bottom: "small" }}>{trade.toTeam.name} receives:</Text>
-                                    <PendingTradeContracts contracts={trade.fromContracts} cash={trade.toCashAmount} />
+                                    <PendingTradeContracts contracts={trade.toContracts} cash={trade.toCashAmount} />
                                 </Box>
                             </Box>
                         </Box>

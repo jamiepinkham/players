@@ -11,16 +11,8 @@ namespace :free_agents do
       exit 1
     end
 
-    # Check if we have stats for the target year
-    stats_count = PlayerStat.joins(:season).where('seasons.target_stat_year = ?', current_season.target_stat_year).count
-    if stats_count == 0
-      puts "❌ ERROR: No stats found for target year #{current_season.target_stat_year}"
-      puts "   Please run stats import before recalculating:"
-      puts "   bin/rails stats:import"
-      exit 1
-    end
-
-    puts "✓ Found #{stats_count} player stat records for #{current_season.target_stat_year}"
+    puts "Target stat year: #{current_season.target_stat_year}"
+    puts "Stats will be fetched on-demand from pybaseball via StatsFetcher"
     puts ""
 
     before_count = Player.where(is_free_agent: true).count
@@ -36,7 +28,7 @@ namespace :free_agents do
       # New status: free agent if no active contract AND has stats
       if player.contract.present?
         new_status = false
-      elsif Player.has_stats_in_pybaseball?(player.bbrefid, current_season.target_stat_year, player.position)
+      elsif Player.has_stats_in_pybaseball?(player.bbrefid, current_season.target_stat_year, player.positions)
         new_status = true
       else
         new_status = false

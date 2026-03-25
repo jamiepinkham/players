@@ -1,16 +1,17 @@
 ## Main Rails app
 FROM ruby:3.3.7 AS web
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client python3 python3-pip
 
 # Install supercronic (cron for containers)
-ARG TARGETPLATFORM
-RUN case "$TARGETPLATFORM" in \
-      "linux/amd64") \
-        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64 ;; \
-      "linux/arm64") \
-        SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64 ;; \
-    esac && \
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+      SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64; \
+    else \
+      echo "Unsupported architecture: $ARCH"; exit 1; \
+    fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
     chmod +x "$(basename ${SUPERCRONIC_URL})" && \
     mv "$(basename ${SUPERCRONIC_URL})" "/usr/local/bin/supercronic"
@@ -37,6 +38,10 @@ WORKDIR /app
 
 COPY rails/Gemfile rails/Gemfile.lock ./
 RUN gem install bundler foreman && bundle install
+
+# Install Python dependencies
+COPY requirements.txt ./
+RUN pip3 install --break-system-packages --root-user-action=ignore -r requirements.txt
 
 # Copy the full app from rails/
 COPY rails/ ./

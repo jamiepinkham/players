@@ -42,6 +42,7 @@ const BIDDING_CONSOLE_QUERY = `
                 isLeading
                 createdAt
                 player {
+                    id
                     name
                     bbrefid
                 }
@@ -162,6 +163,7 @@ export default function BiddingConsole() {
                       header: "Player",
                       render: (bid) => (
                         <PlayerName
+                          playerId={bid.player.id}
                           name={bid.player.name}
                           bbrefid={bid.player.bbrefid}
                         />

@@ -14,7 +14,7 @@ const PLAYER_QUERY = `
       id
       name
       bbrefid
-      position
+      positions
       bbrefLink
       stats {
         title
@@ -98,7 +98,7 @@ export default function PlaceBid() {
   };
 
   const stats = formatPlayerStats(player);
-  const isPitcher = player.position === "SP" || player.position === "RP";
+  const isPitcher = player.positions?.includes("SP") || player.positions?.includes("RP");
 
   return (
     <Box gap="small">

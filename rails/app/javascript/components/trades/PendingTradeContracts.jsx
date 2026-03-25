@@ -21,8 +21,13 @@ export default function PendingTradeContracts({ contracts, cash }) {
                     round="xsmall"
                 >
                     <Box direction="row" gap="small" align="center">
-                        <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
-                        <Text size="small" color="text-weak">({contract.player.position})</Text>
+                        <PlayerName
+                            playerId={contract.player.id}
+                            name={contract.player.name}
+                            bbrefid={contract.player.bbrefid}
+                            showAvatar={false}
+                        />
+                        <Text size="small" color="text-weak">({contract.player.positions?.join(', ')})</Text>
                     </Box>
                     <Box direction="row" gap="small" align="center">
                         <Text size="small">

@@ -3,6 +3,10 @@
 Fetch all stats from FanGraphs for a given year.
 Outputs JSON with batting and pitching stats including WAR.
 Uses BBRef IDs for matching instead of player names.
+
+Usage:
+  fetch_fangraphs_stats.py <year>           # Fetch stats for all players
+  fetch_fangraphs_stats.py <year> <bbrefid> # Fetch stats for specific player
 """
 
 import sys
@@ -266,12 +270,16 @@ def fetch_fielding_positions(year, id_mapping):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: fetch_fangraphs_stats.py <year>", file=sys.stderr)
+        print("Usage: fetch_fangraphs_stats.py <year> [bbrefid]", file=sys.stderr)
         sys.exit(1)
 
     year = int(sys.argv[1])
+    bbrefid_filter = sys.argv[2] if len(sys.argv) > 2 else None
 
-    print(f"Fetching FanGraphs stats for {year}...", file=sys.stderr)
+    if bbrefid_filter:
+        print(f"Fetching FanGraphs stats for {year} (player: {bbrefid_filter})...", file=sys.stderr)
+    else:
+        print(f"Fetching FanGraphs stats for {year}...", file=sys.stderr)
     print("", file=sys.stderr)
 
     # Build ID mapping first
@@ -282,6 +290,13 @@ if __name__ == '__main__':
     batting = fetch_batting_stats(year, id_mapping)
     pitching = fetch_pitching_stats(year, id_mapping)
     positions = fetch_fielding_positions(year, id_mapping)
+
+    # Filter by bbrefid if provided
+    if bbrefid_filter:
+        batting = {bbrefid_filter: batting[bbrefid_filter]} if bbrefid_filter in batting else {}
+        pitching = {bbrefid_filter: pitching[bbrefid_filter]} if bbrefid_filter in pitching else {}
+        positions = {bbrefid_filter: positions[bbrefid_filter]} if bbrefid_filter in positions else {}
+        print(f"Filtered to player: {bbrefid_filter}", file=sys.stderr)
 
     print("", file=sys.stderr)
     print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers, {len(positions)} fielders", file=sys.stderr)

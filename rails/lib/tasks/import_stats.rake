@@ -85,10 +85,9 @@ namespace :stats do
     # ========================================
     # Match and save to database
     # ========================================
-    puts "Matching players and saving to database..."
+    puts "Matching players and caching stats in Redis..."
 
     saved_count = 0
-    updated_count = 0
     skipped_count = 0
     matched_count = 0
     no_war_count = 0
@@ -115,23 +114,40 @@ namespace :stats do
         player.update!(name: fg_name)
       end
 
-      # Update position from FanGraphs
+      # Update positions from FanGraphs
       # Use fielding_stats for position players (C, 1B, 2B, SS, LF, CF, RF, etc.)
       # Classify pitchers as SP/RP based on games started
 
       fg_position = fielding_positions[bbref_id]  # From fielding_stats (returns "P" for pitchers)
 
-      # If fielding_stats says "P", ignore it - we'll classify as SP/RP below
-      fg_position = nil if fg_position == 'P'
+      # Clean up fielding position
+      if fg_position
+        # Split by "/" for multi-position players
+        positions_parts = fg_position.split('/')
+
+        # Convert LF/CF/RF to OF
+        positions_parts = positions_parts.map do |pos|
+          ['LF', 'CF', 'RF'].include?(pos) ? 'OF' : pos
+        end.uniq
+
+        # If fielding_stats says "P", ignore it - we'll classify as SP/RP below
+        positions_parts = positions_parts.reject { |p| p == 'P' }
+
+        # Use first valid position, or nil if all were rejected
+        fg_position = positions_parts.first
+      end
+
+      new_positions = []
 
       if pitching && !batting
         # Pitcher only (not a position player) - classify as SP or RP
         games_started = pitching['GS']&.to_f || 0
         pitcher_position = games_started > 5 ? 'SP' : 'RP'
+        new_positions = [pitcher_position]
 
-        if player.position != pitcher_position
-          puts "  Classifying pitcher: #{player.name} (#{player.position || 'none'} → #{pitcher_position}, GS: #{games_started.to_i})"
-          player.update!(position: pitcher_position)
+        if player.positions != new_positions
+          puts "  Classifying pitcher: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')}, GS: #{games_started.to_i})"
+          player.update!(positions: new_positions)
         end
       elsif batting && pitching
         # Player has both batting and pitching stats
@@ -148,40 +164,57 @@ namespace :stats do
 
           # Use fielding position if available, otherwise DH
           base_position = fg_position || 'DH'
-          new_pos = "#{base_position}/#{pitcher_position}"
+          new_positions = [base_position, pitcher_position]
 
-          if player.position != new_pos
-            puts "  Two-way player: #{player.name} (#{player.position || 'none'} → #{new_pos}, PA: #{plate_appearances}, IP: #{innings_pitched.round(1)}, GS: #{games_started.to_i})"
-            player.update!(position: new_pos)
+          if player.positions&.sort != new_positions.sort
+            puts "  Two-way player: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')}, PA: #{plate_appearances}, IP: #{innings_pitched.round(1)}, GS: #{games_started.to_i})"
+            player.update!(positions: new_positions)
           end
         elsif innings_pitched > 20 && plate_appearances < 100
           # Primarily a pitcher (pitchers who bat occasionally in NL)
           games_started = pitching['GS']&.to_f || 0
           pitcher_position = games_started > 5 ? 'SP' : 'RP'
+          new_positions = [pitcher_position]
 
-          if player.position != pitcher_position
-            puts "  Classifying pitcher: #{player.name} (#{player.position || 'none'} → #{pitcher_position}, GS: #{games_started.to_i})"
-            player.update!(position: pitcher_position)
+          if player.positions != new_positions
+            puts "  Classifying pitcher: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')}, GS: #{games_started.to_i})"
+            player.update!(positions: new_positions)
           end
-        elsif fg_position && player.position != fg_position
+        elsif fg_position
           # Position player with incidental pitching - just update their fielding position
-          puts "  Updating position: #{player.name} (#{player.position || 'none'} → #{fg_position})"
-          player.update!(position: fg_position)
-        elsif !fg_position && plate_appearances >= 100 && player.position != 'DH'
+          new_positions = [fg_position]
+
+          if player.positions != new_positions
+            puts "  Updating position: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')})"
+            player.update!(positions: new_positions)
+          end
+        elsif !fg_position && plate_appearances >= 100
           # Has batting stats but no fielding position - likely a DH
-          puts "  Designating DH: #{player.name} (#{player.position || 'none'} → DH, PA: #{plate_appearances})"
-          player.update!(position: 'DH')
+          new_positions = ['DH']
+
+          if player.positions != new_positions
+            puts "  Designating DH: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')}, PA: #{plate_appearances})"
+            player.update!(positions: new_positions)
+          end
         end
-      elsif fg_position && player.position != fg_position
+      elsif fg_position
         # Pure position player - update from fielding data
-        puts "  Updating position: #{player.name} (#{player.position || 'none'} → #{fg_position})"
-        player.update!(position: fg_position)
+        new_positions = [fg_position]
+
+        if player.positions != new_positions
+          puts "  Updating position: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')})"
+          player.update!(positions: new_positions)
+        end
       elsif batting && !fg_position
         # Has batting stats but no fielding position - likely a DH
         plate_appearances = batting['PA']&.to_i || 0
-        if plate_appearances >= 100 && player.position != 'DH'
-          puts "  Designating DH: #{player.name} (#{player.position || 'none'} → DH, PA: #{plate_appearances})"
-          player.update!(position: 'DH')
+        if plate_appearances >= 100
+          new_positions = ['DH']
+
+          if player.positions != new_positions
+            puts "  Designating DH: #{player.name} (#{player.positions&.join(', ') || 'none'} → #{new_positions.join(', ')}, PA: #{plate_appearances})"
+            player.update!(positions: new_positions)
+          end
         end
       end
 
@@ -225,24 +258,17 @@ namespace :stats do
         no_war_players << { name: player.name, bbrefid: bbref_id }
       end
 
-      # Save or update PlayerStat
-      player_stat = PlayerStat.find_or_initialize_by(player_id: player.id, season_id: current_season.id)
-
-      if player_stat.new_record?
-        player_stat.stats = combined_stats
-        player_stat.save!
-        saved_count += 1
-      else
-        player_stat.stats = combined_stats
-        player_stat.save!
-        updated_count += 1
-      end
+      # Warm Redis cache with stats (no database save needed)
+      # StatsFetcher will be called on-demand from GraphQL, but we pre-populate
+      # the cache here so the first page load is fast
+      cache_key = "player_stats:#{player.bbrefid}:#{year}"
+      Rails.cache.write(cache_key, combined_stats, expires_in: 24.hours)
+      saved_count += 1
     end
 
     puts ""
     puts "✓ Import complete!"
-    puts "  #{saved_count} new player stat records created"
-    puts "  #{updated_count} existing records updated"
+    puts "  #{saved_count} player stats cached in Redis"
     puts "  #{matched_count} players matched to Baseball Reference"
     puts "  #{skipped_count} players skipped (no stats found)"
 
@@ -271,6 +297,7 @@ namespace :stats do
     end
 
     puts ""
-    puts "Stats are now stored in the database for the #{current_season.name} season!"
+    puts "Stats are now cached in Redis for the #{current_season.name} season (#{year})!"
+    puts "Cache will expire in 24 hours - stats will be fetched on-demand from pybaseball as needed."
   end
 end

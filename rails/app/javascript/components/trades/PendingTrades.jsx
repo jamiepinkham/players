@@ -20,7 +20,7 @@ const TRADES_QUERY = `
                 player {
                     name
                     bbrefid
-                    position
+                    positions
                 }
                 amount
                 lastSeason {
@@ -37,7 +37,7 @@ const TRADES_QUERY = `
                 player {
                     name
                     bbrefid
-                    position
+                    positions
                 }
                 amount
                 lastSeason {

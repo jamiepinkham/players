@@ -35,13 +35,9 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         player {
           name
           bbrefid
-          position
+          positions
           isTradeEligible
           tradeIneligibilityReason
-          stats {
-            title
-            value
-          }
         }
       }
     }
@@ -108,7 +104,7 @@ function DraggablePlayerCard({ contract, isDragging, origin }) {
           )}
         </Box>
         <Text size="xsmall" color="text-weak">
-          {contract.player.position} • <CurrencyFormat
+          {contract.player.positions?.join(', ')} • <CurrencyFormat
             value={contract.amount}
             displayType={"text"}
             thousandSeparator={true}
@@ -534,7 +530,7 @@ function DragDropTradeBuilder({ teams, currentTeamId, initialTeamId, initialCont
             <Box direction="column" gap="xxsmall">
               <PlayerName name={activeContract.player.name} bbrefid={activeContract.player.bbrefid} />
               <Text size="xsmall" color="text-weak">
-                {activeContract.player.position} • <CurrencyFormat
+                {activeContract.player.positions?.join(', ')} • <CurrencyFormat
                   value={activeContract.amount}
                   displayType={"text"}
                   thousandSeparator={true}

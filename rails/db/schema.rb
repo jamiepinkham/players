@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_04_025159) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_19_011831) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -73,7 +73,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_025159) do
   create_table "free_agency_periods", id: :serial, force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
     t.datetime "end_date", precision: nil
-    t.boolean "is_active"
+    t.boolean "is_active", default: false
     t.integer "max_bids_for_team", default: 7
     t.integer "max_contract_length", default: 5
     t.integer "season_id"
@@ -108,12 +108,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_025159) do
     t.datetime "created_at", precision: nil, null: false
     t.boolean "is_free_agent", default: false, null: false
     t.string "name"
-    t.string "position"
+    t.text "positions", default: [], array: true
     t.datetime "updated_at", precision: nil, null: false
     t.index ["bbrefid"], name: "index_players_on_bbrefid"
     t.index ["is_free_agent"], name: "index_players_on_is_free_agent"
     t.index ["name"], name: "index_players_on_name"
-    t.index ["position"], name: "index_players_on_position"
+    t.index ["positions"], name: "index_players_on_positions", using: :gin
   end
 
   create_table "seasons", id: :serial, force: :cascade do |t|

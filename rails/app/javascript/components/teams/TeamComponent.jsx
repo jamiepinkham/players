@@ -28,8 +28,9 @@ const TEAM_QUERY = `
       }
       currentContracts {
         player {
+          id
           name
-          position
+          positions
           bbrefid
         }
         firstSeason {
@@ -112,6 +113,7 @@ function TeamComponent(props) {
               render: (contract) => (
                 <Box direction="row" align="center" gap="xsmall">
                   <PlayerName
+                    playerId={contract.player.id}
                     name={contract.player.name}
                     bbrefid={contract.player.bbrefid}
                   />
@@ -121,10 +123,10 @@ function TeamComponent(props) {
               )
             },
             {
-              property: "player.position",
+              property: "player.positions",
               header: "Position",
               sortable: true,
-              render: (contract) => contract.player.position,
+              render: (contract) => contract.player.positions?.join(', ') || '',
             },
             {
               property: "amount",

@@ -35,13 +35,9 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         player {
           name
           bbrefid
-          position
+          positions
           isTradeEligible
           tradeIneligibilityReason
-          stats {
-            title
-            value
-          }
         }
       }
     }
@@ -56,33 +52,29 @@ function PlayerCard({ contract, onAdd, onRemove, showAddButton, showRemoveButton
     <Box
       background="white"
       round="xsmall"
-      pad="small"
+      pad="xsmall"
       border={{ color: "border", size: "xsmall" }}
       margin={{ bottom: "xxsmall" }}
       style={{ opacity: (isEligible && !isDisabled && !inTrade) ? 1 : 0.5 }}
     >
       <Box direction="row" justify="between" align="center" gap="small">
-        <Box direction="column" gap="xxsmall" flex>
-          <Box direction="row" justify="between" align="center">
-            <Box direction="row" gap="xsmall" align="center">
-              <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
-              {contract.summer && <Text size="xsmall" color="status-ok">SUMMER</Text>}
-              {contract.franchise && <Text size="xsmall" color="brand">FRANCHISE</Text>}
-            </Box>
-            {!isEligible && contract.player.tradeIneligibilityReason && (
-              <Text size="xsmall" color="status-critical" weight="bold">
-                {contract.player.tradeIneligibilityReason}
-              </Text>
-            )}
-          </Box>
+        <Box direction="row" gap="small" align="center" flex>
+          <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
           <Text size="xsmall" color="text-weak">
-            {contract.player.position} • <CurrencyFormat
+            {contract.player.positions?.join(', ')} • <CurrencyFormat
               value={contract.amount}
               displayType={"text"}
               thousandSeparator={true}
               prefix={"$"}
             /> • {contract.lastSeason.name}
           </Text>
+          {contract.summer && <Text size="xsmall" color="status-ok">SUMMER</Text>}
+          {contract.franchise && <Text size="xsmall" color="brand">FRAN</Text>}
+          {!isEligible && contract.player.tradeIneligibilityReason && (
+            <Text size="xsmall" color="status-critical" weight="bold">
+              {contract.player.tradeIneligibilityReason}
+            </Text>
+          )}
         </Box>
         {showAddButton && isEligible && (
           <Button
@@ -115,7 +107,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
   const [notification, setNotification] = useState(null);
   const [fromRosterSearch, setFromRosterSearch] = useState("");
   const [toRosterSearch, setToRosterSearch] = useState("");
-  const [summaryExpanded, setSummaryExpanded] = useState(true);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   // Track which contracts are in the trade zone
   const [fromTradeZone, setFromTradeZone] = useState([]); // contracts from your team
@@ -251,13 +243,30 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
   const allFromRosterContracts = fromTeamData?.team?.currentContracts || [];
   const allToRosterContracts = toTeamData?.team?.currentContracts || [];
 
-  // Filter rosters based on search
-  const fromRosterContracts = allFromRosterContracts.filter(contract =>
-    contract.player.name.toLowerCase().includes(fromRosterSearch.toLowerCase())
-  );
-  const toRosterContracts = allToRosterContracts.filter(contract =>
-    contract.player.name.toLowerCase().includes(toRosterSearch.toLowerCase())
-  );
+  // Filter and sort rosters: selected players first, then alphabetical
+  const fromRosterContracts = allFromRosterContracts
+    .filter(contract =>
+      contract.player.name.toLowerCase().includes(fromRosterSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aInTrade = fromTradeZone.some(c => c.id === a.id);
+      const bInTrade = fromTradeZone.some(c => c.id === b.id);
+      if (aInTrade && !bInTrade) return -1;
+      if (!aInTrade && bInTrade) return 1;
+      return a.player.name.localeCompare(b.player.name);
+    });
+
+  const toRosterContracts = allToRosterContracts
+    .filter(contract =>
+      contract.player.name.toLowerCase().includes(toRosterSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aInTrade = toTradeZone.some(c => c.id === a.id);
+      const bInTrade = toTradeZone.some(c => c.id === b.id);
+      if (aInTrade && !bInTrade) return -1;
+      if (!aInTrade && bInTrade) return 1;
+      return a.player.name.localeCompare(b.player.name);
+    });
 
   return (
     <Box gap="medium">
@@ -270,7 +279,39 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
       >
         <Box direction="column" gap="small">
           <Box direction="row" justify="between" align="center">
-            <Text weight="bold" size="large">Trade Summary</Text>
+            <Box direction="column" gap="xsmall">
+              <Text weight="bold" size="large">Trade Summary</Text>
+              {toTeam && (
+                <Box direction="row" gap="medium">
+                  <Box>
+                    <Text size="small" color="text-weak">Sending: </Text>
+                    <Text size="small" weight="bold">
+                      {fromTradeZone.length === 0 && fromCash === 0 ? (
+                        '—'
+                      ) : (
+                        <>
+                          {fromTradeZone.length > 0 && `${fromTradeZone.length} player${fromTradeZone.length !== 1 ? 's' : ''}`}
+                          {fromCash > 0 && (fromTradeZone.length > 0 ? ` + $${fromCash.toLocaleString()}` : `$${fromCash.toLocaleString()}`)}
+                        </>
+                      )}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text size="small" color="text-weak">Receiving: </Text>
+                    <Text size="small" weight="bold">
+                      {toTradeZone.length === 0 && toCash === 0 ? (
+                        '—'
+                      ) : (
+                        <>
+                          {toTradeZone.length > 0 && `${toTradeZone.length} player${toTradeZone.length !== 1 ? 's' : ''}`}
+                          {toCash > 0 && (toTradeZone.length > 0 ? ` + $${toCash.toLocaleString()}` : `$${toCash.toLocaleString()}`)}
+                        </>
+                      )}
+                    </Text>
+                  </Box>
+                </Box>
+              )}
+            </Box>
             <Button
               icon={summaryExpanded ? <FormUp /> : <FormDown />}
               onClick={() => setSummaryExpanded(!summaryExpanded)}
@@ -288,7 +329,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
             <Box direction="row" gap="large">
               {/* Sending column */}
               <Box flex basis="1/2">
-                <Text size="small" margin={{ bottom: 'small' }} weight="bold">{fromTeam?.name} sends:</Text>
+                <Text size="small" margin={{ bottom: 'small' }} weight="bold">You send:</Text>
                 {fromTradeZone.length === 0 && fromCash === 0 ? (
                   <Text size="small" color="text-weak">—</Text>
                 ) : (
@@ -361,7 +402,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
 
               {/* Receiving column */}
               <Box flex basis="1/2">
-                <Text size="small" margin={{ bottom: 'small' }} weight="bold">{toTeam?.name} sends:</Text>
+                <Text size="small" margin={{ bottom: 'small' }} weight="bold">You receive:</Text>
                 {toTradeZone.length === 0 && toCash === 0 ? (
                   <Text size="small" color="text-weak">—</Text>
                 ) : (
@@ -502,35 +543,74 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
                 )}
               </Box>
             </Box>
-            <Box margin={{ bottom: "small" }}>
-              <TextInput
-                placeholder="Search players..."
-                value={fromRosterSearch}
-                onChange={(event) => setFromRosterSearch(event.target.value)}
-                icon={<Search />}
-              />
-            </Box>
-            <Box overflow="auto" flex>
-              {fromTeamLoading ? (
-                <Spinner size="small" />
-              ) : (
-                fromRosterContracts.map(contract => {
-                  const inTrade = fromTradeZone.find(c => c.id === contract.id);
-                  return (
-                    <PlayerCard
-                      key={contract.id}
-                      contract={contract}
-                      onAdd={handleAddFromTeam}
-                      onRemove={handleRemoveFromTeam}
-                      showAddButton={!inTrade}
-                      showRemoveButton={!!inTrade}
-                      isDisabled={!toTeam}
-                      inTrade={!!inTrade}
+            {fromTeamLoading ? (
+              <Spinner size="small" />
+            ) : (
+              <>
+                {fromTradeZone.length > 0 && fromRosterContracts.some(c => fromTradeZone.find(t => t.id === c.id)) && (
+                  <>
+                    <Box
+                      background="status-ok"
+                      pad={{ horizontal: "small", vertical: "xxsmall" }}
+                      margin={{ bottom: "xsmall" }}
+                      round="xxsmall"
+                    >
+                      <Text size="xsmall" weight="bold" color="white">IN TRADE</Text>
+                    </Box>
+                    {fromRosterContracts.filter(c => fromTradeZone.find(t => t.id === c.id)).map(contract => (
+                      <PlayerCard
+                        key={contract.id}
+                        contract={contract}
+                        onAdd={handleAddFromTeam}
+                        onRemove={handleRemoveFromTeam}
+                        showAddButton={false}
+                        showRemoveButton={true}
+                        isDisabled={!toTeam}
+                        inTrade={true}
+                      />
+                    ))}
+                    <Box
+                      border={{ side: "bottom", color: "border", size: "small" }}
+                      margin={{ vertical: "small" }}
                     />
-                  );
-                })
-              )}
-            </Box>
+                  </>
+                )}
+                <Box margin={{ bottom: "small" }}>
+                  <TextInput
+                    placeholder="Search players..."
+                    value={fromRosterSearch}
+                    onChange={(event) => setFromRosterSearch(event.target.value)}
+                    icon={<Search />}
+                  />
+                </Box>
+                {fromRosterContracts.filter(c => !fromTradeZone.find(t => t.id === c.id)).length > 0 && (
+                  <Box overflow="auto" flex>
+                    {fromTradeZone.length > 0 && (
+                      <Box
+                        background="light-3"
+                        pad={{ horizontal: "small", vertical: "xxsmall" }}
+                        margin={{ bottom: "xsmall" }}
+                        round="xxsmall"
+                      >
+                        <Text size="xsmall" weight="bold" color="text-weak">AVAILABLE</Text>
+                      </Box>
+                    )}
+                    {fromRosterContracts.filter(c => !fromTradeZone.find(t => t.id === c.id)).map(contract => (
+                      <PlayerCard
+                        key={contract.id}
+                        contract={contract}
+                        onAdd={handleAddFromTeam}
+                        onRemove={handleRemoveFromTeam}
+                        showAddButton={true}
+                        showRemoveButton={false}
+                        isDisabled={!toTeam}
+                        inTrade={false}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </>
+            )}
           </Box>
         </Box>
 
@@ -582,35 +662,74 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
                     )}
                   </Box>
                 </Box>
-                <Box margin={{ bottom: "small" }}>
-                  <TextInput
-                    placeholder="Search players..."
-                    value={toRosterSearch}
-                    onChange={(event) => setToRosterSearch(event.target.value)}
-                    icon={<Search />}
-                  />
-                </Box>
-                <Box overflow="auto" flex>
-                  {toTeamLoading ? (
-                    <Spinner size="small" />
-                  ) : (
-                    toRosterContracts.map(contract => {
-                      const inTrade = toTradeZone.find(c => c.id === contract.id);
-                      return (
-                        <PlayerCard
-                          key={contract.id}
-                          contract={contract}
-                          onAdd={handleAddToTeam}
-                          onRemove={handleRemoveToTeam}
-                          showAddButton={!inTrade}
-                          showRemoveButton={!!inTrade}
-                          isDisabled={false}
-                          inTrade={!!inTrade}
+                {toTeamLoading ? (
+                  <Spinner size="small" />
+                ) : (
+                  <>
+                    {toTradeZone.length > 0 && toRosterContracts.some(c => toTradeZone.find(t => t.id === c.id)) && (
+                      <>
+                        <Box
+                          background="status-ok"
+                          pad={{ horizontal: "small", vertical: "xxsmall" }}
+                          margin={{ bottom: "xsmall" }}
+                          round="xxsmall"
+                        >
+                          <Text size="xsmall" weight="bold" color="white">IN TRADE</Text>
+                        </Box>
+                        {toRosterContracts.filter(c => toTradeZone.find(t => t.id === c.id)).map(contract => (
+                          <PlayerCard
+                            key={contract.id}
+                            contract={contract}
+                            onAdd={handleAddToTeam}
+                            onRemove={handleRemoveToTeam}
+                            showAddButton={false}
+                            showRemoveButton={true}
+                            isDisabled={false}
+                            inTrade={true}
+                          />
+                        ))}
+                        <Box
+                          border={{ side: "bottom", color: "border", size: "small" }}
+                          margin={{ vertical: "small" }}
                         />
-                      );
-                    })
-                  )}
-                </Box>
+                      </>
+                    )}
+                    <Box margin={{ bottom: "small" }}>
+                      <TextInput
+                        placeholder="Search players..."
+                        value={toRosterSearch}
+                        onChange={(event) => setToRosterSearch(event.target.value)}
+                        icon={<Search />}
+                      />
+                    </Box>
+                    {toRosterContracts.filter(c => !toTradeZone.find(t => t.id === c.id)).length > 0 && (
+                      <Box overflow="auto" flex>
+                        {toTradeZone.length > 0 && (
+                          <Box
+                            background="light-3"
+                            pad={{ horizontal: "small", vertical: "xxsmall" }}
+                            margin={{ bottom: "xsmall" }}
+                            round="xxsmall"
+                          >
+                            <Text size="xsmall" weight="bold" color="text-weak">AVAILABLE</Text>
+                          </Box>
+                        )}
+                        {toRosterContracts.filter(c => !toTradeZone.find(t => t.id === c.id)).map(contract => (
+                          <PlayerCard
+                            key={contract.id}
+                            contract={contract}
+                            onAdd={handleAddToTeam}
+                            onRemove={handleRemoveToTeam}
+                            showAddButton={true}
+                            showRemoveButton={false}
+                            isDisabled={false}
+                            inTrade={false}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                )}
               </>
             )}
             {!toTeam && (

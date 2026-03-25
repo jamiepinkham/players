@@ -8,6 +8,8 @@ gem 'rails', '~> 8.1.0'
 # Use postgres as the database for Active Record
 gem 'pg', '~> 1.6'
 gem 'pg_search'
+# Use Redis for caching
+gem 'redis', '~> 5.0'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 

@@ -35,11 +35,11 @@ namespace :stats do
 
       contracts.each do |contract|
         player = contract.player
-        next unless player.position == 'SP'
+        next unless player.positions&.include?('SP')
 
-        # Get player stats for this season
-        player_stat = PlayerStat.find_by(player: player, season: season)
-        war = player_stat&.stats&.dig('WAR')&.to_f
+        # Get player stats for this season from StatsFetcher (synchronous for rake task)
+        stats = StatsFetcher.fetch_for_player(player, season.target_stat_year, async: false)
+        war = stats&.dig('WAR')&.to_f
 
         next unless war && war >= elite_threshold
 

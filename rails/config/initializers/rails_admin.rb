@@ -8,12 +8,10 @@
 require Rails.root.join('lib', 'rails_admin', 'import_summer_draft')
 require Rails.root.join('lib', 'rails_admin', 'deactivate_contracts')
 require Rails.root.join('lib', 'rails_admin', 'reset_user_password')
-require Rails.root.join('lib', 'rails_admin', 'import_player_stats')
 
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateContracts)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ResetUserPassword)
-RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportPlayerStats)
 
 RailsAdmin.config do |config|
   config.asset_source = :sprockets
@@ -71,7 +69,6 @@ RailsAdmin.config do |config|
 
     ## Custom member actions
     reset_user_password
-    import_player_stats
 
     ## With an audit adapter, you can add:
     # history_index
@@ -152,7 +149,11 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :bbrefid
-      field :position
+      field :positions do
+        pretty_value do
+          value.join(', ') if value.present?
+        end
+      end
       field :is_free_agent do
         label "Free Agent"
         help "Player has no active contract"
@@ -164,7 +165,14 @@ RailsAdmin.config do |config|
     edit do
       field :name
       field :bbrefid
-      field :position
+      field :positions, :enum do
+        label "Eligible Positions"
+        help "Select all positions the player is eligible for (multiple selections allowed)"
+        multiple true
+        enum do
+          Player::POSITIONS
+        end
+      end
       field :bbref_minors
       field :is_free_agent do
         label "Free Agent Status"
@@ -291,6 +299,5 @@ RailsAdmin.config do |config|
   config.excluded_models << JwtDenylist
   config.excluded_models << ContractTrade
   config.excluded_models << TeamEmail
-  config.excluded_models << PlayerStat
 
 end

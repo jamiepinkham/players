@@ -95,7 +95,8 @@ module RailsAdmin
 
                     # Set player attributes
                     player.name = player_name
-                    player.position = position
+                    # Parse position string - could be "SS" or "SS/2B" etc.
+                    player.positions = position.split('/').map(&:strip).uniq
                     player.bbrefid = bbrefid if bbrefid.present?
                     player.bbref_minors = bbref_minors if bbref_minors.present?
 

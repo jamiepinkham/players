@@ -1,50 +1,55 @@
-# Stats Import System
+# Stats System
 
-This system imports player statistics from FanGraphs using pybaseball and stores them in the `player_stats` table.
+This system fetches player statistics from FanGraphs using pybaseball **on-demand** with Redis caching.
 
 ## Architecture
 
 - **Source**: FanGraphs (via pybaseball Python library)
 - **Stats Included**: All batting/pitching stats **including WAR**
-- **Storage**: PostgreSQL `player_stats` table (player_id, season_id, stats JSONB)
-- **Dependencies**: Python 3 + pybaseball (installed in Docker image)
+- **Storage**: Redis cache (24-hour expiry) - stats fetched on-demand from GraphQL
+- **Dependencies**: Python 3 + pybaseball (installed in Docker image), Redis
 
 ## Quick Start
 
-### Import stats for current season's free agents
+### Warm Redis cache for current season's free agents (optional)
+
+Stats are fetched on-demand, but you can pre-warm the cache for faster first page load:
 
 ```bash
 docker compose exec players rake stats:import
 ```
 
-### Import stats for ALL players (not just free agents)
+### Warm cache for ALL players (not just free agents)
 
 ```bash
 docker compose exec players bash -c "cd /app && ALL_PLAYERS=1 bundle exec rake stats:import"
 ```
 
-### Import specific players
+### Warm cache for specific players
 
 ```bash
 docker compose exec players rake stats:import BBREFIDS=judgeaa01,ohtansh01,troutmi01
 ```
 
-### Import for a different season
-
-```bash
-docker compose exec players bash -c "cd /app && SEASON_ID=3 ALL_PLAYERS=1 bundle exec rake stats:import"
-```
-
-### Import all historical seasons
-
-```bash
-# Import stats for all players across all past seasons
-for season_id in 1 2 4 3 5 6; do
-  docker compose exec players bash -c "cd /app && SEASON_ID=$season_id ALL_PLAYERS=1 bundle exec rake stats:import"
-done
-```
+**Note**: These commands are optional. Stats will be fetched automatically when requested via GraphQL.
 
 ## How It Works
+
+### On-Demand Fetching (Automatic)
+
+When stats are requested via GraphQL:
+
+1. **Check Redis cache**: `StatsFetcher` checks if stats for that player/year are cached
+2. **If cached**: Return immediately (~1-10ms)
+3. **If not cached**:
+   - Call Python script with player's bbrefid: `fetch_fangraphs_stats.py 2025 judgeaa01`
+   - Parse JSON response and combine batting/pitching stats
+   - Store in Redis cache (24-hour expiry)
+   - Return stats to GraphQL resolver
+
+### Cache Warming (Optional via rake stats:import)
+
+The rake task pre-populates Redis cache for faster first page load:
 
 1. **Fetch from FanGraphs**: Python script calls pybaseball to get:
    - `batting_stats(2025, 2025, qual=0)` - All batters (1 request)
@@ -56,16 +61,12 @@ done
 
 3. **Update Player Records**: Updates player names and positions from FanGraphs canonical data
    - Names: Updates to FanGraphs canonical spelling (e.g., "Diaz" → "Díaz")
-   - Positions:
-     - Position players: Uses `fielding_stats()` position data (e.g., "SS", "2B/SS", "CF", "LF/RF")
-     - Pitchers only: Classifies as SP if GS > 5, RP if GS ≤ 5
-     - Two-way players: Combines positions if **PA ≥ 100 AND IP > 20** (e.g., "DH/SP", "RF/SP")
-       - Uses actual stats to determine two-way status (not current position)
-       - This correctly identifies players like Ohtani who have significant playing time at both
-       - Position players with incidental pitching (<20 IP) are not classified as pitchers
-       - Pitchers who occasionally bat (<100 PA) are not classified as two-way
+   - Positions: Stored as arrays (e.g., ["SS", "2B"], ["SP"], ["DH", "SP"])
+     - Position players: Uses `fielding_stats()` (converted to "OF" for LF/CF/RF)
+     - Pitchers only: ["SP"] if GS > 5, ["RP"] if GS ≤ 5
+     - Two-way players: Combines positions if **PA ≥ 100 AND IP > 20** (e.g., ["DH", "SP"])
 
-4. **Store in Database**: Save to `player_stats` table with:
+4. **Warm Redis Cache**: Write stats to Redis with 24-hour expiry:
    - Batting: PA, G, AB, H, 1B, 2B, 3B, HR, R, RBI, SB, BB, SO, BA, OBP, SLG, OPS, WAR
    - Pitching: IP, G, GS, W, L, SV, H, R, ER, HR, BB, SO, ERA, WHIP, WAR
    - Two-way players: Combined (batting + pitching WAR summed)
@@ -98,28 +99,26 @@ The Dockerfile installs:
 query {
   player(id: "123") {
     name
-    stats(year: 2025)
+    stats(year: 2025) {
+      title
+      value
+    }
   }
 }
 ```
 
-Returns: `{ "PA": "679", "HR": "53", "BA": "0.331", "WAR": "10.1", ... }`
+Returns: `[{ title: "PA", value: "679" }, { title: "HR", value: "53" }, ...]`
 
 ### Rails Console
 
 ```ruby
-# Get a player's stats
+# Get a player's stats (fetches from Redis cache or pybaseball)
 player = Player.find_by(name: "Aaron Judge")
-stats = PlayerStat.find_by(player: player, season: Season.current)
+stats = StatsFetcher.fetch_for_player(player, 2025)
 stats["WAR"]  # => "10.1"
 
-# WAR per dollar query (for players with contracts)
-PlayerStat.joins(player: :contract)
-  .select("players.name,
-           stats->>'WAR' as war,
-           contracts.amount,
-           (stats->>'WAR')::float / contracts.amount as war_per_dollar")
-  .order("war_per_dollar DESC")
+# Invalidate cache to force fresh fetch
+StatsFetcher.invalidate_cache("judgeaa01", 2025)
 ```
 
 ## Troubleshooting
@@ -148,9 +147,15 @@ docker compose exec players python3 -c "from pybaseball import cache; cache.purg
 
 ## Performance
 
+### On-Demand Fetching
+- **Cache hit**: ~1-10ms (Redis)
+- **Cache miss**: ~1-2 seconds (Python subprocess + pybaseball)
+- **Cache expiry**: 24 hours
+
+### Bulk Cache Warming (rake stats:import)
 - **First run**: ~30 seconds (downloads from FanGraphs)
 - **Subsequent runs**: ~10 seconds (uses pybaseball cache)
-- **Total requests**: 2 (batting + pitching leaderboards)
+- **Total requests**: 3 (batting + pitching + fielding leaderboards)
 - **No rate limiting** - Fetches leaderboards, not individual pages
 
 ## Workflow
@@ -158,29 +163,27 @@ docker compose exec players python3 -c "from pybaseball import cache; cache.purg
 ### When Free Agency Starts
 
 ```bash
-# 1. Import stats for all free agents
+# 1. (Optional) Warm Redis cache for all free agents
 docker compose exec players rake stats:import
 
-# 2. Verify import
-docker compose exec players rails runner "
-  puts 'Total stats: ' + PlayerStat.count.to_s
-  puts 'With WAR: ' + PlayerStat.where(\"stats->>'WAR' IS NOT NULL\").count.to_s
-"
+# Stats will be fetched on-demand when players are viewed
+# The rake task just pre-warms the cache for faster first page load
 ```
 
 ### When New Season Starts
 
 1. Update `Season.current.target_stat_year` to new year
-2. Run import again - new stats for new season
-3. Historical stats preserved (tied to previous season)
+2. Stats for new year will be fetched on-demand
+3. Old cached stats expire after 24 hours
 
 ## Why This Approach?
 
+✅ **On-demand fetching** - Stats fetched only when needed, no stale data
 ✅ **Single source** - FanGraphs for everything (including WAR)
+✅ **Redis caching** - Fast repeated access, automatic expiry
+✅ **No database migrations** - No `player_stats` table to maintain
 ✅ **No CSV management** - No git-tracking large files
-✅ **No rate limiting** - Bulk leaderboard fetch (2 requests total)
-✅ **Simple dependencies** - Just Python + pybaseball
-✅ **docker compose up works** - All deps installed automatically
-✅ **Perfect for "WAR per dollar"** - WAR included in every import
+✅ **Simple dependencies** - Just Python + pybaseball + Redis
 ✅ **BBRef ID matching** - No name/accent issues, accurate player matching
 ✅ **Auto-updates names** - Keeps database in sync with FanGraphs canonical names
+✅ **Always fresh** - Cache expires every 24 hours, refetches latest stats

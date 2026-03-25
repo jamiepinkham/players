@@ -44,7 +44,7 @@ namespace :season do
       player = contract.player
 
       # Check if player has stats for next season's target year
-      has_stats = Player.has_stats_in_pybaseball?(player.bbrefid, next_season.target_stat_year, player.position)
+      has_stats = Player.has_stats_in_pybaseball?(player.bbrefid, next_season.target_stat_year, player.positions)
 
       if has_stats
         eligible << { player: player, team: contract.team, contract: contract }
@@ -58,7 +58,7 @@ namespace :season do
       puts "  (none)"
     else
       eligible.each do |data|
-        puts "  ✓ #{data[:player].name} (#{data[:player].position}) from #{data[:team].name}"
+        puts "  ✓ #{data[:player].name} (#{data[:player].positions&.join(', ')}) from #{data[:team].name}"
       end
     end
 
@@ -68,7 +68,7 @@ namespace :season do
       puts "  (none)"
     else
       ineligible.each do |data|
-        puts "  ✗ #{data[:player].name} (#{data[:player].position}) from #{data[:team].name}"
+        puts "  ✗ #{data[:player].name} (#{data[:player].positions&.join(', ')}) from #{data[:team].name}"
       end
     end
 

@@ -19,23 +19,46 @@ module Queries
             end
 
             # Get all players matching criteria
-            players = players_query.includes(:leading_bid, :player_stats, contract: [:last_season, :team])
+            players = players_query.includes(:leading_bid, contract: [:last_season, :team])
                 .to_a
 
-            # Sort by stats if sort_by is provided
+            # Sort by stats if sort_by is provided, otherwise sort by name
             if sort_by.present?
+                # Get current season's target year for stats
                 current_season = Season.current
-                players.sort_by! do |player|
-                    begin
-                        # Get stats from player_stats table
-                        player_stat = player.player_stats.find { |ps| ps.season_id == current_season&.id }
-                        stat_value = player_stat&.stats&.dig(sort_by)
-                        # Convert to float, default to 0 if nil or invalid
-                        stat_value.to_f
-                    rescue TypeError
-                        0.0
+                target_year = current_season&.target_stat_year
+
+                if target_year
+                    # Fetch stats for all players (uses cache, fast)
+                    players_with_stats = players.map do |player|
+                        stats_hash = StatsFetcher.fetch_for_player(player, target_year, async: false)
+                        stat_value = stats_hash[sort_by]
+
+                        # Convert to numeric for sorting, handle missing/nil values
+                        numeric_value = if stat_value.nil?
+                            -Float::INFINITY  # Sort missing values to the end
+                        else
+                            # Try to convert to float, fall back to string comparison
+                            stat_value.to_f rescue stat_value
+                        end
+
+                        { player: player, stat_value: numeric_value }
                     end
+
+                    # Sort by stat value
+                    players_with_stats.sort_by! { |p| p[:stat_value] }
+                    players_with_stats.reverse! if sort_direction.downcase == "desc"
+
+                    # Extract just the players
+                    players = players_with_stats.map { |p| p[:player] }
+                else
+                    # Fall back to name sorting if no target year
+                    players.sort_by! { |p| p.name.downcase }
+                    players.reverse! if sort_direction.downcase == "desc"
                 end
+            else
+                # Default sort by name
+                players.sort_by! { |p| p.name.downcase }
                 players.reverse! if sort_direction.downcase == "desc"
             end
 

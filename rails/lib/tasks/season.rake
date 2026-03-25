@@ -213,7 +213,7 @@ namespace :season do
       total_salary = contracts.sum(&:amount)
       puts "\n  #{team.name} (#{contracts.count} players, $#{total_salary.to_i.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse})"
       contracts.first(5).each do |contract|
-        puts "    • #{contract.player.name.ljust(25)} #{contract.player.position.ljust(8)} $#{contract.amount.to_i}"
+        puts "    • #{contract.player.name.ljust(25)} #{contract.player.positions&.join('/')&.ljust(8)} $#{contract.amount.to_i}"
       end
       if contracts.count > 5
         puts "    ... and #{contracts.count - 5} more"

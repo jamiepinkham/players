@@ -26,6 +26,11 @@ Rails.application.routes.draw do
   put '/users/username', to: 'usernames#update'
   get '/users/validate', to: 'users/validations#show'
 
+  # API endpoints
+  namespace :api do
+    get 'player_images/:bbrefid', to: 'player_images#show'
+  end
+
   root 'static#index'
   get '*path', to: 'static#index', constraints: lambda { |req|
     !req.path.match?(/\A\/(assets|images|packs|favicon\.ico|robots\.txt)/) &&

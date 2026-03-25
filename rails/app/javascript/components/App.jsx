@@ -17,6 +17,7 @@ import TeamComponent from "./teams/TeamComponent";
 import TradeOfferComponent from "./trades/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./players/AllPlayersListSearch";
+import PlayerDetailPage from "./players/PlayerDetailPage";
 
 import { Box, Header, Heading, Main, ResponsiveContext, Text, Button } from "grommet";
 import { Logout } from "grommet-icons";
@@ -225,6 +226,7 @@ export default function App(props) {
             <Route path="/forgot" element={<ForgotPasswordForm />} />
             <Route path="/reset/:token" element={<ChangePassword />} />
             <Route path="/player_search" element={<PrivateRoute><AllPlayersListSearch /></PrivateRoute>} />
+            <Route path="/player/:id" element={<PrivateRoute><PlayerDetailPage /></PrivateRoute>} />
             <Route path="/teams" element={<PrivateRoute><TeamsList /></PrivateRoute>} />
             <Route path="/team/:id" element={<PrivateRoute><TeamComponent /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
