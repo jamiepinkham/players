@@ -5,7 +5,7 @@ import PositionPlayerList from "./PositionPlayerList";
 import EmptyState from "../common/EmptyState";
 
 export default function PlayerLists({ onPlayerSelected, teamId }) {
-  const positions = ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF"];
+  const positions = ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH"];
 
   // Initialize index from localStorage or default to null
   const [index, setIndex] = useState(() => {
