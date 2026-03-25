@@ -50,6 +50,7 @@ export default function PlayerLists({ onPlayerSelected, teamId }) {
       {index !== null ? (
         <Box pad="medium">
           <PositionPlayerList
+            key={positions[index]}
             position={positions[index]}
             onPlayerSelected={onPlayerSelected}
             teamId={teamId}

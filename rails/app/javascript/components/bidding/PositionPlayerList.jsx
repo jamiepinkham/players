@@ -14,7 +14,7 @@ const POSITION_PLAYER_LIST_QUERY = `
             id
             name
             bbrefid
-            position
+            positions
             stats {
                 title
                 value
@@ -123,13 +123,11 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
     };
   }, [refetchPlayers]);
 
-  if (!data.players) return (
-    <Box align="center" justify="center" style={{ minHeight: "400px" }}>
-      <Spinner size="medium" />
-    </Box>
-  );
-
-  const { players, totalCount, totalPages } = data.players;
+  // Extract data with fallbacks for loading state
+  const players = data.players?.players || [];
+  const totalCount = data.players?.totalCount || 0;
+  const totalPages = data.players?.totalPages || 0;
+  const isLoading = !data.players;
 
   // Get all active bids (for displaying) and merge with players
   const allActiveBids = data?.currentSeason?.activeFreeAgencyPeriod?.allBids || [];
@@ -186,7 +184,11 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
           tip={sortDirection === "desc" ? "Descending" : "Ascending"}
         />
       </Box>
-      {playersWithBids.length === 0 ? (
+      {isLoading ? (
+        <Box align="center" justify="center" style={{ minHeight: "400px" }}>
+          <Spinner size="medium" />
+        </Box>
+      ) : playersWithBids.length === 0 ? (
         <EmptyState
           icon={User}
           title={searchTerm ? "No players found" : "No free agents"}
