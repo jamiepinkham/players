@@ -97,4 +97,17 @@ class Trade < ApplicationRecord
             errors.add(:base, "Cannot trade with yourself")
         end
     end
+
+    def to_s
+        status_label = case status
+        when 'pending' then ' [pending]'
+        when 'rejected' then ' [rejected]'
+        else ''
+        end
+        "#{from_team&.name || 'Unknown'} → #{to_team&.name || 'Unknown'}#{status_label}"
+    end
+
+    def rails_admin_label
+        to_s
+    end
 end

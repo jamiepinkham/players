@@ -4,13 +4,11 @@ FROM ruby:3.3.7 AS web
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client python3 python3-pip
 
 # Install supercronic (cron for containers)
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
       SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64; \
-    elif [ "$ARCH" = "aarch64" ]; then \
+    elif [ "$ARCH" = "arm64" ]; then \
       SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-arm64; \
-    else \
-      echo "Unsupported architecture: $ARCH"; exit 1; \
     fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
     chmod +x "$(basename ${SUPERCRONIC_URL})" && \

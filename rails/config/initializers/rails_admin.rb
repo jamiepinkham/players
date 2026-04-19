@@ -76,6 +76,8 @@ RailsAdmin.config do |config|
   end
 
   config.model 'Bid' do
+    object_label_method :rails_admin_label
+
     list do
       field :player
       field :team
@@ -104,6 +106,8 @@ RailsAdmin.config do |config|
   end
 
   config.model 'Contract' do
+    object_label_method :rails_admin_label
+
     list do
       field :team
       field :player
@@ -215,6 +219,8 @@ RailsAdmin.config do |config|
       field :user do
         label "Owner"
       end
+      field :contracts
+      field :bids
     end
     edit do
       field :name
@@ -226,13 +232,17 @@ RailsAdmin.config do |config|
       field :team_emails do
         label "Notification Emails"
         help "Add email addresses for trade notifications"
+        inline_add true
+        inline_edit true
       end
-      field :contracts
-      field :bids
     end
   end
 
   config.model 'TeamEmail' do
+    object_label_method do
+      :custom_label
+    end
+
     list do
       field :team
       field :email
@@ -256,6 +266,8 @@ RailsAdmin.config do |config|
   end
 
   config.model 'Trade' do
+    object_label_method :rails_admin_label
+
     list do
       field :from_team
       field :to_team
@@ -265,7 +277,7 @@ RailsAdmin.config do |config|
       field :to_cash_amount
       field :status
     end
-    edit do 
+    edit do
       field :from_team
       field :to_team
       field :from_contracts
@@ -277,6 +289,8 @@ RailsAdmin.config do |config|
   end
 
   config.model 'User' do
+    object_label_method :username
+
     list do
       field :name
       field :username
@@ -298,6 +312,5 @@ RailsAdmin.config do |config|
 
   config.excluded_models << JwtDenylist
   config.excluded_models << ContractTrade
-  config.excluded_models << TeamEmail
 
 end
