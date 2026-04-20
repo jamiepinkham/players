@@ -16,7 +16,7 @@ import requests
 import time
 
 try:
-    from pybaseball import bwar_bat, bwar_pitch, cache, chadwick_register
+    from pybaseball import cache, chadwick_register
 except ImportError:
     print("ERROR: pybaseball not installed. Run: pip3 install pybaseball", file=sys.stderr)
     sys.exit(1)
@@ -243,48 +243,9 @@ def fetch_all_pitching_stats(year, id_mapping):
     return stats_by_bbref
 
 def fetch_war_stats(year):
-    """Fetch WAR stats from Baseball Reference"""
-    try:
-        print(f"Fetching WAR stats for {year}...", file=sys.stderr)
-
-        # Suppress pybaseball's stdout messages
-        with SuppressStdout():
-            batting_war = bwar_bat(return_all=False)
-            pitching_war = bwar_pitch(return_all=False)
-
-        # Filter to requested year
-        batting_war = batting_war[batting_war['year_ID'] == year] if 'year_ID' in batting_war.columns else batting_war
-        pitching_war = pitching_war[pitching_war['year_ID'] == year] if 'year_ID' in pitching_war.columns else pitching_war
-
-        print(f"  Loaded {len(batting_war)} batting WAR, {len(pitching_war)} pitching WAR", file=sys.stderr)
-
-        war_by_bbref = {}
-
-        # Process batting WAR
-        for _, row in batting_war.iterrows():
-            bbref_id = row.get('player_ID')
-            war = row.get('WAR')
-            if bbref_id and war is not None and str(war) != 'nan':
-                if bbref_id not in war_by_bbref:
-                    war_by_bbref[bbref_id] = {}
-                war_by_bbref[bbref_id]['batting_war'] = str(war)
-
-        # Process pitching WAR
-        for _, row in pitching_war.iterrows():
-            bbref_id = row.get('player_ID')
-            war = row.get('WAR')
-            if bbref_id and war is not None and str(war) != 'nan':
-                if bbref_id not in war_by_bbref:
-                    war_by_bbref[bbref_id] = {}
-                war_by_bbref[bbref_id]['pitching_war'] = str(war)
-
-        return war_by_bbref
-
-    except Exception as e:
-        print(f"  Error fetching WAR stats: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc(file=sys.stderr)
-        return {}
+    """Fetch WAR stats - currently disabled due to Baseball Reference parsing errors"""
+    print(f"Skipping WAR stats (Baseball Reference broken)...", file=sys.stderr)
+    return {}
 
 def fetch_fielding_positions(year, reverse_mapping):
     """Fetch fielding positions from MLB Stats API"""
@@ -353,15 +314,8 @@ if __name__ == '__main__':
         war = fetch_war_stats(year)
         positions = fetch_fielding_positions(year, reverse_mapping)
 
-    # Merge WAR into batting and pitching stats
-    for bbref_id, war_data in war.items():
-        if bbref_id in batting and 'batting_war' in war_data:
-            batting[bbref_id]['stats']['WAR'] = war_data['batting_war']
-        if bbref_id in pitching and 'pitching_war' in war_data:
-            pitching[bbref_id]['stats']['WAR'] = war_data['pitching_war']
-
     print("", file=sys.stderr)
-    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers", file=sys.stderr)
+    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers (WAR disabled)", file=sys.stderr)
 
     # Output JSON to stdout with UTF-8 encoding
     result = {
