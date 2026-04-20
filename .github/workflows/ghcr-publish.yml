@@ -108,7 +108,13 @@ jobs:
 
           if [ -n "$PR_NUMBER" ]; then
             echo "Found PR #$PR_NUMBER for branch ${{ github.ref_name }}"
-            gh pr comment "$PR_NUMBER" --body "## 🐳 Docker Image Published
+
+            # Find existing comment from github-actions bot with our marker
+            COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/$PR_NUMBER/comments" \
+              --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("🐳 Docker Image Published"))) | .id' \
+              | head -1)
+
+            COMMENT_BODY="## 🐳 Docker Image Published
 
           Your Docker image has been built and published to GitHub Container Registry!
 
@@ -151,6 +157,16 @@ jobs:
           \`\`\`
           ${{ steps.meta.outputs.tags }}
           \`\`\`"
+
+            if [ -n "$COMMENT_ID" ]; then
+              echo "Updating existing comment ID: $COMMENT_ID"
+              gh api "repos/${{ github.repository }}/issues/comments/$COMMENT_ID" \
+                -X PATCH \
+                -f body="$COMMENT_BODY"
+            else
+              echo "Creating new comment"
+              gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
+            fi
           else
             echo "No open PR found for branch ${{ github.ref_name }}, skipping PR comment"
           fi
