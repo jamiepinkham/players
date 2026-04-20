@@ -11,6 +11,7 @@ gem 'pg_search'
 # Use Redis for caching and background jobs
 gem 'redis', '~> 5.0'
 gem 'sidekiq', '~> 7.3'
+gem 'connection_pool', '< 3.0' # Sidekiq 7.3.9 not compatible with 3.x
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 
