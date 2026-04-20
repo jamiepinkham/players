@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fetch all stats from FanGraphs for a given year.
+Fetch all stats from MLB Stats API for a given year, with WAR from Baseball Reference.
 Outputs JSON with batting and pitching stats including WAR.
 Uses BBRef IDs for matching instead of player names.
 
@@ -12,40 +12,19 @@ Usage:
 import sys
 import json
 import os
+import requests
+import time
 
 try:
-    from pybaseball import batting_stats, pitching_stats, fielding_stats, cache, chadwick_register
-    import pybaseball.datasources.fangraphs as fg
+    from pybaseball import bwar_bat, bwar_pitch, cache, chadwick_register
 except ImportError:
     print("ERROR: pybaseball not installed. Run: pip3 install pybaseball", file=sys.stderr)
     sys.exit(1)
 
-# Configure headers to avoid 403 errors from FanGraphs
-import requests
-session = requests.Session()
-session.headers.update({
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'DNT': '1',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Cache-Control': 'max-age=0'
-})
-
-# Monkey-patch pybaseball to use our session
-if hasattr(fg, 'session'):
-    fg.session = session
-
 # Enable caching to speed up repeated requests
 cache.enable()
 
-# Suppress pybaseball's stdout messages (like "Gathering player lookup table")
-# We only want JSON output on stdout
+# Suppress pybaseball's stdout messages
 class SuppressStdout:
     def __enter__(self):
         self._original_stdout = sys.stdout
@@ -55,14 +34,11 @@ class SuppressStdout:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout = self._original_stdout
 
-# Stats we want from FanGraphs
-# Note: 'Pos' in FanGraphs is positional adjustment (defensive metric), NOT actual position
-# Team: Team abbreviation
-BATTING_STATS = ['IDfg', 'Name', 'Team', 'G', 'PA', 'AB', 'H', '1B', '2B', '3B', 'HR', 'R', 'RBI', 'SB', 'BB', 'SO', 'AVG', 'OBP', 'SLG', 'OPS', 'WAR']
-PITCHING_STATS = ['IDfg', 'Name', 'Team', 'G', 'GS', 'W', 'L', 'SV', 'IP', 'H', 'R', 'ER', 'HR', 'BB', 'SO', 'ERA', 'WHIP', 'WAR']
+# MLB Stats API base URL
+MLB_STATS_API = 'https://statsapi.mlb.com/api/v1'
 
 def build_id_mapping():
-    """Build FanGraphs ID -> BBRef ID mapping from Chadwick Register"""
+    """Build MLB ID -> BBRef ID mapping from Chadwick Register"""
     try:
         print("Loading Chadwick Register for ID mapping...", file=sys.stderr)
 
@@ -71,224 +47,251 @@ def build_id_mapping():
             register = chadwick_register()
 
         mapping = {}
+        reverse_mapping = {}
         for _, row in register.iterrows():
-            fg_id = row.get('key_fangraphs')
+            mlb_id = row.get('key_mlbam')
             bbref_id = row.get('key_bbref')
-            if fg_id and bbref_id and str(fg_id) != 'nan' and str(bbref_id) != 'nan':
+            if mlb_id and bbref_id and str(mlb_id) != 'nan' and str(bbref_id) != 'nan':
                 try:
-                    mapping[int(fg_id)] = bbref_id
+                    mapping[int(mlb_id)] = bbref_id
+                    reverse_mapping[bbref_id] = int(mlb_id)
                 except (ValueError, TypeError):
                     continue
 
-        print(f"  Loaded {len(mapping)} FanGraphs ID -> BBRef ID mappings", file=sys.stderr)
-        return mapping
+        print(f"  Loaded {len(mapping)} MLB ID -> BBRef ID mappings", file=sys.stderr)
+        return mapping, reverse_mapping
 
     except Exception as e:
         print(f"  Error loading Chadwick Register: {e}", file=sys.stderr)
-        return {}
+        return {}, {}
 
-def fetch_batting_stats(year, id_mapping):
-    """Fetch batting stats from FanGraphs, keyed by BBRef ID"""
+def fetch_mlb_batting_stats(mlb_id, season):
+    """Fetch batting stats from MLB Stats API for a single player"""
     try:
-        print(f"Fetching batting stats for {year}...", file=sys.stderr)
+        url = f'{MLB_STATS_API}/people/{mlb_id}/stats?stats=season&season={season}&group=hitting'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code != 200:
+            return None
+
+        data = response.json()
+
+        # Extract stats from response
+        if 'stats' in data and len(data['stats']) > 0:
+            splits = data['stats'][0].get('splits', [])
+            if len(splits) > 0:
+                stat = splits[0].get('stat', {})
+
+                # Extract the stats we want
+                return {
+                    'G': str(stat.get('gamesPlayed', '')),
+                    'PA': str(stat.get('plateAppearances', '')),
+                    'AB': str(stat.get('atBats', '')),
+                    'H': str(stat.get('hits', '')),
+                    '1B': str(stat.get('hits', 0) - stat.get('doubles', 0) - stat.get('triples', 0) - stat.get('homeRuns', 0)) if all(k in stat for k in ['hits', 'doubles', 'triples', 'homeRuns']) else '',
+                    '2B': str(stat.get('doubles', '')),
+                    '3B': str(stat.get('triples', '')),
+                    'HR': str(stat.get('homeRuns', '')),
+                    'R': str(stat.get('runs', '')),
+                    'RBI': str(stat.get('rbi', '')),
+                    'SB': str(stat.get('stolenBases', '')),
+                    'BB': str(stat.get('baseOnBalls', '')),
+                    'SO': str(stat.get('strikeOuts', '')),
+                    'BA': str(stat.get('avg', '')),
+                    'OBP': str(stat.get('obp', '')),
+                    'SLG': str(stat.get('slg', '')),
+                    'OPS': str(stat.get('ops', ''))
+                }
+
+        return None
+
+    except Exception as e:
+        print(f"  Error fetching MLB batting stats for {mlb_id}: {e}", file=sys.stderr)
+        return None
+
+def fetch_mlb_pitching_stats(mlb_id, season):
+    """Fetch pitching stats from MLB Stats API for a single player"""
+    try:
+        url = f'{MLB_STATS_API}/people/{mlb_id}/stats?stats=season&season={season}&group=pitching'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code != 200:
+            return None
+
+        data = response.json()
+
+        # Extract stats from response
+        if 'stats' in data and len(data['stats']) > 0:
+            splits = data['stats'][0].get('splits', [])
+            if len(splits) > 0:
+                stat = splits[0].get('stat', {})
+
+                # Extract the stats we want
+                return {
+                    'G': str(stat.get('gamesPlayed', '')),
+                    'GS': str(stat.get('gamesStarted', '')),
+                    'W': str(stat.get('wins', '')),
+                    'L': str(stat.get('losses', '')),
+                    'SV': str(stat.get('saves', '')),
+                    'IP': str(stat.get('inningsPitched', '')),
+                    'H': str(stat.get('hits', '')),
+                    'R': str(stat.get('runs', '')),
+                    'ER': str(stat.get('earnedRuns', '')),
+                    'HR': str(stat.get('homeRuns', '')),
+                    'BB': str(stat.get('baseOnBalls', '')),
+                    'SO': str(stat.get('strikeOuts', '')),
+                    'ERA': str(stat.get('era', '')),
+                    'WHIP': str(stat.get('whip', ''))
+                }
+
+        return None
+
+    except Exception as e:
+        print(f"  Error fetching MLB pitching stats for {mlb_id}: {e}", file=sys.stderr)
+        return None
+
+def fetch_mlb_player_info(mlb_id):
+    """Fetch player name and team from MLB Stats API"""
+    try:
+        url = f'{MLB_STATS_API}/people/{mlb_id}'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code != 200:
+            return None, None
+
+        data = response.json()
+
+        if 'people' in data and len(data['people']) > 0:
+            person = data['people'][0]
+            name = f"{person.get('firstName', '')} {person.get('lastName', '')}".strip()
+            team = person.get('currentTeam', {}).get('abbreviation', '')
+            return name, team
+
+        return None, None
+
+    except Exception as e:
+        return None, None
+
+def fetch_all_batting_stats(year, id_mapping):
+    """Fetch batting stats for all players from MLB Stats API"""
+    print(f"Fetching batting stats for {year}...", file=sys.stderr)
+
+    stats_by_bbref = {}
+    count = 0
+
+    for mlb_id, bbref_id in id_mapping.items():
+        stats = fetch_mlb_batting_stats(mlb_id, year)
+
+        if stats:
+            # Get player info
+            name, team = fetch_mlb_player_info(mlb_id)
+
+            player_info = {}
+            if name:
+                player_info['Name'] = name
+            if team:
+                player_info['Team'] = team
+
+            stats_by_bbref[bbref_id] = {
+                'stats': stats,
+                'player_info': player_info
+            }
+            count += 1
+
+            # Rate limiting
+            time.sleep(0.1)
+
+            if count % 100 == 0:
+                print(f"  Fetched {count} batters...", file=sys.stderr)
+
+    print(f"  Loaded {count} batters", file=sys.stderr)
+    return stats_by_bbref
+
+def fetch_all_pitching_stats(year, id_mapping):
+    """Fetch pitching stats for all players from MLB Stats API"""
+    print(f"Fetching pitching stats for {year}...", file=sys.stderr)
+
+    stats_by_bbref = {}
+    count = 0
+
+    for mlb_id, bbref_id in id_mapping.items():
+        stats = fetch_mlb_pitching_stats(mlb_id, year)
+
+        if stats:
+            # Get player info
+            name, team = fetch_mlb_player_info(mlb_id)
+
+            player_info = {}
+            if name:
+                player_info['Name'] = name
+            if team:
+                player_info['Team'] = team
+
+            stats_by_bbref[bbref_id] = {
+                'stats': stats,
+                'player_info': player_info
+            }
+            count += 1
+
+            # Rate limiting
+            time.sleep(0.1)
+
+            if count % 100 == 0:
+                print(f"  Fetched {count} pitchers...", file=sys.stderr)
+
+    print(f"  Loaded {count} pitchers", file=sys.stderr)
+    return stats_by_bbref
+
+def fetch_war_stats(year):
+    """Fetch WAR stats from Baseball Reference"""
+    try:
+        print(f"Fetching WAR stats for {year}...", file=sys.stderr)
 
         # Suppress pybaseball's stdout messages
         with SuppressStdout():
-            df = batting_stats(year, year, qual=0)  # qual=0 gets all players
+            batting_war = bwar_bat(return_all=False)
+            pitching_war = bwar_pitch(return_all=False)
 
-        print(f"  Loaded {len(df)} batters", file=sys.stderr)
+        # Filter to requested year
+        batting_war = batting_war[batting_war['year_ID'] == year] if 'year_ID' in batting_war.columns else batting_war
+        pitching_war = pitching_war[pitching_war['year_ID'] == year] if 'year_ID' in pitching_war.columns else pitching_war
 
-        # Convert to dict keyed by BBRef ID
-        stats_by_bbref = {}
-        unmatched_count = 0
+        print(f"  Loaded {len(batting_war)} batting WAR, {len(pitching_war)} pitching WAR", file=sys.stderr)
 
-        for _, row in df.iterrows():
-            # Get FanGraphs ID
-            fg_id = row.get('IDfg')
-            if not fg_id or str(fg_id) == 'nan':
-                unmatched_count += 1
-                continue
+        war_by_bbref = {}
 
-            try:
-                fg_id = int(fg_id)
-            except (ValueError, TypeError):
-                unmatched_count += 1
-                continue
+        # Process batting WAR
+        for _, row in batting_war.iterrows():
+            bbref_id = row.get('player_ID')
+            war = row.get('WAR')
+            if bbref_id and war is not None and str(war) != 'nan':
+                if bbref_id not in war_by_bbref:
+                    war_by_bbref[bbref_id] = {}
+                war_by_bbref[bbref_id]['batting_war'] = str(war)
 
-            # Look up BBRef ID
-            bbref_id = id_mapping.get(fg_id)
-            if not bbref_id:
-                unmatched_count += 1
-                continue
+        # Process pitching WAR
+        for _, row in pitching_war.iterrows():
+            bbref_id = row.get('player_ID')
+            war = row.get('WAR')
+            if bbref_id and war is not None and str(war) != 'nan':
+                if bbref_id not in war_by_bbref:
+                    war_by_bbref[bbref_id] = {}
+                war_by_bbref[bbref_id]['pitching_war'] = str(war)
 
-            stats = {}
-            player_info = {}  # Metadata about the player (name, team, position)
-
-            for stat in BATTING_STATS:
-                if stat == 'IDfg':  # Skip ID field
-                    continue
-
-                if stat in row:
-                    value = row[stat]
-                    # Convert to string, handle NaN
-                    if value is not None and str(value) != 'nan':
-                        # Rename AVG to BA for consistency
-                        key = 'BA' if stat == 'AVG' else stat
-
-                        # Store player metadata separately
-                        if stat in ['Name', 'Team']:
-                            player_info[stat] = str(value).strip()
-                        else:
-                            stats[key] = str(value)
-
-            if stats:
-                # Include player info with stats
-                result = {'stats': stats, 'player_info': player_info}
-                stats_by_bbref[bbref_id] = result
-
-        if unmatched_count > 0:
-            print(f"  Warning: {unmatched_count} batters couldn't be matched to BBRef IDs", file=sys.stderr)
-
-        return stats_by_bbref
+        return war_by_bbref
 
     except Exception as e:
-        print(f"  Error fetching batting stats: {e}", file=sys.stderr)
+        print(f"  Error fetching WAR stats: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         return {}
 
-def fetch_pitching_stats(year, id_mapping):
-    """Fetch pitching stats from FanGraphs, keyed by BBRef ID"""
-    try:
-        print(f"Fetching pitching stats for {year}...", file=sys.stderr)
-
-        # Suppress pybaseball's stdout messages
-        with SuppressStdout():
-            df = pitching_stats(year, year, qual=0)  # qual=0 gets all players
-
-        print(f"  Loaded {len(df)} pitchers", file=sys.stderr)
-
-        # Convert to dict keyed by BBRef ID
-        stats_by_bbref = {}
-        unmatched_count = 0
-
-        for _, row in df.iterrows():
-            # Get FanGraphs ID
-            fg_id = row.get('IDfg')
-            if not fg_id or str(fg_id) == 'nan':
-                unmatched_count += 1
-                continue
-
-            try:
-                fg_id = int(fg_id)
-            except (ValueError, TypeError):
-                unmatched_count += 1
-                continue
-
-            # Look up BBRef ID
-            bbref_id = id_mapping.get(fg_id)
-            if not bbref_id:
-                unmatched_count += 1
-                continue
-
-            stats = {}
-            player_info = {}  # Metadata about the player (name, team)
-
-            for stat in PITCHING_STATS:
-                if stat == 'IDfg':  # Skip ID field
-                    continue
-
-                if stat in row:
-                    value = row[stat]
-                    # Convert to string, handle NaN
-                    if value is not None and str(value) != 'nan':
-                        # Store player metadata separately
-                        if stat in ['Name', 'Team']:
-                            player_info[stat] = str(value).strip()
-                        else:
-                            stats[stat] = str(value)
-
-            if stats:
-                # Include player info with stats
-                result = {'stats': stats, 'player_info': player_info}
-                stats_by_bbref[bbref_id] = result
-
-        if unmatched_count > 0:
-            print(f"  Warning: {unmatched_count} pitchers couldn't be matched to BBRef IDs", file=sys.stderr)
-
-        return stats_by_bbref
-
-    except Exception as e:
-        print(f"  Error fetching pitching stats: {e}", file=sys.stderr)
-        return {}
-
-def fetch_fielding_positions(year, id_mapping):
-    """Fetch fielding positions from FanGraphs, keyed by BBRef ID"""
-    # Map numerical position codes to abbreviations
-    POSITION_MAP = {
-        '1': 'P',   # Pitcher
-        '2': 'C',   # Catcher
-        '3': '1B',  # First Base
-        '4': '2B',  # Second Base
-        '5': '3B',  # Third Base
-        '6': 'SS',  # Shortstop
-        '7': 'LF',  # Left Field
-        '8': 'CF',  # Center Field
-        '9': 'RF',  # Right Field
-    }
-
-    try:
-        print(f"Fetching fielding positions for {year}...", file=sys.stderr)
-
-        # Suppress pybaseball's stdout messages
-        with SuppressStdout():
-            df = fielding_stats(year, year, qual=0)  # qual=0 gets all players
-
-        print(f"  Loaded {len(df)} fielders", file=sys.stderr)
-
-        # Convert to dict keyed by BBRef ID
-        # Group by player and aggregate positions (some play multiple)
-        positions_by_bbref = {}
-        unmatched_count = 0
-
-        for _, row in df.iterrows():
-            # Get FanGraphs ID
-            fg_id = row.get('IDfg')
-            if not fg_id or str(fg_id) == 'nan':
-                unmatched_count += 1
-                continue
-
-            try:
-                fg_id = int(fg_id)
-            except (ValueError, TypeError):
-                unmatched_count += 1
-                continue
-
-            # Look up BBRef ID
-            bbref_id = id_mapping.get(fg_id)
-            if not bbref_id:
-                unmatched_count += 1
-                continue
-
-            position_code = row.get('Pos')
-            if position_code and str(position_code) != 'nan':
-                # Convert numerical code to position abbreviation
-                position = POSITION_MAP.get(str(position_code), str(position_code))
-
-                # If player already has a position, combine them (e.g., "SS/3B")
-                if bbref_id in positions_by_bbref:
-                    existing_pos = positions_by_bbref[bbref_id]
-                    if position not in existing_pos:
-                        positions_by_bbref[bbref_id] = f"{existing_pos}/{position}"
-                else:
-                    positions_by_bbref[bbref_id] = position
-
-        if unmatched_count > 0:
-            print(f"  Warning: {unmatched_count} fielders couldn't be matched to BBRef IDs", file=sys.stderr)
-
-        return positions_by_bbref
-
-    except Exception as e:
-        print(f"  Error fetching fielding positions: {e}", file=sys.stderr)
-        return {}
+def fetch_fielding_positions(year, reverse_mapping):
+    """Fetch fielding positions from MLB Stats API"""
+    # For now, return empty dict - we can implement this later if needed
+    print(f"Fetching fielding positions for {year}...", file=sys.stderr)
+    print(f"  Loaded 0 fielders (not implemented yet)", file=sys.stderr)
+    return {}
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -299,34 +302,65 @@ if __name__ == '__main__':
     bbrefid_filter = sys.argv[2] if len(sys.argv) > 2 else None
 
     if bbrefid_filter:
-        print(f"Fetching FanGraphs stats for {year} (player: {bbrefid_filter})...", file=sys.stderr)
+        print(f"Fetching stats for {year} (player: {bbrefid_filter})...", file=sys.stderr)
     else:
-        print(f"Fetching FanGraphs stats for {year}...", file=sys.stderr)
+        print(f"Fetching stats for {year}...", file=sys.stderr)
     print("", file=sys.stderr)
 
     # Build ID mapping first
-    id_mapping = build_id_mapping()
+    id_mapping, reverse_mapping = build_id_mapping()
     print("", file=sys.stderr)
 
-    # Fetch stats using ID mapping
-    batting = fetch_batting_stats(year, id_mapping)
-    pitching = fetch_pitching_stats(year, id_mapping)
-    positions = fetch_fielding_positions(year, id_mapping)
-
-    # Filter by bbrefid if provided
+    # Fetch stats
     if bbrefid_filter:
-        batting = {bbrefid_filter: batting[bbrefid_filter]} if bbrefid_filter in batting else {}
-        pitching = {bbrefid_filter: pitching[bbrefid_filter]} if bbrefid_filter in pitching else {}
-        positions = {bbrefid_filter: positions[bbrefid_filter]} if bbrefid_filter in positions else {}
-        print(f"Filtered to player: {bbrefid_filter}", file=sys.stderr)
+        # Single player mode
+        if bbrefid_filter not in reverse_mapping:
+            print(f"ERROR: Player {bbrefid_filter} not found in ID mapping", file=sys.stderr)
+            sys.exit(1)
+
+        mlb_id = reverse_mapping[bbrefid_filter]
+
+        batting = {}
+        batting_stats = fetch_mlb_batting_stats(mlb_id, year)
+        if batting_stats:
+            name, team = fetch_mlb_player_info(mlb_id)
+            player_info = {}
+            if name:
+                player_info['Name'] = name
+            if team:
+                player_info['Team'] = team
+            batting[bbrefid_filter] = {'stats': batting_stats, 'player_info': player_info}
+
+        pitching = {}
+        pitching_stats = fetch_mlb_pitching_stats(mlb_id, year)
+        if pitching_stats:
+            name, team = fetch_mlb_player_info(mlb_id)
+            player_info = {}
+            if name:
+                player_info['Name'] = name
+            if team:
+                player_info['Team'] = team
+            pitching[bbrefid_filter] = {'stats': pitching_stats, 'player_info': player_info}
+
+        war = fetch_war_stats(year)
+        war = {bbrefid_filter: war[bbrefid_filter]} if bbrefid_filter in war else {}
+
+        positions = {}
+    else:
+        # All players mode
+        batting = fetch_all_batting_stats(year, id_mapping)
+        pitching = fetch_all_pitching_stats(year, id_mapping)
+        war = fetch_war_stats(year)
+        positions = fetch_fielding_positions(year, reverse_mapping)
 
     print("", file=sys.stderr)
-    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers, {len(positions)} fielders", file=sys.stderr)
+    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers, {len(war)} WAR entries", file=sys.stderr)
 
     # Output JSON to stdout with UTF-8 encoding
     result = {
         'batting': batting,
         'pitching': pitching,
-        'positions': positions
+        'positions': positions,
+        'war': war
     }
     json.dump(result, sys.stdout, indent=2, ensure_ascii=False)
