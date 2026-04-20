@@ -240,7 +240,7 @@ const AllPlayersListSearch = () => {
         )}
       </Box>
 
-      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <Box round="small" overflow={{ horizontal: "hidden" }} border={{ color: "border", size: "xsmall" }}>
         <DataTable
           columns={[
           {

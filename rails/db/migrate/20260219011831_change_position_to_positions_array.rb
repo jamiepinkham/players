@@ -4,25 +4,33 @@ class ChangePositionToPositionsArray < ActiveRecord::Migration[8.1]
     add_column :players, :positions, :text, array: true, default: []
 
     # Migrate existing position data
+    # Old position column used numeric codes: 1=P, 2=C, 3=1B, 4=2B, 5=3B, 6=SS, 7/8/9=OF, H/D=DH
+    position_map = {
+      '1' => 'P', '2' => 'C', '3' => '1B', '4' => '2B', '5' => '3B', '6' => 'SS',
+      '7' => 'OF', '8' => 'OF', '9' => 'OF', 'H' => 'DH', 'D' => 'DH',
+      'LF' => 'OF', 'CF' => 'OF', 'RF' => 'OF'
+    }
+
     Player.find_each do |player|
       next if player.position.blank?
 
-      # Split position string by "/" to handle multi-position players
-      position_parts = player.position.split('/')
+      positions = []
 
-      # Map each part to the standardized position
-      positions = position_parts.map do |pos|
-        pos = pos.strip
-
-        # Convert specific outfield positions to generic OF
-        if ['LF', 'CF', 'RF'].include?(pos)
-          'OF'
-        else
-          pos
+      # Handle SP and RP as complete strings
+      if player.position == 'SP'
+        positions = ['SP']
+      elsif player.position == 'RP'
+        positions = ['RP']
+      else
+        # Split position string into individual characters and map them
+        player.position.each_char do |char|
+          mapped = position_map[char] || position_map[char.upcase]
+          positions << mapped if mapped
         end
-      end.uniq # Remove duplicates (e.g., if someone had "LF/CF" both become "OF")
+        positions.uniq!
+      end
 
-      player.update_column(:positions, positions)
+      player.update_column(:positions, positions) if positions.any?
     end
 
     # Remove old position column and its index
