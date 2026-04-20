@@ -4,9 +4,19 @@ class AddFreeAgentTrackingToPlayers < ActiveRecord::Migration[8.1]
     add_column :players, :is_free_agent, :boolean, default: false, null: false
     add_index :players, :is_free_agent
 
-    # Note: Initial free agent status will be calculated by after_save callbacks
-    # on existing contracts, or can be manually triggered with:
-    # rake free_agents:update
+    # Set correct free agent status for existing players
+    # Players are free agents if they don't have an active contract in the current season
+    execute <<-SQL
+      UPDATE players
+      SET is_free_agent = true
+      WHERE id NOT IN (
+        SELECT DISTINCT player_id
+        FROM contracts
+        WHERE active = true
+          AND first_season_id <= (SELECT id FROM seasons WHERE is_active = true LIMIT 1)
+          AND last_season_id >= (SELECT id FROM seasons WHERE is_active = true LIMIT 1)
+      )
+    SQL
   end
 
   def down
