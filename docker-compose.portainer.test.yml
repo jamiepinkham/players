@@ -4,7 +4,7 @@
 
 services:
   players:
-    image: ghcr.io/jamiepinkham/players:${IMAGE_TAG:-main}
+    image: ghcr.io/jamiepinkham/players:${GIT_REF:-main}
     restart: unless-stopped
     depends_on:
       db:
@@ -41,7 +41,7 @@ services:
       ASSET_HOST: ${ASSET_HOST:-}
 
   scheduler:
-    image: ghcr.io/jamiepinkham/players:${IMAGE_TAG:-main}
+    image: ghcr.io/jamiepinkham/players:${GIT_REF:-main}
     restart: unless-stopped
     depends_on:
       db:

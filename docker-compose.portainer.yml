@@ -4,10 +4,18 @@
 #
 # IMPORTANT: Set environment variables in Portainer's Environment Variables section
 # Do NOT use an .env file - Portainer will inject the variables you configure in the UI
+#
+# Environment Variable Guide:
+#   GIT_REF: Git branch/ref to deploy (default: main)
+#     Production: main
+#     QA: any branch for UAT testing
+#   DATABASE_NAME: Database name (auto-derived from GIT_REF as "players_<git-ref>")
+#     Production: Explicitly set to "players_production" to override default
+#     QA: Leave unset - auto-creates "players_<branch-name>" per branch
 
 services:
   players:
-    image: ghcr.io/jamiepinkham/players:main
+    image: ghcr.io/jamiepinkham/players:${GIT_REF:-main}
     restart: unless-stopped
     depends_on:
       db:
@@ -21,7 +29,7 @@ services:
       # Database Configuration
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_NAME: ${DATABASE_NAME:-players_${GIT_REF:-main}}
       DATABASE_HOST: ${DATABASE_HOST}
       # Rails Configuration
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
@@ -44,7 +52,7 @@ services:
       ASSET_HOST: ${ASSET_HOST:-}
 
   scheduler:
-    image: ghcr.io/jamiepinkham/players:main
+    image: ghcr.io/jamiepinkham/players:${GIT_REF:-main}
     restart: unless-stopped
     depends_on:
       db:
@@ -56,7 +64,7 @@ services:
       # Database Configuration
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_NAME: ${DATABASE_NAME:-players_${GIT_REF:-main}}
       DATABASE_HOST: ${DATABASE_HOST}
       # Rails Configuration
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
@@ -88,7 +96,7 @@ services:
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_DB: ${DATABASE_NAME:-players_${GIT_REF:-main}}
 
 volumes:
   pgdata:
