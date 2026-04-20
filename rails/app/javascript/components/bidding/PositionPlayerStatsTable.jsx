@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, DataTable, Box, Text, Grid } from "grommet";
+import { Button, DataTable, Box, Text, Grid, Spinner } from "grommet";
 import { Currency } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
 import LeadingBidComponent from "./LeadingBidComponent";
@@ -18,8 +18,6 @@ export default function PositionPlayerStatsTable({
   showContractAccordion = false,
   teamId
 }) {
-  players = players.filter((player) => player.stats.length > 0);
-
   const formatPlayerStats = (player) => {
     const stats = {};
     player.stats.forEach(stat => {
@@ -30,25 +28,32 @@ export default function PositionPlayerStatsTable({
 
   const renderPlayerLabel = (player) => {
     const stats = formatPlayerStats(player);
+    const StatValue = ({ label, value }) => (
+      <Box pad={{ horizontal: "small" }}>
+        <Text weight="bold">
+          {label}: {value || <Spinner size="xsmall" />}
+        </Text>
+      </Box>
+    );
 
     const statsContent = position === "SP" || position === "RP" ? (
       <>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">IP: {stats.IP}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">ERA: {stats.ERA}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">W: {stats.W}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">L: {stats.L}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">SV: {stats.SV}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+        <StatValue label="IP" value={stats.IP} />
+        <StatValue label="ERA" value={stats.ERA} />
+        <StatValue label="W" value={stats.W} />
+        <StatValue label="L" value={stats.L} />
+        <StatValue label="SV" value={stats.SV} />
+        <StatValue label="WAR" value={stats.WAR} />
       </>
     ) : (
       <>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">PA: {stats.PA}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">HR: {stats.HR}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">R: {stats.R}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">RBI: {stats.RBI}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">AVG: {stats.BA}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">OPS: {stats.OPS}</Text></Box>
-        <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+        <StatValue label="PA" value={stats.PA} />
+        <StatValue label="HR" value={stats.HR} />
+        <StatValue label="R" value={stats.R} />
+        <StatValue label="RBI" value={stats.RBI} />
+        <StatValue label="AVG" value={stats.BA} />
+        <StatValue label="OPS" value={stats.OPS} />
+        <StatValue label="WAR" value={stats.WAR} />
       </>
     );
 
