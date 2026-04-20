@@ -353,14 +353,20 @@ if __name__ == '__main__':
         war = fetch_war_stats(year)
         positions = fetch_fielding_positions(year, reverse_mapping)
 
+    # Merge WAR into batting and pitching stats
+    for bbref_id, war_data in war.items():
+        if bbref_id in batting and 'batting_war' in war_data:
+            batting[bbref_id]['stats']['WAR'] = war_data['batting_war']
+        if bbref_id in pitching and 'pitching_war' in war_data:
+            pitching[bbref_id]['stats']['WAR'] = war_data['pitching_war']
+
     print("", file=sys.stderr)
-    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers, {len(war)} WAR entries", file=sys.stderr)
+    print(f"Total matched: {len(batting)} batters, {len(pitching)} pitchers", file=sys.stderr)
 
     # Output JSON to stdout with UTF-8 encoding
     result = {
         'batting': batting,
         'pitching': pitching,
-        'positions': positions,
-        'war': war
+        'positions': positions
     }
     json.dump(result, sys.stdout, indent=2, ensure_ascii=False)

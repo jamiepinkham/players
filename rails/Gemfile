@@ -10,7 +10,7 @@ gem 'pg', '~> 1.6'
 gem 'pg_search'
 # Use Redis for caching and background jobs
 gem 'redis', '~> 5.0'
-gem 'sidekiq', '~> 7.0'
+gem 'sidekiq', '~> 7.3'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 
