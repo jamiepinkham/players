@@ -74,7 +74,7 @@ export default function PositionPlayerStatsTable({
     return (
       <Box direction="row" justify="between" align="center" pad="small" width="100%" gap="small">
         <Box width="medium" gap="xxsmall">
-          <PlayerName playerId={player.id} name={player.name} bbrefid={player.bbrefid} bold />
+          <PlayerName name={player.name} bbrefid={player.bbrefid} bold />
           {contractSummary}
         </Box>
         <Box flex direction="row" gap="large" align="center" justify="end">
