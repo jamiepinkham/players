@@ -14,24 +14,27 @@ The season switch process consists of three main steps:
 
 ### What it does:
 
-- Fetches player stats from Baseball Reference via pybaseball
+- Fetches player stats from **MLB Stats API** for batting and pitching stats
+- Uses **Baseball Reference** for WAR (currently disabled due to data format issues)
 - Uses current season's `target_stat_year` to determine which MLB season to import
 - Example: BMPL 2026 season has `target_stat_year: 2025` (uses 2025 MLB stats)
 - Stores stats in `player_stats` table (one row per player per season)
+- Stats are also cached in Redis with 24-hour expiry for real-time viewing
 - Handles UTF-8 encoding for accented player names
 - Updates player positions based on fielding data and playing time
 
 ### When to run:
 
-- After Baseball Reference/pybaseball has stats for the upcoming season
+- After the MLB season concludes and stats are available via MLB Stats API
 - Typically: late fall/early winter after MLB season concludes
 - Can be re-run safely if new players are added or stats updated
+- Note: Redis cache is separate from player_stats table - stats:import populates the table
 
 ### Expected output:
 
 ```
 Importing stats for 623 free agents (2025)...
-Fetching stats from Baseball Reference (2025)...
+Fetching stats from MLB Stats API (2025)...
   Batting: 487 players
   Pitching: 312 players
   Fielding positions: 458 players
@@ -39,14 +42,14 @@ Fetching stats from Baseball Reference (2025)...
 ✓ Import complete!
   487 new player stat records created
   136 existing records updated
-  623 players matched to Baseball Reference
+  623 players matched
 
-  ⚠️  12 players missing WAR (FanGraphs lookup failed via Chadwick Register):
-    - Dedniel Núñez (nunezde01)
-  These players have counting stats but no WAR - still eligible for free agency
+  ⚠️  WAR stats currently unavailable (Baseball Reference parsing issue)
+  All players have batting/pitching counting stats - still eligible for free agency
 ```
 
-**Time:** ~2-5 minutes depending on network speed
+**Time:** ~2-5 minutes depending on network speed and API rate limits
+**Note:** WAR is temporarily unavailable. Stats include: G, PA, AB, H, HR, RBI, BA, OBP, SLG, OPS (batting) and G, GS, W, L, SV, IP, H, R, ER, HR, BB, SO, ERA, WHIP (pitching)
 
 ---
 
@@ -194,11 +197,33 @@ Step 5: Creating free agency period for BMPL 2027...
 
 ---
 
+## Stats Caching
+
+The application uses **two separate systems** for player stats:
+
+### 1. player_stats Table (Permanent Storage)
+- Populated by `bin/rails stats:import`
+- One row per player per season
+- Used for free agent eligibility checks
+- Historical data persists
+
+### 2. Redis Cache (Real-Time Display)
+- Populated on-demand when users view player pages
+- 24-hour expiry
+- Fetched from MLB Stats API via background jobs (Sidekiq)
+- Can be cleared: `bin/rails cache:clear`
+
+### When Switching Seasons:
+- `stats:import` populates the **player_stats table** for eligibility checks
+- Redis cache is **separate** - it auto-expires and refetches as needed
+- No need to manually clear cache when switching seasons
+- Player pages will fetch current season stats automatically
+
 ## Quick Reference
 
 ```bash
 # Complete season switch workflow:
-bin/rails stats:import                    # Step 1: Import stats
+bin/rails stats:import                    # Step 1: Import stats to DB
 bin/rails season:promote_free_agents      # Step 2: Preview and promote FAs
 bin/rails season:switch                   # Step 3: Switch to next season
 
@@ -207,6 +232,7 @@ bin/rails season:status                   # Show current season info
 bin/rails season:preview                  # Preview season switch impact
 bin/rails free_agents:recalculate         # Recalculate all FA statuses
 bin/rails free_agents:stats               # Show FA statistics
+bin/rails cache:clear                     # Clear Redis cache (optional)
 ```
 
 ## Activating Free Agency
@@ -234,12 +260,24 @@ If you see "No stats found for target year", ensure:
 1. The next season has `target_stat_year` configured
 2. You've run `bin/rails stats:import` successfully
 3. The stats were imported for the correct year
+4. MLB Stats API is accessible (check network connectivity)
 
 ### Players not becoming free agents
 If players aren't being promoted:
 1. Check that they have stats in the database for the target year
 2. Verify their position is set correctly
 3. Ensure they meet the minimum thresholds (PA > 0 or IP > 0)
+4. Check `player_stats` table: `PlayerStat.where(year: 2025).count`
+
+### Stats not showing on player pages
+If player detail pages aren't showing stats:
+1. Check Sidekiq is running: `docker logs players-sidekiq-qa`
+2. Check Redis is accessible: `docker exec players-redis-qa redis-cli ping`
+3. Clear cache and retry: `bin/rails cache:clear`
+4. Check background job processing: `Sidekiq::Stats.new.processed`
+
+### WAR data missing
+WAR stats are currently unavailable due to Baseball Reference data format changes. Players are still eligible for free agency based on counting stats (PA for batters, IP for pitchers). WAR will be re-enabled when pybaseball library is updated.
 
 ### Need to undo a promotion
 If you accidentally promoted players:
