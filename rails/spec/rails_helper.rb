@@ -49,6 +49,15 @@ RSpec.configure do |config|
   # Include Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :feature
 
+  # Sidekiq test mode configuration
+  config.before(:each) do
+    Sidekiq::Testing.fake!
+  end
+
+  config.after(:each) do
+    Sidekiq::Worker.clear_all
+  end
+
   # Database cleaner configuration
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
