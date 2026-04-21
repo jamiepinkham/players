@@ -50,6 +50,9 @@ RSpec.configure do |config|
   # Include Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :feature
 
+  # Include ActiveJob test helpers
+  config.include ActiveJob::TestHelper
+
   # Sidekiq test mode configuration
   config.before(:each) do
     Sidekiq::Testing.fake!
