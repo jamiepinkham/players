@@ -152,14 +152,10 @@ RSpec.feature 'Stats System', type: :feature do
   describe 'REG-STATS-003: Background Job Processing' do
     let(:player) { create(:player, name: 'Async Test', bbrefid: 'asynctest01') }
 
+    # Sidekiq::Testing.fake! is already set globally in rails_helper
+    # Just clear the queue before each test
     before do
-      # Use Sidekiq test mode
-      Sidekiq::Testing.fake!
-      FetchPlayerStatsJob.clear
-    end
-
-    after do
-      Sidekiq::Testing.inline!
+      Sidekiq::Queues.clear_all
     end
 
     it 'queues background job when async is true' do
@@ -180,13 +176,13 @@ RSpec.feature 'Stats System', type: :feature do
       allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_return(stats_data)
 
-      # Switch to inline mode to process immediately
+      # Process job inline
       Sidekiq::Testing.inline! do
-        FetchPlayerStatsJob.perform_later(player.bbrefid, 2024)
+        StatsFetcher.fetch_for_player(player, 2024, async: true)
       end
 
       # Stats should now be cached
-      cached_stats = StatsFetcher.fetch_for_player(player, 2024, async: false)
+      cached_stats = Rails.cache.read("player_stats:#{player.bbrefid}:2024")
       expect(cached_stats).to eq(stats_data)
     end
   end
