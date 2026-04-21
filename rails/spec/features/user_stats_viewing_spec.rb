@@ -2,7 +2,10 @@
 
 require 'rails_helper'
 
-RSpec.feature 'User Stats Viewing', type: :feature, js: true, skip: true do
+RSpec.feature 'User Stats Viewing', type: :feature, js: true do
+  before(:each) do
+    skip "UI tests require browser setup"
+  end
   let(:season) { create(:season, :active, name: '2024') }
   let(:team) { create(:team, name: 'Test Team') }
   let(:user) { create(:user) }
