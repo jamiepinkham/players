@@ -8,7 +8,7 @@ RSpec.feature 'Stats System', type: :feature do
 
   before do
     # Stub external API calls
-    allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
+    allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
   end
 
   describe 'REG-STATS-001: Player Stats Display' do
@@ -17,7 +17,7 @@ RSpec.feature 'Stats System', type: :feature do
 
       before do
         # Mock stats for this player
-        allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+        allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
           'G' => '150',
           'PA' => '650',
           'AB' => '580',
@@ -52,7 +52,7 @@ RSpec.feature 'Stats System', type: :feature do
       let(:pitcher) { create(:player, name: 'Test Pitcher', bbrefid: 'pitchte01') }
 
       before do
-        allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+        allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
           'G' => '32',
           'GS' => '32',
           'W' => '15',
@@ -85,7 +85,7 @@ RSpec.feature 'Stats System', type: :feature do
       let(:player) { create(:player, name: 'No Stats Player', bbrefid: 'nostats01') }
 
       before do
-        allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
+        allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
       end
 
       it 'shows appropriate message when stats are unavailable' do
@@ -105,7 +105,7 @@ RSpec.feature 'Stats System', type: :feature do
       stats_data = { 'G' => '100', 'HR' => '20', 'BA' => '.280' }
 
       # First call should fetch from external source
-      expect_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      expect(StatsFetcher).to receive(:fetch_from_pybaseball)
         .once
         .and_return(stats_data)
 
@@ -124,11 +124,11 @@ RSpec.feature 'Stats System', type: :feature do
       stats_2023 = { 'G' => '90', 'HR' => '15' }
       stats_2024 = { 'G' => '100', 'HR' => '20' }
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .with(player.bbrefid, 2023)
         .and_return(stats_2023)
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .with(player.bbrefid, 2024)
         .and_return(stats_2024)
 
@@ -176,7 +176,7 @@ RSpec.feature 'Stats System', type: :feature do
     it 'processes background job successfully' do
       stats_data = { 'G' => '100', 'HR' => '25' }
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_return(stats_data)
 
       # Queue and process the job
@@ -213,7 +213,7 @@ RSpec.feature 'Stats System', type: :feature do
 
     it 'handles API errors gracefully' do
       # Stub to simulate API failure
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_raise(StandardError.new('API timeout'))
 
       result = StatsFetcher.fetch_for_player(player, 2024, async: false)
@@ -226,7 +226,7 @@ RSpec.feature 'Stats System', type: :feature do
       # Player with no MLB stats
       unknown_player = create(:player, bbrefid: 'unknown99')
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_return({})
 
       result = StatsFetcher.fetch_for_player(unknown_player, 2024, async: false)
@@ -258,11 +258,11 @@ RSpec.feature 'Stats System', type: :feature do
       stats_2023 = { 'G' => '140', 'HR' => '25' }
       stats_2024 = { 'G' => '150', 'HR' => '30' }
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .with(player.bbrefid, 2023)
         .and_return(stats_2023)
 
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .with(player.bbrefid, 2024)
         .and_return(stats_2024)
 
@@ -279,7 +279,7 @@ RSpec.feature 'Stats System', type: :feature do
 
     before do
       # Mock both batting and pitching stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'G' => '135',
         'AB' => '497',
         'HR' => '44',
@@ -316,7 +316,7 @@ RSpec.feature 'Stats System', type: :feature do
       new_stats = { 'G' => '101', 'HR' => '21' }
 
       # First fetch
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_return(old_stats)
 
       result1 = StatsFetcher.fetch_for_player(player, 2024, async: false)
@@ -326,7 +326,7 @@ RSpec.feature 'Stats System', type: :feature do
       StatsFetcher.invalidate_cache(player.bbrefid, 2024)
 
       # Mock new stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball)
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball)
         .and_return(new_stats)
 
       # Fetch again - should get new stats

@@ -9,7 +9,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
   before do
     # Mock stats API to avoid external calls
-    allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
+    allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
   end
 
   describe 'UAT-STATS-001: Viewing Batter Stats' do
@@ -23,7 +23,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     before do
       # Mock realistic batting stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'G' => '150',
         'PA' => '650',
         'AB' => '580',
@@ -111,7 +111,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     before do
       # Mock realistic pitching stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'G' => '32',
         'GS' => '32',
         'W' => '15',
@@ -188,7 +188,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
     end
 
     before do
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'G' => '65',
         'GS' => '0',
         'W' => '5',
@@ -239,7 +239,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     before do
       # Mock combined batting and pitching stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         # Batting
         'G' => '135',
         'PA' => '550',
@@ -292,7 +292,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     before do
       # Mock different stats for different years
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball) do |_, bbrefid, year|
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball) do |_, bbrefid, year|
         case year
         when 2024
           { 'G' => '150', 'HR' => '30', 'BA' => '.300' }
@@ -356,7 +356,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     before do
       # No stats available
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({})
     end
 
     scenario 'User views player with no stats and sees appropriate message' do
@@ -384,7 +384,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     scenario 'User sees loading indicator while stats are being fetched' do
       # Simulate slow API response
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball) do
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball) do
         sleep(0.5)
         { 'G' => '100', 'HR' => '20' }
       end
@@ -410,7 +410,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
     end
 
     before do
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball) do |_, bbrefid, _year|
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball) do |_, bbrefid, _year|
         case bbrefid
         when 'playera01'
           { 'G' => '150', 'HR' => '40', 'BA' => '.320', 'RBI' => '120' }
@@ -443,7 +443,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
     let(:player) { create(:player, name: 'Public Player', bbrefid: 'public01') }
 
     before do
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'G' => '130', 'HR' => '22', 'BA' => '.275'
       })
     end
@@ -468,7 +468,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
 
     scenario 'User can refresh player page to get updated stats' do
       # Initial stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'HR' => '20'
       })
 
@@ -479,7 +479,7 @@ RSpec.feature 'User Stats Viewing', type: :feature, js: true do
       end
 
       # Update mock to return new stats
-      allow_any_instance_of(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
+      allow(StatsFetcher).to receive(:fetch_from_pybaseball).and_return({
         'HR' => '21'
       })
 
