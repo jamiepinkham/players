@@ -9,6 +9,7 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 require 'selenium-webdriver'
+require 'sidekiq/testing'
 
 # Configure FactoryBot to only load from test/factories (not spec/factories)
 FactoryBot.definition_file_paths = ['test/factories']
@@ -52,10 +53,7 @@ RSpec.configure do |config|
   # Sidekiq test mode configuration
   config.before(:each) do
     Sidekiq::Testing.fake!
-  end
-
-  config.after(:each) do
-    Sidekiq::Worker.clear_all
+    Sidekiq::Queues.clear_all
   end
 
   # Database cleaner configuration
