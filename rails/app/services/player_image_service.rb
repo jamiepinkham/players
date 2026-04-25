@@ -23,7 +23,11 @@ class PlayerImageService
 
   def self.fetch_from_pybaseball(bbrefid)
     script_path = Rails.root.join('lib', 'scripts', 'get_player_image.py')
-    result = `python3 #{script_path} #{bbrefid} 2>&1`.strip
+
+    # Add timeout to prevent hanging requests
+    result = Timeout.timeout(5) do
+      `python3 #{script_path} #{bbrefid} 2>&1`.strip
+    end
 
     # Check if the command succeeded and returned a valid URL
     if $?.success? && result.present? && result.start_with?('http')
@@ -32,5 +36,8 @@ class PlayerImageService
       Rails.logger.warn("Failed to fetch image for #{bbrefid}: #{result}")
       DEFAULT_IMAGE
     end
+  rescue Timeout::Error
+    Rails.logger.warn("Timeout fetching image for #{bbrefid}")
+    DEFAULT_IMAGE
   end
 end
