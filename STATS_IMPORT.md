@@ -1,100 +1,202 @@
 # Stats System
 
-This system fetches player statistics from FanGraphs using pybaseball **on-demand** with Redis caching.
+This system fetches player statistics from MLB Stats API using pybaseball with Redis caching and database persistence.
 
 ## Architecture
 
-- **Source**: FanGraphs (via pybaseball Python library)
-- **Stats Included**: All batting/pitching stats **including WAR**
-- **Storage**: Redis cache (24-hour expiry) - stats fetched on-demand from GraphQL
-- **Dependencies**: Python 3 + pybaseball (installed in Docker image), Redis
+- **Source**: MLB Stats API (via pybaseball Python library)
+- **Stats Included**: All batting/pitching stats **excluding WAR** (Baseball Reference broken)
+- **Storage**:
+  - **Primary**: Redis cache (24-hour expiry) for fast access
+  - **Secondary**: PostgreSQL `player_stats` table for cache warmup
+- **Dependencies**: Python 3 + pybaseball, Redis, PostgreSQL
 
 ## Quick Start
 
-### Warm Redis cache for current season's free agents (optional)
-
-Stats are fetched on-demand, but you can pre-warm the cache for faster first page load:
+### Populate Stats Database (First Time)
 
 ```bash
-docker compose exec players rake stats:import
+# Production/QA
+docker exec players-web rails stats:populate
+
+# Local development
+docker compose exec players rails stats:populate
 ```
 
-### Warm cache for ALL players (not just free agents)
+This creates `PlayerStat` database records for all players with 2025 stats.
+
+**Stats**: ~2,800 players, ~1,000 new records, 0 errors
+**Time**: ~30 minutes (fetches from MLB API, one player at a time)
+
+### Warm Redis Cache from Database (After Restart)
 
 ```bash
-docker compose exec players bash -c "cd /app && ALL_PLAYERS=1 bundle exec rake stats:import"
+# Quick warmup - top 100 free agents (5-10 seconds)
+docker exec players-web rails cache:warmup_quick
+
+# Full warmup - all players with stats (1-2 minutes)
+docker exec players-web rails cache:warmup
 ```
 
-### Warm cache for specific players
+This loads stats from `player_stats` table into Redis (fast, no API calls).
+
+### Clean Up Ineligible Players
 
 ```bash
-docker compose exec players rake stats:import BBREFIDS=judgeaa01,ohtansh01,troutmi01
+# List players without current season stats
+docker exec players-web rails players:list_ineligible
+
+# Remove them from database
+docker exec players-web rails players:remove_ineligible
 ```
 
-**Note**: These commands are optional. Stats will be fetched automatically when requested via GraphQL.
+Removes players who can't be signed (no stats for current season).
 
 ## How It Works
 
-### On-Demand Fetching (Automatic)
+### Stats Fetching Flow
 
-When stats are requested via GraphQL:
+#### 1. GraphQL Request (Frontend)
+```graphql
+player(id: "123") {
+  stats(year: 2025) { title value }
+}
+```
 
-1. **Check Redis cache**: `StatsFetcher` checks if stats for that player/year are cached
-2. **If cached**: Return immediately (~1-10ms)
-3. **If not cached**:
-   - Call Python script with player's bbrefid: `fetch_fangraphs_stats.py 2025 judgeaa01`
-   - Parse JSON response and combine batting/pitching stats
-   - Store in Redis cache (24-hour expiry)
-   - Return stats to GraphQL resolver
+#### 2. StatsFetcher Service (async: true by default)
+```ruby
+StatsFetcher.fetch_for_player(player, year, async: true)
+# Returns {} immediately
+# Queues FetchPlayerStatsJob in background
+```
 
-### Cache Warming (Optional via rake stats:import)
+#### 3. Background Job
+```ruby
+FetchPlayerStatsJob.perform_later(bbrefid, year)
+# Checks Redis cache
+# If not cached: calls Python script
+# Writes to Redis (24-hour expiry)
+```
 
-The rake task pre-populates Redis cache for faster first page load:
+#### 4. Frontend Retry Logic
+- Gets empty `{}` on first request
+- Retries 3 times with 2-second delays
+- Eventually gets stats from cache after job completes
 
-1. **Fetch from FanGraphs**: Python script calls pybaseball to get:
-   - `batting_stats(2025, 2025, qual=0)` - All batters (1 request)
-   - `pitching_stats(2025, 2025, qual=0)` - All pitchers (1 request)
-   - `fielding_stats(2025, 2025, qual=0)` - Fielding positions (1 request)
-   - `chadwick_register()` - FanGraphs ID → BBRef ID mapping
+### Database Persistence (PlayerStat model)
 
-2. **Match by BBRef ID**: Uses Chadwick Register to map FanGraphs player IDs to BBRef IDs for accurate matching (no accent/name issues)
+Created by `rails stats:populate`:
 
-3. **Update Player Records**: Updates player names and positions from FanGraphs canonical data
-   - Names: Updates to FanGraphs canonical spelling (e.g., "Diaz" → "Díaz")
-   - Positions: Stored as arrays (e.g., ["SS", "2B"], ["SP"], ["DH", "SP"])
-     - Position players: Uses `fielding_stats()` (converted to "OF" for LF/CF/RF)
-     - Pitchers only: ["SP"] if GS > 5, ["RP"] if GS ≤ 5
-     - Two-way players: Combines positions if **PA ≥ 100 AND IP > 20** (e.g., ["DH", "SP"])
+```ruby
+PlayerStat.create!(
+  player: player,
+  season: season,
+  stats: {
+    "PA" => "679",
+    "HR" => "53",
+    "BA" => ".291",
+    # ... all stats
+  }
+)
+```
 
-4. **Warm Redis Cache**: Write stats to Redis with 24-hour expiry:
-   - Batting: PA, G, AB, H, 1B, 2B, 3B, HR, R, RBI, SB, BB, SO, BA, OBP, SLG, OPS, WAR
-   - Pitching: IP, G, GS, W, L, SV, H, R, ER, HR, BB, SO, ERA, WHIP, WAR
-   - Two-way players: Combined (batting + pitching WAR summed)
+**Used for:**
+- Cache warmup (fast, no API calls)
+- Persistent storage across cache clears
+- Historical records
+
+**Not used for:**
+- Real-time queries (cache-first)
+- Automatic updates (manual populate)
+
+## Stats Included
+
+### Batting Stats
+PA, G, AB, H, 1B, 2B, 3B, HR, R, RBI, SB, BB, SO, BA, OBP, SLG, OPS
+
+### Pitching Stats
+IP, G, GS, W, L, SV, H, R, ER, HR, BB, SO, ERA, WHIP
+
+### Excluded
+- **WAR** - Disabled (Baseball Reference parsing broken)
+
+## Rake Tasks
+
+### `rails stats:populate`
+**Purpose**: Fetch stats from MLB API and create PlayerStat records
+
+**Options**:
+```bash
+# All players with bbrefid
+rails stats:populate
+
+# Specific players only
+rails stats:populate BBREFIDS=judgeaa01,ohtansh01
+
+# Specific year
+rails stats:populate YEAR=2024
+```
+
+**What it does**:
+1. Finds all players with `bbrefid` set
+2. Calls `PlayerStat.fetch_or_create_for(player, season)`
+3. Fetches stats from MLB API (synchronous)
+4. Creates database record
+5. Writes to Redis cache
+
+**Performance**:
+- ~2-3 seconds per player
+- ~30 minutes for 600 players
+- Uses MLB Stats API (rate limited)
+
+### `rails cache:warmup`
+**Purpose**: Load stats from database into Redis cache
+
+**Options**:
+```bash
+# All players with stats (1-2 minutes)
+rails cache:warmup
+
+# Top 100 free agents only (5-10 seconds)
+rails cache:warmup_quick
+```
+
+**What it does**:
+1. Reads `PlayerStat` records from database
+2. Writes to Redis cache (24-hour expiry)
+3. No API calls (fast!)
+
+**When to use**:
+- After container restart (cache cleared)
+- After Redis restart
+- When free agents page shows spinners
+
+### `rails players:remove_ineligible`
+**Purpose**: Clean up players without current season stats
+
+**What it does**:
+1. Finds players with no stats for `Season.current.target_stat_year`
+2. Deletes them from database
+3. Typically removes ~47% of database (1,300+ players)
+
+**Why**: Players without current season stats can't be signed and clutter the database.
 
 ## Dependencies
 
-### Python Requirements
-
-Defined in `requirements.txt`:
+### Python Requirements (`requirements.txt`)
 ```
 pybaseball==2.2.7
 ```
 
-Installed automatically during `docker compose build`.
-
 ### Docker Setup
-
-The Dockerfile installs:
-- Python 3
+Automatically installed in Docker image:
+- Python 3.11+
 - pip3
-- pybaseball (from requirements.txt)
-
-**No manual setup needed** - `docker compose up` just works!
+- pybaseball
 
 ## Querying Stats
 
 ### GraphQL (Frontend)
-
 ```graphql
 query {
   player(id: "123") {
@@ -110,80 +212,140 @@ query {
 Returns: `[{ title: "PA", value: "679" }, { title: "HR", value: "53" }, ...]`
 
 ### Rails Console
-
 ```ruby
-# Get a player's stats (fetches from Redis cache or pybaseball)
+# Fetch stats (async by default)
 player = Player.find_by(name: "Aaron Judge")
 stats = StatsFetcher.fetch_for_player(player, 2025)
-stats["WAR"]  # => "10.1"
+# => {} (returns immediately, job queued)
 
-# Invalidate cache to force fresh fetch
-StatsFetcher.invalidate_cache("judgeaa01", 2025)
+# Fetch synchronously (waits for result)
+stats = StatsFetcher.fetch_for_player(player, 2025, async: false)
+# => { "PA" => "679", "HR" => "53", ... }
+
+# Get from database
+player_stat = PlayerStat.find_by(player: player, season: Season.current)
+player_stat.stats["HR"]  # => "53"
+
+# Invalidate cache
+cache_key = "player_stats:#{player.bbrefid}:2025"
+Rails.cache.delete(cache_key)
 ```
 
 ## Troubleshooting
 
-### Players not matching
+### Free Agents Page Shows Spinners
 
-Players are matched by BBRef ID using the Chadwick Register, so name/accent issues are avoided. If a player doesn't match:
-- Check that the player has a valid `bbrefid` in the database
-- Verify the player appeared in FanGraphs stats for that year (they need games played)
-- Check if the BBRef ID exists in the Chadwick Register mapping
+**Cause**: Redis cache empty, background jobs haven't completed yet
 
-### pybaseball errors
-
-If you see "pybaseball not installed":
+**Fix**:
 ```bash
+# Quick warmup from database
+docker exec players-web rails cache:warmup_quick
+```
+
+### Stats Not Showing for Player
+
+**Check**:
+1. Does player have `bbrefid`? `player.bbrefid.present?`
+2. Does PlayerStat record exist? `PlayerStat.find_by(player: player, season: Season.current)`
+3. Is it cached? `Rails.cache.exist?("player_stats:#{bbrefid}:2025")`
+
+**Fix**:
+```bash
+# Fetch for specific player
+docker exec players-web rails runner '
+player = Player.find_by(name: "Aaron Judge")
+PlayerStat.fetch_or_create_for(player, Season.current)
+'
+```
+
+### pybaseball Errors
+
+**Symptoms**: `ModuleNotFoundError: No module named 'pybaseball'`
+
+**Fix**:
+```bash
+# Rebuild Docker image
 docker compose build players
 docker compose up -d
 ```
 
-### Cache issues
+### Cache Cleared After Restart
 
-pybaseball caches data in `~/.pybaseball`. To force refresh, clear cache:
-```bash
-docker compose exec players python3 -c "from pybaseball import cache; cache.purge()"
+**Expected behavior** - Redis cache is in-memory by default
+
+**Solution**: Run cache warmup automatically on startup
+```yaml
+# docker-compose.yml
+command: sh -c "bin/warmup-cache && bin/rails server -b 0.0.0.0"
 ```
+
+See `rails/CACHE_WARMUP.md` for details.
 
 ## Performance
 
-### On-Demand Fetching
-- **Cache hit**: ~1-10ms (Redis)
-- **Cache miss**: ~1-2 seconds (Python subprocess + pybaseball)
-- **Cache expiry**: 24 hours
+### Cache Warmup (from database)
+- **Quick warmup**: 5-10 seconds (100 free agents)
+- **Full warmup**: 1-2 minutes (all players)
+- **No API calls** - reads from PostgreSQL
 
-### Bulk Cache Warming (rake stats:import)
-- **First run**: ~30 seconds (downloads from FanGraphs)
-- **Subsequent runs**: ~10 seconds (uses pybaseball cache)
-- **Total requests**: 3 (batting + pitching + fielding leaderboards)
-- **No rate limiting** - Fetches leaderboards, not individual pages
+### Stats Population (from MLB API)
+- **Per player**: 2-3 seconds
+- **600 players**: ~30 minutes
+- **Rate limited** - MLB Stats API
+
+### Query Performance
+- **Cache hit**: ~1-10ms (Redis)
+- **Cache miss**: ~2-3 seconds (background job + retry)
+- **Database query**: ~10-50ms (fallback)
 
 ## Workflow
 
-### When Free Agency Starts
+### Season Start
+1. Update `Season.current.target_stat_year` to new year (e.g., 2026)
+2. Run `rails stats:populate` to fetch new season's stats
+3. Run `rails players:remove_ineligible` to clean up old players
+4. Cache automatically expires and refreshes
 
-```bash
-# 1. (Optional) Warm Redis cache for all free agents
-docker compose exec players rake stats:import
+### Free Agency Start
+1. Ensure stats populated: `rails stats:populate`
+2. Warm cache: `rails cache:warmup`
+3. Free agents page loads fast (no spinners)
 
-# Stats will be fetched on-demand when players are viewed
-# The rake task just pre-warms the cache for faster first page load
-```
+### Container Restart
+1. Cache cleared (in-memory Redis)
+2. **Automatic**: `bin/warmup-cache` runs on startup (if configured)
+3. **Manual**: `rails cache:warmup_quick`
 
-### When New Season Starts
-
-1. Update `Season.current.target_stat_year` to new year
-2. Stats for new year will be fetched on-demand
-3. Old cached stats expire after 24 hours
+### Player Addition
+New players get stats automatically:
+1. Player created with `bbrefid`
+2. Frontend requests stats
+3. Background job fetches from MLB API
+4. Stats cached and returned on retry
 
 ## Why This Approach?
 
-✅ **On-demand fetching** - Stats fetched only when needed, no stale data
-✅ **Single source** - FanGraphs for everything (including WAR)
-✅ **Redis caching** - Fast repeated access, automatic expiry
-✅ **No database migrations** - No `player_stats` table to maintain
-✅ **No CSV management** - No git-tracking large files
-✅ **Simple dependencies** - Just Python + pybaseball + Redis
-✅ **BBRef ID matching** - No name/accent issues, accurate player matching
-✅ **Auto-updates names** - Keeps database in sync with FanGraphs canonical names
-✅ **Always fresh** - Cache expires every 24 hours, refetches latest stats
+✅ **Cache-first** - Fast access via Redis (1-10ms)
+✅ **Database persistence** - Survives cache clears, enables warmup
+✅ **Async fetching** - Non-blocking, frontend retries automatically
+✅ **Single source** - MLB Stats API for all data
+✅ **Accurate matching** - BBRef ID matching (no name/accent issues)
+✅ **Always fresh** - 24-hour cache expiry
+✅ **Clean database** - Remove ineligible players
+✅ **Fast startup** - Warmup from database in seconds
+
+## File Locations
+
+- **Stats Fetcher**: `rails/app/services/stats_fetcher.rb`
+- **Background Job**: `rails/app/jobs/fetch_player_stats_job.rb`
+- **PlayerStat Model**: `rails/app/models/player_stat.rb`
+- **Python Script**: `rails/lib/scripts/fetch_fangraphs_stats.py`
+- **Rake Tasks**: `rails/lib/tasks/populate_player_stats.rake`, `rails/lib/tasks/cache_warmup.rake`
+- **GraphQL Resolver**: `rails/app/graphql/types/player_type.rb`
+
+## Additional Documentation
+
+- **Cache Warmup**: See `rails/CACHE_WARMUP.md`
+- **Season Switching**: See `rails/SEASON_SWITCH.md`
+- **Deployment**: See `~/dev/players-deployment/docs/DEPLOYMENT.md`
