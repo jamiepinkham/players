@@ -54,7 +54,7 @@ Removes players who can't be signed (no stats for current season).
 
 ## How It Works
 
-### Stats Fetching Flow
+### Stats Fetching Flow (Three-Tier System)
 
 #### 1. GraphQL Request (Frontend)
 ```graphql
@@ -63,25 +63,39 @@ player(id: "123") {
 }
 ```
 
-#### 2. StatsFetcher Service (async: true by default)
+#### 2. StatsFetcher Service (three-tier fallback)
 ```ruby
 StatsFetcher.fetch_for_player(player, year, async: true)
-# Returns {} immediately
-# Queues FetchPlayerStatsJob in background
+
+# Tier 1: Check Redis cache (1-10ms)
+return cached_stats if cached
+
+# Tier 2: Check PlayerStat database (10-50ms)
+player_stat = PlayerStat.find_by(player: player, season: season)
+if player_stat.present?
+  Rails.cache.write(cache_key, player_stat.stats)
+  return player_stat.stats  # Fast! No spinner!
+end
+
+# Tier 3: Fall back to slow MLB API (2-3 seconds)
+FetchPlayerStatsJob.perform_later(bbrefid, year)
+return {}  # Spinner shows, frontend retries
 ```
 
-#### 3. Background Job
+#### 3. Background Job (only if database miss)
 ```ruby
 FetchPlayerStatsJob.perform_later(bbrefid, year)
-# Checks Redis cache
-# If not cached: calls Python script
-# Writes to Redis (24-hour expiry)
+# Calls Python script to fetch from MLB API
+# Writes to Redis cache (24-hour expiry)
+# Optionally creates PlayerStat record
 ```
 
 #### 4. Frontend Retry Logic
-- Gets empty `{}` on first request
+- Gets empty `{}` only if both cache AND database miss
 - Retries 3 times with 2-second delays
 - Eventually gets stats from cache after job completes
+
+**Result**: Most requests hit database (fast, no spinners) instead of slow API!
 
 ### Database Persistence (PlayerStat model)
 
@@ -284,6 +298,11 @@ See `rails/CACHE_WARMUP.md` for details.
 
 ## Performance
 
+### Query Performance (three-tier system)
+- **Tier 1 - Cache hit**: ~1-10ms (Redis) ✅ **Most common**
+- **Tier 2 - Database hit**: ~10-50ms (PostgreSQL) ✅ **After cache expires**
+- **Tier 3 - API fetch**: ~2-3 seconds (MLB API + job) ⚠️ **Rare (new players only)**
+
 ### Cache Warmup (from database)
 - **Quick warmup**: 5-10 seconds (100 free agents)
 - **Full warmup**: 1-2 minutes (all players)
@@ -294,10 +313,7 @@ See `rails/CACHE_WARMUP.md` for details.
 - **600 players**: ~30 minutes
 - **Rate limited** - MLB Stats API
 
-### Query Performance
-- **Cache hit**: ~1-10ms (Redis)
-- **Cache miss**: ~2-3 seconds (background job + retry)
-- **Database query**: ~10-50ms (fallback)
+**Key improvement**: After 24-hour cache expiry, stats come from database (50ms) instead of slow API (2-3 sec). No spinners! 🎉
 
 ## Workflow
 
@@ -326,7 +342,9 @@ New players get stats automatically:
 
 ## Why This Approach?
 
-✅ **Cache-first** - Fast access via Redis (1-10ms)
+✅ **Three-tier fallback** - Cache (1ms) → Database (50ms) → API (2s)
+✅ **No spinners after expiry** - Database fallback prevents slow API calls
+✅ **Cache-first** - Fast access via Redis when available
 ✅ **Database persistence** - Survives cache clears, enables warmup
 ✅ **Async fetching** - Non-blocking, frontend retries automatically
 ✅ **Single source** - MLB Stats API for all data
@@ -334,6 +352,8 @@ New players get stats automatically:
 ✅ **Always fresh** - 24-hour cache expiry
 ✅ **Clean database** - Remove ineligible players
 ✅ **Fast startup** - Warmup from database in seconds
+
+**Key benefit**: Free agents page stays fast even after 24-hour cache expiry!
 
 ## File Locations
 
