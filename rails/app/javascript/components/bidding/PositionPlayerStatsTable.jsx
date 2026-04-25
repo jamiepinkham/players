@@ -43,7 +43,6 @@ export default function PositionPlayerStatsTable({
         <StatValue label="W" value={stats.W} />
         <StatValue label="L" value={stats.L} />
         <StatValue label="SV" value={stats.SV} />
-        <StatValue label="WAR" value={stats.WAR} />
       </>
     ) : (
       <>
@@ -53,7 +52,6 @@ export default function PositionPlayerStatsTable({
         <StatValue label="RBI" value={stats.RBI} />
         <StatValue label="AVG" value={stats.BA} />
         <StatValue label="OPS" value={stats.OPS} />
-        <StatValue label="WAR" value={stats.WAR} />
       </>
     );
 

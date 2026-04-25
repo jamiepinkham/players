@@ -74,8 +74,8 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
 
   // Define sortable stats based on position
   const sortableStats = position === "SP" || position === "RP"
-    ? ["IP", "ERA", "W", "L", "SV", "WAR"]
-    : ["PA", "HR", "R", "RBI", "BA", "OPS", "WAR"];
+    ? ["IP", "ERA", "W", "L", "SV"]
+    : ["PA", "HR", "R", "RBI", "BA", "OPS"];
 
   const formatPlayerStats = (player) => {
     const stats = {};

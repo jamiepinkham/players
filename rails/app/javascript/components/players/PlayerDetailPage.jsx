@@ -88,8 +88,8 @@ function YearStats({ playerId, year, positions }) {
 
   // Define relevant stats based on position
   const relevantStatKeys = isPitcher
-    ? ['IP', 'ERA', 'W', 'L', 'SV', 'WHIP', 'WAR']
-    : ['PA', 'AB', 'H', 'HR', 'R', 'RBI', 'BA', 'OBP', 'SLG', 'OPS', 'WAR'];
+    ? ['IP', 'ERA', 'W', 'L', 'SV', 'WHIP']
+    : ['PA', 'AB', 'H', 'HR', 'R', 'RBI', 'BA', 'OBP', 'SLG', 'OPS'];
 
   // Filter stats to only show relevant ones
   const stats = allStats.filter(stat => relevantStatKeys.includes(stat.title));
