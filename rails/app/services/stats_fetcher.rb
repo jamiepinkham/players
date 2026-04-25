@@ -26,6 +26,18 @@ class StatsFetcher
       cached_stats = Rails.cache.read(cache_key)
       return cached_stats if cached_stats
 
+      # Check database before falling back to slow API
+      # This prevents spinners when cache expires but database has stats
+      season = Season.find_by(target_stat_year: year)
+      if season
+        player_stat = PlayerStat.find_by(player: player, season: season)
+        if player_stat&.stats&.any?
+          # Found in database - write to cache and return
+          Rails.cache.write(cache_key, player_stat.stats, expires_in: CACHE_EXPIRY)
+          return player_stat.stats
+        end
+      end
+
       # If async mode, queue background job and return empty hash
       if async
         FetchPlayerStatsJob.perform_later(player.bbrefid, year)
