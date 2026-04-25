@@ -1,0 +1,12 @@
+#!/bin/bash
+# Cache warmup script - runs on container startup
+# Usage: Run this after the Rails server starts to warm the cache in the background
+
+echo "Starting cache warmup in background..."
+
+# Run quick warmup (free agents only) in background
+# This completes in ~5-10 seconds instead of minutes
+bundle exec rails cache:warmup_quick &
+
+echo "Cache warmup initiated (PID: $!)"
+echo "Check logs for completion status"
