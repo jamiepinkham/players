@@ -53,7 +53,7 @@ gem 'httparty', '~> 0.24'
 gem 'puma', '~> 7.0'
 gem 'rack-timeout', '~> 0.7'
 gem 'graphql', '~> 2.5'
-gem 'graphiql-rails', '~> 1.10', group: [:development, :staging]
+gem 'graphiql-rails', '~> 1.10', group: :development
 gem 'nokogiri', '~> 1.19'
 gem 'solid_queue', '~> 1.1'
 
