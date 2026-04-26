@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   get '/health/live', to: 'health#live'
 
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
-  if Rails.env.development?
+  if Rails.env.development? || Rails.env.staging?
     mount GraphiQL::Rails::Engine, at: '/graphiql', graphql_path: '/graphql'
   end
   post '/graphql', to: 'graphql#execute'

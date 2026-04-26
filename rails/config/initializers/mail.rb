@@ -1,4 +1,8 @@
 Rails.application.configure do
+  # Standard ActionMailer SMTP configuration
+  # Note: Staging environment uses an interceptor to log emails instead of sending
+  # See config/initializers/staging_email_interceptor.rb
+
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
