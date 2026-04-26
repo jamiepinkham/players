@@ -426,11 +426,22 @@ player.is_free_agent        # Current status
 ### Stats not showing on player pages
 
 **Possible causes:**
-1. Sidekiq not running (background job processor)
-2. Redis not accessible
-3. Stats expired from cache
+1. Redis cache empty (after container restart)
+2. Sidekiq not running (background job processor)
+3. Redis not accessible
 
 **Fix:**
+
+**Option 1: Warm cache from database (recommended)**
+```bash
+# Quick warmup - top 100 free agents (5-10 seconds)
+bin/rails cache:warmup_quick
+
+# Full warmup - all players with stats (1-2 minutes)
+bin/rails cache:warmup
+```
+
+**Option 2: Check services**
 
 Check Sidekiq status:
 ```bash
@@ -450,9 +461,13 @@ docker exec players-redis-qa redis-cli ping
 docker exec players-redis redis-cli ping
 ```
 
-Clear cache and retry:
+**Option 3: Clear and rebuild cache**
 ```bash
+# Clear cache (last resort)
 bin/rails cache:clear
+
+# Then warm it up from database
+bin/rails cache:warmup_quick
 ```
 
 ---
@@ -504,6 +519,8 @@ bin/rails free_agents:stats          # Show FA statistics
 
 # Stats management
 bin/rails stats:import               # Import stats from Baseball Reference
+bin/rails cache:warmup               # Warm cache from database (all players)
+bin/rails cache:warmup_quick         # Warm cache (top 100 free agents, fast)
 bin/rails cache:clear                # Clear Redis cache
 
 # Season promotion (optional)
