@@ -57,7 +57,7 @@ class StatsFetcher
     # @param year [Integer] The year to fetch stats for
     # @return [Hash] Stats hash
     def fetch_from_pybaseball(bbrefid, year)
-      python_script = Rails.root.join('lib', 'scripts', 'fetch_fangraphs_stats.py')
+      python_script = Rails.root.join('lib', 'scripts', 'fetch_mlb_stats.py')
 
       # Set environment to ensure UTF-8 encoding
       env = { 'PYTHONIOENCODING' => 'utf-8', 'LC_ALL' => 'en_US.UTF-8' }

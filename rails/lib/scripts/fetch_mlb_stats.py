@@ -5,8 +5,8 @@ Outputs JSON with batting and pitching stats including WAR.
 Uses BBRef IDs for matching instead of player names.
 
 Usage:
-  fetch_fangraphs_stats.py <year>           # Fetch stats for all players
-  fetch_fangraphs_stats.py <year> <bbrefid> # Fetch stats for specific player
+  fetch_mlb_stats.py <year>           # Fetch stats for all players
+  fetch_mlb_stats.py <year> <bbrefid> # Fetch stats for specific player
 """
 
 import sys
@@ -256,7 +256,7 @@ def fetch_fielding_positions(year, reverse_mapping):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: fetch_fangraphs_stats.py <year> [bbrefid]", file=sys.stderr)
+        print("Usage: fetch_mlb_stats.py <year> [bbrefid]", file=sys.stderr)
         sys.exit(1)
 
     year = int(sys.argv[1])

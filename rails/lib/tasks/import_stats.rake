@@ -44,7 +44,7 @@ namespace :stats do
     # ========================================
     puts "Fetching stats from Baseball Reference (#{year})..."
 
-    python_script = Rails.root.join('lib', 'scripts', 'fetch_fangraphs_stats.py')
+    python_script = Rails.root.join('lib', 'scripts', 'fetch_mlb_stats.py')
 
     # Run the Python script to fetch stats
     # Set environment to ensure UTF-8 encoding
