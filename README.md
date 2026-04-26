@@ -14,6 +14,10 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
 - **Deployment**: Docker + Portainer
 - **CI/CD**: GitHub Actions → GitHub Container Registry
 
+## Documentation
+
+- **[Commissioner Runbook](COMMISSIONER_RUNBOOK.md)** - Season management, free agent identification, and administrative workflows
+
 ## Project Structure
 
 ```
