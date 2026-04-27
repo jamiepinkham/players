@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useMutation, useQuery } from "graphql-hooks";
-import { Box, Text, Heading, Select, Layer, Button, Spinner, TextInput, Collapsible } from "grommet";
+import { Box, Text, Heading, Select, Layer, Button, Spinner, TextInput, Collapsible, Tip } from "grommet";
 import { Close, Add, Search, FormDown, FormUp } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
 import CurrencyInput from "../common/CurrencyInput";
@@ -33,16 +33,64 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         summer
         franchise
         player {
+          id
           name
           bbrefid
           positions
           isTradeEligible
           tradeIneligibilityReason
+          stats {
+            title
+            value
+          }
         }
       }
     }
   }
 `;
+
+// Player Stats Tooltip Component
+function PlayerStatsTooltip({ player, children }) {
+  if (!player.bbrefid) {
+    return children;
+  }
+
+  const statsMap = {};
+  (player.stats || []).forEach(stat => {
+    statsMap[stat.title] = stat.value;
+  });
+
+  const isPitcher = player.positions?.some(pos => pos === 'SP' || pos === 'RP');
+
+  const tooltipContent = (
+    <Box pad="small" gap="xsmall" background="dark-1" round="xsmall">
+      <Text weight="bold" size="small">{player.name}</Text>
+      <Box direction="row" gap="medium" wrap>
+        {isPitcher ? (
+          <>
+            <Text size="small">IP: {statsMap.IP || '--'}</Text>
+            <Text size="small">ERA: {statsMap.ERA || '--'}</Text>
+            <Text size="small">W: {statsMap.W || '--'}</Text>
+            <Text size="small">L: {statsMap.L || '--'}</Text>
+            <Text size="small">SV: {statsMap.SV || '--'}</Text>
+            <Text size="small">WHIP: {statsMap.WHIP || '--'}</Text>
+          </>
+        ) : (
+          <>
+            <Text size="small">PA: {statsMap.PA || '--'}</Text>
+            <Text size="small">HR: {statsMap.HR || '--'}</Text>
+            <Text size="small">R: {statsMap.R || '--'}</Text>
+            <Text size="small">RBI: {statsMap.RBI || '--'}</Text>
+            <Text size="small">AVG: {statsMap.BA || '--'}</Text>
+            <Text size="small">OPS: {statsMap.OPS || '--'}</Text>
+          </>
+        )}
+      </Box>
+    </Box>
+  );
+
+  return <Tip content={tooltipContent}>{children}</Tip>;
+}
 
 // Clickable Player Card Component
 function PlayerCard({ contract, onAdd, onRemove, showAddButton, showRemoveButton, isDisabled, inTrade }) {
@@ -59,7 +107,9 @@ function PlayerCard({ contract, onAdd, onRemove, showAddButton, showRemoveButton
     >
       <Box direction="row" justify="between" align="center" gap="small">
         <Box direction="row" gap="small" align="center" flex>
-          <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
+          <PlayerStatsTooltip player={contract.player}>
+            <PlayerName playerId={contract.player.id} name={contract.player.name} bbrefid={contract.player.bbrefid} />
+          </PlayerStatsTooltip>
           <Text size="xsmall" color="text-weak">
             {contract.player.positions?.join(', ')} • <CurrencyFormat
               value={contract.amount}
