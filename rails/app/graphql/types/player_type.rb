@@ -68,8 +68,8 @@ module Types
       stat_year = year || Season.current&.target_stat_year
       return [] unless stat_year
 
-      # Fetch stats from cache (via StatsFetcher)
-      stats_hash = StatsFetcher.fetch_for_player(object, stat_year)
+      # Fetch stats from Stats API microservice
+      stats_hash = StatsClient.fetch(object.bbrefid, stat_year)
       return [] if stats_hash.blank?
 
       # Convert hash to array of { title:, value: } objects
