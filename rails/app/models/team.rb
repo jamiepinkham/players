@@ -61,9 +61,14 @@ class Team < ApplicationRecord
     current_season = Season.current
     return 0 unless current_season
 
+    # Count summer contracts where player has no bbrefid (prospects/minors)
+    # These don't count against payroll
     contracts
+      .joins(:player)
       .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
-      .where(active: false)
+      .where(active: true)
+      .where(summer: true)
+      .where(players: { bbrefid: nil })
       .count
   end
 
