@@ -115,13 +115,13 @@ export default function PositionPlayerStatsTable({
                 {includeBidLink && (
                   <Box pad={{ right: "small" }}>
                     <Button
-                      primary={!hasExistingBid}
+                      primary={!hasExistingBid && player.bbrefid}
                       size="small"
-                      label={hasExistingBid ? "Bid Placed" : "Place Bid"}
-                      icon={<Currency color={hasExistingBid ? "status-ok" : "white"} />}
-                      disabled={hasExistingBid}
+                      label={hasExistingBid ? "Bid Placed" : (player.bbrefid ? "Place Bid" : "No Stats")}
+                      icon={<Currency color={hasExistingBid ? "status-ok" : (player.bbrefid ? "white" : "status-critical")} />}
+                      disabled={hasExistingBid || !player.bbrefid}
                       onClick={() => onPlayerSelected(player)}
-                      tip={hasExistingBid ? "You already have a bid on this player" : undefined}
+                      tip={hasExistingBid ? "You already have a bid on this player" : (!player.bbrefid ? "Player has no MLB stats - not eligible for bidding" : undefined)}
                     />
                   </Box>
                 )}

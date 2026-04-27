@@ -185,25 +185,51 @@ export default function PlayerDetailPage() {
           {player.team && <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '4px' }}>{player.team.name}</div>}
 
           {player.isFreeAgent ? (
-            <Link to={`/bidding/${player.id}/place-bid`} style={{ textDecoration: 'none' }}>
-              <div style={{
-                display: 'inline-block',
-                marginTop: '8px',
-                padding: '6px 14px',
-                backgroundColor: '#7D4CDB',
-                color: 'white',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6C3FCB'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7D4CDB'}
-              >
-                FREE AGENT - PLACE BID
+            player.bbrefid ? (
+              <Link to={`/bidding/${player.id}/place-bid`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  display: 'inline-block',
+                  marginTop: '8px',
+                  padding: '6px 14px',
+                  backgroundColor: '#7D4CDB',
+                  color: 'white',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6C3FCB'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7D4CDB'}
+                >
+                  FREE AGENT - PLACE BID
+                </div>
+              </Link>
+            ) : (
+              <div style={{ marginTop: '8px' }}>
+                <div style={{
+                  display: 'inline-block',
+                  padding: '6px 14px',
+                  backgroundColor: '#CCCCCC',
+                  color: '#666666',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'not-allowed',
+                  opacity: 0.7
+                }}>
+                  FREE AGENT - NO STATS AVAILABLE
+                </div>
+                <div style={{
+                  marginTop: '4px',
+                  fontSize: '12px',
+                  color: '#FF4040',
+                  fontWeight: '500'
+                }}>
+                  Player has no MLB stats - not eligible for bidding
+                </div>
               </div>
-            </Link>
+            )
           ) : player.contract && (
             player.isTradeEligible ? (
               <Link
