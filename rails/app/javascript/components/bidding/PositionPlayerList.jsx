@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, DataTable, Spinner, Box, TextInput, Select, Text, Pagination } from "grommet";
 import { Search, FormClose, User, Ascend, Descend } from "grommet-icons";
+import { useSearchParams } from "react-router-dom";
 
 import { useQuery } from "graphql-hooks";
 
@@ -64,13 +65,29 @@ const POSITION_PLAYER_LIST_QUERY = `
 `;
 
 export default function PositionPlayerList({ position, onPlayerSelected, teamId }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
   const itemsPerPage = 25;
 
   const defaultSortStat = position === "SP" || position === "RP" ? "IP" : "PA";
-  const [sortBy, setSortBy] = useState(defaultSortStat);
-  const [sortDirection, setSortDirection] = useState("desc");
+
+  // Read state from URL params with defaults
+  const searchTerm = searchParams.get("search") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const sortBy = searchParams.get("sortBy") || defaultSortStat;
+  const sortDirection = searchParams.get("sortDir") || "desc";
+
+  // Helper to update URL params
+  const updateParams = (updates) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  };
 
   // Define sortable stats based on position
   const sortableStats = position === "SP" || position === "RP"
@@ -88,14 +105,8 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
   // Reset sort to default when position changes
   useEffect(() => {
     const newDefaultSort = position === "SP" || position === "RP" ? "IP" : "PA";
-    setSortBy(newDefaultSort);
-    setCurrentPage(1);
+    updateParams({ sortBy: newDefaultSort, page: "1" });
   }, [position]);
-
-  // Reset to page 1 when search or sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortBy, sortDirection]);
 
   const { data = { players: null }, refetch: refetchPlayers } = useQuery(
     POSITION_PLAYER_LIST_QUERY,
@@ -157,7 +168,7 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
           <TextInput
             placeholder="Search by name..."
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => updateParams({ search: event.target.value, page: "1" })}
             icon={<Search />}
             plain
           />
@@ -165,7 +176,7 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
         {searchTerm && (
           <Button
             icon={<FormClose />}
-            onClick={() => setSearchTerm("")}
+            onClick={() => updateParams({ search: "", page: "1" })}
             tip="Clear search"
           />
         )}
@@ -175,12 +186,12 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
             plain
             options={sortableStats}
             value={sortBy}
-            onChange={({ option }) => setSortBy(option)}
+            onChange={({ option }) => updateParams({ sortBy: option, page: "1" })}
           />
         </Box>
         <Button
           icon={sortDirection === "desc" ? <Descend /> : <Ascend />}
-          onClick={() => setSortDirection(sortDirection === "desc" ? "asc" : "desc")}
+          onClick={() => updateParams({ sortDir: sortDirection === "desc" ? "asc" : "desc" })}
           tip={sortDirection === "desc" ? "Descending" : "Ascending"}
         />
       </Box>
@@ -205,7 +216,7 @@ export default function PositionPlayerList({ position, onPlayerSelected, teamId 
                 numberItems={totalCount}
                 page={currentPage}
                 step={itemsPerPage}
-                onChange={({ page }) => setCurrentPage(page)}
+                onChange={({ page }) => updateParams({ page: page.toString() })}
               />
             )}
           </Box>

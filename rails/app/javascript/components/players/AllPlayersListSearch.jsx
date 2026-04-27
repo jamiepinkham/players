@@ -12,7 +12,7 @@ import {
 import { FormUp, FormDown } from 'grommet-icons';
 import { useManualQuery } from 'graphql-hooks';
 import { useAuth } from '../../hooks/use_auth';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
 import LoadingState from '../common/LoadingState';
@@ -68,35 +68,66 @@ query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $pos
 
 const AllPlayersListSearch = () => {
   const auth = useAuth();
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const [positionFilter, setPositionFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [searchParams, setSearchParams] = useSearchParams();
   const itemsPerPage = 25;
   const searchInputRef = useRef(null);
   const wasFocused = useRef(false);
 
+  // Read state from URL params
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") || '');
+  const search = searchParams.get("search") || '';
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const sortDirection = searchParams.get("sortDir") || 'asc';
+
+  // Position and status filters need to find the matching option object
+  const uniquePositions = [
+    { label: 'All Positions', value: '' },
+    { label: 'SP', value: 'SP' },
+    { label: 'RP', value: 'RP' },
+    { label: 'C', value: '2' },
+    { label: '1B', value: '3' },
+    { label: '2B', value: '4' },
+    { label: '3B', value: '5' },
+    { label: 'SS', value: '6' },
+    { label: 'LF', value: '7' },
+    { label: 'CF', value: '8' },
+    { label: 'RF', value: '9' },
+    { label: 'DH', value: 'D' },
+  ];
+
+  const statusOptions = [
+    { label: 'All Statuses', value: '' },
+    { label: 'Under Contract (Tradeable)', value: 'Under Contract' },
+    { label: 'Free Agent (Biddable)', value: 'Free Agent' },
+    { label: 'Ineligible', value: 'Ineligible' },
+  ];
+
+  const positionFilter = uniquePositions.find(p => p.value === searchParams.get("position")) || uniquePositions[0];
+  const statusFilter = statusOptions.find(s => s.value === searchParams.get("status")) || statusOptions[0];
+
+  // Helper to update URL params
+  const updateParams = (updates) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  };
+
   // Debounce search input with 300ms delay
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearch(searchInput);
+      if (searchInput !== search) {
+        updateParams({ search: searchInput, page: "1" });
+      }
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchInput]);
-
-  // Clear name search when position or status filters change
-  useEffect(() => {
-    setSearchInput('');
-    setSearch('');
-  }, [positionFilter, statusFilter]);
-
-  // Reset to page 1 when filters or sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, positionFilter, statusFilter, sortDirection]);
 
   // Map position filter label to server-side position value
   const getPositionValue = (filter) => {
@@ -143,7 +174,7 @@ const AllPlayersListSearch = () => {
 
   // Handle column header click for sorting (name only)
   const handleSort = () => {
-    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    updateParams({ sortDir: sortDirection === 'asc' ? 'desc' : 'asc' });
   };
 
   const hasActiveFAPeriod = data?.currentSeason?.activeFreeAgencyPeriod != null;
@@ -167,28 +198,6 @@ const AllPlayersListSearch = () => {
     </Button>
   );
 
-  const uniquePositions = [
-    { label: 'All Positions', value: '' },
-    { label: 'SP', value: 'SP' },
-    { label: 'RP', value: 'RP' },
-    { label: 'C', value: '2' },
-    { label: '1B', value: '3' },
-    { label: '2B', value: '4' },
-    { label: '3B', value: '5' },
-    { label: 'SS', value: '6' },
-    { label: 'LF', value: '7' },
-    { label: 'CF', value: '8' },
-    { label: 'RF', value: '9' },
-    { label: 'DH', value: 'D' },
-  ];
-
-  const statusOptions = [
-    { label: 'All Statuses', value: '' },
-    { label: 'Under Contract (Tradeable)', value: 'Under Contract' },
-    { label: 'Free Agent (Biddable)', value: 'Free Agent' },
-    { label: 'Ineligible', value: 'Ineligible' },
-  ];
-
   if (loading) return <LoadingState message="Loading players..." />;
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
@@ -210,7 +219,10 @@ const AllPlayersListSearch = () => {
             placeholder="All Positions"
             options={uniquePositions}
             value={positionFilter}
-            onChange={({ option }) => setPositionFilter(option || '')}
+            onChange={({ option }) => {
+              updateParams({ position: option?.value || '', search: '', page: "1" });
+              setSearchInput(''); // Clear search input when changing filters
+            }}
             clear
           />
         </Box>
@@ -219,7 +231,10 @@ const AllPlayersListSearch = () => {
             placeholder="All Statuses"
             options={statusOptions}
             value={statusFilter}
-            onChange={({ option }) => setStatusFilter(option || '')}
+            onChange={({ option }) => {
+              updateParams({ status: option?.value || '', search: '', page: "1" });
+              setSearchInput(''); // Clear search input when changing filters
+            }}
             clear
           />
         </Box>
@@ -235,7 +250,7 @@ const AllPlayersListSearch = () => {
             numberItems={totalCount}
             page={currentPage}
             step={itemsPerPage}
-            onChange={({ page }) => setCurrentPage(page)}
+            onChange={({ page }) => updateParams({ page: page.toString() })}
           />
         )}
       </Box>
@@ -312,7 +327,7 @@ const AllPlayersListSearch = () => {
             numberItems={totalCount}
             page={currentPage}
             step={itemsPerPage}
-            onChange={({ page }) => setCurrentPage(page)}
+            onChange={({ page }) => updateParams({ page: page.toString() })}
           />
         </Box>
       )}
