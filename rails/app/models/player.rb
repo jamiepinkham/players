@@ -116,16 +116,13 @@ class Player < ApplicationRecord
     )
   end
 
-  # Check if player has stats in pybaseball for a given season's target year
+  # Check if player has stats for a given season's target year
   # This is the source of truth for eligibility
   def self.has_stats_in_pybaseball?(bbrefid, target_year, positions)
     return false if bbrefid.blank? || target_year.blank?
 
-    player = Player.find_by(bbrefid: bbrefid)
-    return false unless player
-
-    # Fetch stats directly from pybaseball via StatsFetcher (synchronous for validation)
-    stats = StatsFetcher.fetch_for_player(player, target_year, async: false)
+    # Fetch stats from stats API microservice
+    stats = StatsClient.fetch(bbrefid, target_year)
     return false unless stats&.present?
 
     # Check based on player positions (if they have any pitcher positions)

@@ -16,14 +16,12 @@ namespace :season do
 
     # Note: Stats are now managed by the stats microservice
     # The stats:import task should be run on the stats service before promotion
-    # No local database check needed
 
     puts "\n🔍 FREE AGENT PROMOTION PREVIEW"
     puts "=" * 80
     puts ""
     puts "📅 Promoting for: #{next_season.name}"
     puts "📊 Target stat year: #{next_season.target_stat_year}"
-    puts "✓ Found #{stats_count} player stat records for #{next_season.target_stat_year}"
     puts ""
 
     # Find contracts expiring this season
