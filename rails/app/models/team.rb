@@ -29,6 +29,7 @@ class Team < ApplicationRecord
     contracts
       .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
       .where(active: true)
+      .where(summer: false)  # Exclude summer contracts from payroll
       .sum(:amount)
   end
 
