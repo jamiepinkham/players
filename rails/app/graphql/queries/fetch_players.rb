@@ -31,7 +31,7 @@ module Queries
                 if target_year
                     # Fetch stats for all players (uses cache, fast)
                     players_with_stats = players.map do |player|
-                        stats_hash = StatsFetcher.fetch_for_player(player, target_year, async: true)
+                        stats_hash = StatsClient.fetch(player.bbrefid, target_year)
                         stat_value = stats_hash[sort_by]
 
                         # Convert to numeric for sorting, handle missing/nil values
