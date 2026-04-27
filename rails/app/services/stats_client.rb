@@ -32,9 +32,14 @@ class StatsClient
   BASE_URL = ENV.fetch('STATS_API_URL', 'http://stats-api:3001')
   TIMEOUT = 5 # seconds
   # Allow STATS_API_MOCK env var to override (useful for testing)
-  MOCK_MODE = ENV.fetch('STATS_API_MOCK', nil) == 'true' ? true :
-              ENV.fetch('STATS_API_MOCK', nil) == 'false' ? false :
-              (Rails.env.development? || Rails.env.test?)
+  # Default: mock in dev/test, real API in production/staging
+  MOCK_MODE = if ENV['STATS_API_MOCK'] == 'false'
+                false
+              elsif ENV['STATS_API_MOCK'] == 'true'
+                true
+              else
+                Rails.env.development? || Rails.env.test?
+              end
 
   class << self
     # Fetch stats for a single player
