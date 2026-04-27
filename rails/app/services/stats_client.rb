@@ -29,7 +29,7 @@ class StatsClient
   class TimeoutError < Error; end
   class ServerError < Error; end
 
-  BASE_URL = ENV.fetch('STATS_API_URL', 'http://localhost:3001')
+  BASE_URL = ENV.fetch('STATS_API_URL', 'http://stats-api:3001')
   TIMEOUT = 5 # seconds
   # Allow STATS_API_MOCK env var to override (useful for testing)
   MOCK_MODE = ENV.fetch('STATS_API_MOCK', nil) == 'true' ? true :
