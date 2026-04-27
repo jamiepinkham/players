@@ -8,6 +8,7 @@ import {
   Pagination,
   Anchor,
   Button,
+  Spinner,
 } from 'grommet';
 import { FormUp, FormDown } from 'grommet-icons';
 import { useManualQuery } from 'graphql-hooks';
@@ -15,7 +16,6 @@ import { useAuth } from '../../hooks/use_auth';
 import { Link, useSearchParams } from 'react-router-dom';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
-import LoadingState from '../common/LoadingState';
 import { DATA_TABLE_THEME } from '../../constants/ui';
 
 const PLAYERS_QUERY = `
@@ -198,7 +198,6 @@ const AllPlayersListSearch = () => {
     </Button>
   );
 
-  if (loading) return <LoadingState message="Loading players..." />;
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
   return (
@@ -255,71 +254,78 @@ const AllPlayersListSearch = () => {
         )}
       </Box>
 
-      <Box round="small" overflow={{ horizontal: "hidden" }} border={{ color: "border", size: "xsmall" }}>
-        <DataTable
-          columns={[
-          {
-            property: 'name',
-            header: renderSortableHeader('Name'),
-            primary: true,
-            render: (player) => (
-              <PlayerName playerId={player.id} name={player.name} bbrefid={player.bbrefid} bold />
-            ),
-          },
-          {
-            property: 'positions',
-            header: "Position",
-            render: (player) => <Text>{player.positions?.join(', ') || ''}</Text>,
-          },
-          {
-            property: 'contract',
-            header: "Contract Status",
-            align: 'end',
-            render: (player) => {
-              if (player.contract) {
-                return (
-                  <Text>
-                    {player.contract.team?.name || 'Unknown'} - <CurrencyFormat
-                      value={player.contract.amount}
-                      thousandSeparator={true}
-                      prefix={'$'}
-                      displayType={'text'}
-                    /> - Ends: {player.contract.lastSeason?.name || '?'}
-                  </Text>
-                );
-              } else if (player.isFreeAgent) {
-                return <Text>Free Agent</Text>;
-              } else {
-                return <Text color="status-critical">Ineligible</Text>;
-              }
+      {loading ? (
+        <Box align="center" justify="center" pad="large">
+          <Spinner size="medium" />
+          <Text margin={{ top: 'small' }} color="dark-4">Loading players...</Text>
+        </Box>
+      ) : (
+        <Box round="small" overflow={{ horizontal: "hidden" }} border={{ color: "border", size: "xsmall" }}>
+          <DataTable
+            columns={[
+            {
+              property: 'name',
+              header: renderSortableHeader('Name'),
+              primary: true,
+              render: (player) => (
+                <PlayerName playerId={player.id} name={player.name} bbrefid={player.bbrefid} bold />
+              ),
             },
-          },
-          {
-            property: 'action',
-            header: "Action",
-            align: 'end',
-            render: (player) => {
-              if (!hasTeam) {
-                return <Text color="dark-5">N/A</Text>;
-              }
+            {
+              property: 'positions',
+              header: "Position",
+              render: (player) => <Text>{player.positions?.join(', ') || ''}</Text>,
+            },
+            {
+              property: 'contract',
+              header: "Contract Status",
+              align: 'end',
+              render: (player) => {
+                if (player.contract) {
+                  return (
+                    <Text>
+                      {player.contract.team?.name || 'Unknown'} - <CurrencyFormat
+                        value={player.contract.amount}
+                        thousandSeparator={true}
+                        prefix={'$'}
+                        displayType={'text'}
+                      /> - Ends: {player.contract.lastSeason?.name || '?'}
+                    </Text>
+                  );
+                } else if (player.isFreeAgent) {
+                  return <Text>Free Agent</Text>;
+                } else {
+                  return <Text color="status-critical">Ineligible</Text>;
+                }
+              },
+            },
+            {
+              property: 'action',
+              header: "Action",
+              align: 'end',
+              render: (player) => {
+                if (!hasTeam) {
+                  return <Text color="dark-5">N/A</Text>;
+                }
 
-              if (player.contract) {
-                return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
-              } else if (player.isFreeAgent && hasActiveFAPeriod) {
-                return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
-              } else if (player.isFreeAgent && !hasActiveFAPeriod) {
-                return <Text color="dark-5">Bid (N/A)</Text>;
-              } else {
-                return <Text color="dark-5">N/A</Text>;
-              }
+                if (player.contract) {
+                  return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
+                } else if (player.isFreeAgent && hasActiveFAPeriod) {
+                  return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
+                } else if (player.isFreeAgent && !hasActiveFAPeriod) {
+                  return <Text color="dark-5">Bid (N/A)</Text>;
+                } else {
+                  return <Text color="dark-5">N/A</Text>;
+                }
+              },
             },
-          },
-        ]}
-        data={players}
-        responsive
-        background={DATA_TABLE_THEME.background}
-        />
-      </Box>
+          ]}
+          data={players}
+          responsive
+          background={DATA_TABLE_THEME.background}
+          />
+        </Box>
+      )}
 
       {totalPages > 1 && (
         <Box align="center" margin={{ top: 'medium' }}>
