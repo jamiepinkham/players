@@ -14,6 +14,90 @@ A fantasy sports league management application built with Rails and GraphQL. Thi
 - **Deployment**: Docker + Portainer
 - **CI/CD**: GitHub Actions → GitHub Container Registry
 
+## Stats System
+
+Player statistics are fetched from MLB's Stats API via a shared microservice:
+
+### Local Development (Mock Mode)
+
+When running locally with `docker compose up`, the application **automatically uses mock data** for player statistics. No stats service is required.
+
+- **Mock mode is enabled automatically** in development and test environments
+- Returns realistic, randomly-generated stats for any player
+- Stats are consistent per player (seeded by bbrefid)
+- No network calls to external services
+
+This allows you to develop and test locally without:
+- Running the stats API microservice
+- Waiting for slow MLB API calls
+- Network connectivity
+
+### Production/Staging (Real Stats)
+
+In production and staging environments, the application connects to the **bmpl-stats** microservice:
+
+- Fetches real MLB player statistics
+- Three-tier caching: Redis → PostgreSQL → MLB Stats API
+- Shared between production and QA environments
+- First request triggers async background fetch (~5-10 seconds)
+- Subsequent requests return cached data instantly
+
+**Configuration:**
+```bash
+# Default (works in production/staging automatically)
+STATS_API_URL=http://stats-api:3001
+
+# To test against real stats API locally:
+STATS_API_URL=http://host.docker.internal:3001
+STATS_API_MOCK=false
+```
+
+**How it works:**
+1. GraphQL query requests player stats
+2. StatsClient checks environment:
+   - Development/test → Return mock data
+   - Production/staging → Call stats-api service
+3. Stats API returns cached data or triggers background fetch
+4. Empty response on first request, data on subsequent requests
+
+### Local Development with Real Stats API (Optional)
+
+If you need to test against the real stats API locally (e.g., testing stats fetching logic), use the `docker-compose.with-stats.yml` override file:
+
+**1. Start with stats services:**
+```bash
+docker compose -f docker-compose.yml -f docker-compose.with-stats.yml up
+```
+
+This will start:
+- Players app (Rails)
+- Players database and Redis
+- Stats API, worker, database, and Redis (from `ghcr.io/jamiepinkham/players-stats:main`)
+
+**2. Run stats database migration (first time only):**
+```bash
+docker compose -f docker-compose.yml -f docker-compose.with-stats.yml exec stats-api alembic upgrade head
+```
+
+**3. Test the integration:**
+```bash
+# Fetch a player's stats (first call triggers async fetch)
+docker compose exec players bin/rails runner "puts StatsClient.fetch('judgeaa01', 2024).inspect"
+# => {} (empty, background job queued)
+
+# Wait ~5 seconds, then try again
+docker compose exec players bin/rails runner "puts StatsClient.fetch('judgeaa01', 2024).inspect"
+# => {"G"=>"158", "PA"=>"704", "HR"=>"58", ...}
+```
+
+**Notes:**
+- Uses the published `:main` image from GitHub Container Registry
+- Stats API runs on port 3001
+- First fetch returns empty (triggers background Celery job)
+- Subsequent fetches return cached data instantly
+- Stats persist in `stats-db-data` volume
+- To return to mock mode, just use regular `docker compose up` without the override file
+
 ## Documentation
 
 - **[Commissioner Runbook](COMMISSIONER_RUNBOOK.md)** - Season management, free agent identification, and administrative workflows
