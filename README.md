@@ -576,7 +576,7 @@ The application is deployed to production using Portainer with `docker-compose.p
 
 **Services in production:**
 - `players` - Main Rails web application
-- `scheduler` - Cron sidecar that runs scheduled tasks (converts leading bids nightly at midnight UTC)
+- `scheduler` - Cron sidecar that runs scheduled tasks (converts leading bids nightly at midnight Eastern Time)
 - `db` - PostgreSQL database
 
 #### Testing Portainer Deployment Locally
@@ -773,9 +773,9 @@ Authorization: Bearer <token>
 
 The application includes automated tasks that run on a schedule in production:
 
-### Convert Leading Bids (Nightly at Midnight UTC)
+### Convert Leading Bids (Nightly at Midnight Eastern Time)
 
-The `convert_bids:convert_leading` rake task runs automatically every night at midnight UTC via the scheduler sidecar container. This task:
+The `convert_bids:convert_leading` rake task runs automatically every night at midnight Eastern Time (America/New_York) via the scheduler sidecar container. This task:
 - Converts leading bids that are >24 hours old to contracts
 - Processes bids for the active free agency period
 - Updates bid statuses (is_leading, is_active) for all players
