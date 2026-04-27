@@ -47,11 +47,17 @@ const PLAYER_STATS_QUERY = `
   }
 `;
 
-function YearStats({ playerId, year, positions }) {
+function YearStats({ playerId, year, positions, hasBbrefid }) {
   const [retryCount, setRetryCount] = React.useState(0);
   const { loading, error, data, refetch } = useQuery(PLAYER_STATS_QUERY, {
-    variables: { id: playerId, year }
+    variables: { id: playerId, year },
+    skip: !hasBbrefid  // Skip query if no bbrefid
   });
+
+  // If no bbrefid, show placeholder immediately
+  if (!hasBbrefid) {
+    return <div style={{ color: '#999' }}>No stats available (player has no Baseball Reference ID)</div>;
+  }
 
   // Poll for stats if they're empty (being fetched in background)
   React.useEffect(() => {
@@ -288,7 +294,7 @@ export default function PlayerDetailPage() {
           {player.availableStatYears.map((year) => (
             <div key={year} style={{ marginBottom: '32px' }}>
               <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>{year} Season</h3>
-              <YearStats playerId={player.id} year={year} positions={player.positions} />
+              <YearStats playerId={player.id} year={year} positions={player.positions} hasBbrefid={!!player.bbrefid} />
             </div>
           ))}
         </div>

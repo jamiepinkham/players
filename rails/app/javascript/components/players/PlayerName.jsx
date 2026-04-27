@@ -26,6 +26,11 @@ const PlayerName = ({ playerId, name, bbrefid, bold = false, size, showAvatar = 
     <Box direction="row" align="center" gap="xsmall">
       {showAvatar && bbrefid && <PlayerAvatar bbrefid={bbrefid} size={avatarSize} name={name} />}
       <Text weight={bold ? "bold" : "normal"} size={size}>{name}</Text>
+      {!bbrefid && (
+        <Tip content="No Baseball Reference ID - stats unavailable">
+          <Text size="small" color="status-warning" weight="bold">*</Text>
+        </Tip>
+      )}
       {showBaseballRefLink && bbrefUrl && (
         <Anchor
           href={bbrefUrl}

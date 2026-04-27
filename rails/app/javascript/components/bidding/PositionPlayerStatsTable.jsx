@@ -28,10 +28,11 @@ export default function PositionPlayerStatsTable({
 
   const renderPlayerLabel = (player) => {
     const stats = formatPlayerStats(player);
+    const hasNoBbrefid = !player.bbrefid;
     const StatValue = ({ label, value }) => (
       <Box pad={{ horizontal: "small" }}>
         <Text weight="bold">
-          {label}: {value || <Spinner size="xsmall" />}
+          {label}: {hasNoBbrefid ? "--" : (value || <Spinner size="xsmall" />)}
         </Text>
       </Box>
     );
