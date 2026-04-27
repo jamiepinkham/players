@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_19_011831) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_21_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -88,18 +88,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_011831) do
     t.string "jti", null: false
     t.index ["exp"], name: "index_jwt_denylist_on_exp"
     t.index ["jti"], name: "index_jwt_denylist_on_jti"
-  end
-
-  create_table "player_stats", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "player_id", null: false
-    t.bigint "season_id", null: false
-    t.jsonb "stats", default: {}, null: false
-    t.datetime "updated_at", null: false
-    t.index ["player_id", "season_id"], name: "index_player_stats_on_player_id_and_season_id", unique: true
-    t.index ["player_id"], name: "index_player_stats_on_player_id"
-    t.index ["season_id"], name: "index_player_stats_on_season_id"
-    t.index ["stats"], name: "index_player_stats_on_stats", using: :gin
   end
 
   create_table "players", id: :serial, force: :cascade do |t|
@@ -192,8 +180,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_19_011831) do
   add_foreign_key "contracts", "players"
   add_foreign_key "contracts", "teams"
   add_foreign_key "free_agency_periods", "seasons"
-  add_foreign_key "player_stats", "players"
-  add_foreign_key "player_stats", "seasons"
   add_foreign_key "team_emails", "teams"
   add_foreign_key "users", "teams", on_delete: :nullify
 end

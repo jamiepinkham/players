@@ -29,9 +29,12 @@ class StatsClient
   class TimeoutError < Error; end
   class ServerError < Error; end
 
-  BASE_URL = ENV.fetch('STATS_API_URL', 'http://stats-api:3001')
+  BASE_URL = ENV.fetch('STATS_API_URL', 'http://localhost:3001')
   TIMEOUT = 5 # seconds
-  MOCK_MODE = Rails.env.development? || Rails.env.test?
+  # Allow STATS_API_MOCK env var to override (useful for testing)
+  MOCK_MODE = ENV.fetch('STATS_API_MOCK', nil) == 'true' ? true :
+              ENV.fetch('STATS_API_MOCK', nil) == 'false' ? false :
+              (Rails.env.development? || Rails.env.test?)
 
   class << self
     # Fetch stats for a single player
