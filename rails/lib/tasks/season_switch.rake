@@ -14,14 +14,9 @@ namespace :season do
       exit 1
     end
 
-    # Check if we have ANY stats for the target year
-    stats_count = PlayerStat.joins(:season).where('seasons.target_stat_year = ?', next_season.target_stat_year).count
-    if stats_count == 0
-      puts "❌ ERROR: No stats found for target year #{next_season.target_stat_year}"
-      puts "   Please run stats import before promoting free agents:"
-      puts "   bin/rails stats:import"
-      exit 1
-    end
+    # Note: Stats are now managed by the stats microservice
+    # The stats:import task should be run on the stats service before promotion
+    # No local database check needed
 
     puts "\n🔍 FREE AGENT PROMOTION PREVIEW"
     puts "=" * 80

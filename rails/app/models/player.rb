@@ -8,7 +8,6 @@ class Player < ApplicationRecord
   }
 
   has_one :leading_bid, -> { where(is_leading: true) }, class_name: 'Bid'
-  has_many :player_stats, dependent: :destroy
 
   # Position constants
   POSITIONS = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF', 'DH'].freeze
