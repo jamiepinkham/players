@@ -11,8 +11,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      mock-stats:
+        condition: service_started
     env_file:
       - .env
+    environment:
+      - STATS_API_URL=http://mock-stats:3001
     entrypoint: /usr/local/bin/web-entrypoint.sh
     ports:
       - "3000:3000"
@@ -49,6 +53,20 @@ services:
       - redisdata:/data
     ports:
       - "6379:6379"
+
+  # Mock Stats API - Lightweight fake stats service for local development
+  # Provides instant fake player stats without needing the full stats microservice
+  # Dashboard will show "MOCK ENVIRONMENT" when using this service
+  # To use real stats API instead, change STATS_API_URL above to point to the real service
+  mock-stats:
+    build:
+      context: ./mock-stats
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
 
 volumes:
   pgdata:

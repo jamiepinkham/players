@@ -19,7 +19,8 @@ require 'json'
 #   Production/staging always use the real API.
 #
 # Environment:
-#   STATS_API_URL - Base URL of stats service (default: http://stats-api:3001)
+#   STATS_API_URL - Base URL of stats service (default: http://mock-stats:3001)
+#                   Docker Compose automatically sets this to the mock service
 #
 # Example:
 #   stats = StatsClient.fetch('judgeaa01', 2025)
@@ -29,7 +30,9 @@ class StatsClient
   class TimeoutError < Error; end
   class ServerError < Error; end
 
-  BASE_URL = ENV.fetch('STATS_API_URL', 'http://stats-api:3001')
+  # Default to mock-stats service for best developer experience
+  # Override with STATS_API_URL env var to point to real stats API
+  BASE_URL = ENV.fetch('STATS_API_URL', 'http://mock-stats:3001')
   TIMEOUT = 5 # seconds
   # Allow STATS_API_MOCK env var to override (useful for testing)
   # Default: mock in dev/test, real API in production/staging
