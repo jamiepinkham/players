@@ -4,10 +4,10 @@ class Trade < ApplicationRecord
     belongs_to :from_team, class_name: 'Team'
     belongs_to :to_team, class_name: 'Team'
 
-    validate :valid_trade_date
+    validate :valid_trade_date, on: :create
     # validate :valid_cash_amounts
-    validate :valid_contracts
-    validate :no_self_trading
+    validate :valid_contracts, on: :create
+    validate :no_self_trading, on: :create
 
     scope :pending, -> { where(status: :pending) }
     scope :accepted, -> { where(status: :accepted) }
@@ -40,7 +40,9 @@ class Trade < ApplicationRecord
     end
 
     def reject!
-        self.status_rejected!
+        # Skip validations since we're just changing status, and we want to be able
+        # to reject invalid trades (e.g., if contracts were moved after trade creation)
+        update_column(:status, self.class.statuses[:rejected])
     end
 
     def from_contracts

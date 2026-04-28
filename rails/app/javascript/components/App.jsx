@@ -6,6 +6,7 @@ import axios from "axios";
 import { useQuery } from "graphql-hooks";
 
 import PrivateRoute from "./auth/PrivateRoute";
+import AdminRoute from "./commissioner/AdminRoute";
 import TeamsList from "./teams/TeamsList";
 import Profile from "./user/Profile";
 import Bidding from "./bidding/Bidding";
@@ -18,6 +19,10 @@ import TradeOfferComponent from "./trades/TradeOfferComponent";
 import CompletedTrades from "./trades/CompletedTrades";
 import AllPlayersListSearch from "./players/AllPlayersListSearch";
 import PlayerDetailPage from "./players/PlayerDetailPage";
+import CommissionerDashboard from "./commissioner/CommissionerDashboard";
+import PlayersList from "./commissioner/PlayersList";
+import TradesList from "./commissioner/TradesList";
+import PlayerEdit from "./commissioner/PlayerEdit";
 
 import { Box, Header, Heading, Main, ResponsiveContext, Text, Button } from "grommet";
 import { Logout } from "grommet-icons";
@@ -170,6 +175,7 @@ export default function App(props) {
     if (location.pathname === "/trades") return "All Trades";
     if (location.pathname === "/player_search") return "Player Search";
     if (location.pathname === "/profile") return myTeamData?.team?.name ? `${myTeamData.team.name} Settings` : "Settings";
+    if (location.pathname.startsWith("/commissioner")) return "Commissioner Dashboard";
     return null;
   };
 
@@ -234,6 +240,10 @@ export default function App(props) {
             <Route path="/bidding/:playerId/place-bid" element={<PrivateRoute><PlaceBid /></PrivateRoute>} />
             <Route path="/trade" element={<PrivateRoute><TradeOfferComponent /></PrivateRoute>} />
             <Route path="/trades" element={<PrivateRoute><CompletedTrades /></PrivateRoute>} />
+            <Route path="/commissioner" element={<AdminRoute><CommissionerDashboard /></AdminRoute>} />
+            <Route path="/commissioner/players" element={<AdminRoute><PlayersList /></AdminRoute>} />
+            <Route path="/commissioner/players/:playerId/edit" element={<AdminRoute><PlayerEdit /></AdminRoute>} />
+            <Route path="/commissioner/trades" element={<AdminRoute><TradesList /></AdminRoute>} />
             <Route path="*" element={<NoMatch />} />
           </Routes>
             </Main>

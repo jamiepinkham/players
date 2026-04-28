@@ -4,6 +4,9 @@ class Team < ApplicationRecord
   has_many :bids, -> { includes :player }
   has_many :team_emails, dependent: :destroy
 
+  validates :name, presence: true, uniqueness: true
+  validates :budget, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
   def to_s
     name || "Team ##{id}"
   end

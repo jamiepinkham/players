@@ -2,9 +2,9 @@ class Season < ApplicationRecord
     include Enumerable
     has_many :free_agency_periods, dependent: :destroy
 
-    # Season linking - only need one direction, can traverse both ways
+    # Season linking - database has both next_season_id and previous_season_id columns
     belongs_to :previous_season, class_name: 'Season', optional: true
-    has_one :next_season, class_name: 'Season', foreign_key: 'previous_season_id'
+    belongs_to :next_season, class_name: 'Season', foreign_key: 'next_season_id', optional: true
 
     def to_s
         name || "Season ##{id}"
@@ -46,6 +46,7 @@ class Season < ApplicationRecord
         while season && !visited.include?(season.id)
             visited.add(season.id)
             block.call(season)
+            # Use next_season (belongs_to) to traverse forward
             season = season.next_season
         end
 

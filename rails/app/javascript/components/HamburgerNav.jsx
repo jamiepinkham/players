@@ -265,17 +265,31 @@ const HamburgerNav = ({
               </Box>
 
               {isAdmin && (
-                <Box
-                  pad="small"
-                  round="xsmall"
-                >
-                  <Anchor
-                    icon={<UserAdmin />}
-                    label="Admin"
-                    color="white"
-                    onClick={handleAdminNavClick}
-                  />
-                </Box>
+                <>
+                  <Box
+                    pad="small"
+                    background={currentPath.startsWith("/commissioner") ? { color: "white", opacity: 0.2 } : undefined}
+                    round="xsmall"
+                  >
+                    <Anchor
+                      icon={<List />}
+                      label="Commissioner Dashboard"
+                      color="white"
+                      onClick={() => handleNavClick("commissioner")}
+                    />
+                  </Box>
+                  <Box
+                    pad="small"
+                    round="xsmall"
+                  >
+                    <Anchor
+                      icon={<UserAdmin />}
+                      label="Admin"
+                      color="white"
+                      onClick={handleAdminNavClick}
+                    />
+                  </Box>
+                </>
               )}
 
               <Box
