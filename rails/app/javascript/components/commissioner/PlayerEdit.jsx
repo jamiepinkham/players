@@ -54,7 +54,6 @@ const PlayerEdit = () => {
     try {
       setLoading(true);
       const response = await axios.get(`/api/commissioner/players/${playerId}`);
-      console.log("Fetched player data:", response.data);
       setPlayer(response.data);
       setOriginalPlayer(JSON.parse(JSON.stringify(response.data))); // Deep copy
       setError(null);
@@ -93,7 +92,6 @@ const PlayerEdit = () => {
     setSaving(true);
     try {
       const response = await axios.patch(`/api/commissioner/players/${playerId}`, player);
-      console.log("Save response:", response.data);
       setNotification({
         message: "Player updated successfully!",
         type: "success",

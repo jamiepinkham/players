@@ -6,13 +6,6 @@ import { Box, Text } from "grommet";
 const AdminRoute = ({ children }) => {
   let auth = useAuth();
 
-  // Debug logging
-  console.log('AdminRoute - auth state:', {
-    isValidating: auth.isValidating,
-    isSignedIn: auth.isSignedIn,
-    isAdmin: auth.isAdmin
-  });
-
   // Show loading while validating token
   if (auth.isValidating) {
     return (
