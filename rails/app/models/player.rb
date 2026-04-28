@@ -108,11 +108,22 @@ class Player < ApplicationRecord
   end
 
   def cannot_be_free_agent_with_contract
-    return unless is_free_agent? && contract.present?
+    return unless is_free_agent?
+
+    # Find active contract manually (scoped associations don't always work in validations)
+    current_season = Season.current
+    active_contract = contracts.find do |c|
+      c.active &&
+      current_season &&
+      c.first_season_id <= current_season.id &&
+      c.last_season_id >= current_season.id
+    end
+
+    return unless active_contract
 
     errors.add(
       :is_free_agent,
-      "cannot be set to true - player has active contract with #{contract.team.name} through #{contract.last_season.name}"
+      "cannot be set to true - player has active contract with #{active_contract.team.name} through #{active_contract.last_season.name}"
     )
   end
 

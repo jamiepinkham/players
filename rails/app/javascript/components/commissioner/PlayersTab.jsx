@@ -21,6 +21,7 @@ const PlayersTab = ({ freeAgents, season, setNotification }) => {
   const [loadingFreeAgents, setLoadingFreeAgents] = useState(false);
   const [faSearchQuery, setFaSearchQuery] = useState('');
   const [faStatusFilter, setFaStatusFilter] = useState('all');
+  const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
     fetchFreeAgentsList();
@@ -38,6 +39,29 @@ const PlayersTab = ({ freeAgents, season, setNotification }) => {
       });
     } finally {
       setLoadingFreeAgents(false);
+    }
+  };
+
+  const handleRecalculate = async () => {
+    if (!confirm('Recalculate free agent status for all players based on contracts and stats? This may take a moment.')) {
+      return;
+    }
+
+    setRecalculating(true);
+    try {
+      const response = await axios.post('/api/commissioner/free_agents/recalculate');
+      setNotification({
+        message: response.data.message || 'Free agent status recalculated successfully',
+        type: 'success'
+      });
+      await fetchFreeAgentsList();
+    } catch (err) {
+      setNotification({
+        message: err.response?.data?.error || 'Failed to recalculate free agents',
+        type: 'error'
+      });
+    } finally {
+      setRecalculating(false);
     }
   };
 
@@ -71,7 +95,15 @@ const PlayersTab = ({ freeAgents, season, setNotification }) => {
 
       {/* Search and Filter */}
       <Box direction="row" justify="between" align="center" margin={{ bottom: "medium" }}>
-        <Text weight="bold">All Players</Text>
+        <Box direction="row" gap="small" align="center">
+          <Text weight="bold">All Players</Text>
+          <Button
+            label={recalculating ? "Recalculating..." : "Recalculate FA Status"}
+            onClick={handleRecalculate}
+            disabled={recalculating}
+            size="small"
+          />
+        </Box>
         <Box direction="row" gap="small" align="center">
           <Select
             options={[

@@ -346,15 +346,22 @@ class Api::CommissionerDashboardController < ApplicationController
     current_season = Season.current
 
     # Eager load all associations to avoid N+1 queries
-    players = Player.includes(contract: [:team, :last_season]).all.map do |player|
+    players = Player.includes(contracts: [:team, :last_season, :first_season]).all.map do |player|
+      # Find the current active contract manually (scoped associations don't work well with includes)
+      current_contract = player.contracts.find do |c|
+        c.active &&
+        c.first_season_id <= current_season&.id &&
+        c.last_season_id >= current_season&.id
+      end
+
       # Determine if contract is expiring
-      is_expiring = player.contract.present? &&
-                   player.contract.active &&
-                   player.contract.last_season_id == current_season&.id
+      is_expiring = current_contract.present? &&
+                   current_contract.active &&
+                   current_contract.last_season_id == current_season&.id
 
       status = if is_expiring
         'expiring'
-      elsif player.contract.present?
+      elsif current_contract.present?
         'under_contract'
       elsif player.is_free_agent
         'free_agent'
@@ -364,12 +371,12 @@ class Api::CommissionerDashboardController < ApplicationController
 
       reasons = []
 
-      if player.contract.present?
+      if current_contract.present?
         if is_expiring
-          reasons << "Contract expires after #{player.contract.last_season.name}"
+          reasons << "Contract expires after #{current_contract.last_season.name}"
           reasons << "Will enter free agency for #{current_season.next_season&.name || 'next season'}"
         else
-          reasons << "Active contract with #{player.contract.team.name} through #{player.contract.last_season.name}"
+          reasons << "Active contract with #{current_contract.team.name} through #{current_contract.last_season.name}"
         end
       else
         reasons << "No contract"
