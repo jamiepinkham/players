@@ -524,8 +524,9 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
               </Box>
             </Box>
           )}
+          </Collapsible>
 
-          {/* Action button at bottom left */}
+          {/* Action button at bottom - always visible */}
           <Box direction="row" justify="between" align="center" margin={{ top: "small" }}>
             <Box direction="row" gap="small" align="center">
               <Button
@@ -541,7 +542,6 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
               )}
             </Box>
           </Box>
-          </Collapsible>
         </Box>
       </Box>
 
