@@ -1,16 +1,34 @@
-FactoryBot.define do
-    factory :trade do
-        from_team factory: :team        
-        from_cash_amount { 10 }
-        to_team factory: :team        
-        to_cash_amount { 20 }
-        status { :pending }
-    end
-end
+# frozen_string_literal: true
 
-def multiplayer_trade
-    FactoryBot.create(:trade) do |trade|
-        FactoryBot.create_list(:contract, 3, team: trade.from_team)
-        FactoryBot.create_list(:contract, 2, team: trade.to_team)
+FactoryBot.define do
+  factory :trade do
+    association :from_team, factory: :team
+    association :to_team, factory: :team
+    from_cash_amount { 0 }
+    to_cash_amount { 0 }
+    status { :pending }
+
+    trait :pending do
+      status { :pending }
     end
+
+    trait :accepted do
+      status { :accepted }
+    end
+
+    trait :rejected do
+      status { :rejected }
+    end
+
+    # Aliases for test compatibility
+    transient do
+      initiating_team { nil }
+      partner_team { nil }
+    end
+
+    before(:create) do |trade, evaluator|
+      trade.from_team = evaluator.initiating_team if evaluator.initiating_team
+      trade.to_team = evaluator.partner_team if evaluator.partner_team
+    end
+  end
 end

@@ -26,7 +26,11 @@ Rails.application.configure do
   end
 
   # Change to :null_store to avoid any caching.
-  config.cache_store = :memory_store
+  # Use Redis for caching to persist across restarts
+  config.cache_store = :redis_cache_store, {
+    url: ENV.fetch('REDIS_URL', 'redis://redis:6379/0'),
+    expires_in: 24.hours
+  }
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false

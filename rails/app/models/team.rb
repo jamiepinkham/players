@@ -4,6 +4,9 @@ class Team < ApplicationRecord
   has_many :bids, -> { includes :player }
   has_many :team_emails, dependent: :destroy
 
+  validates :name, presence: true, uniqueness: true
+  validates :budget, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
   def to_s
     name || "Team ##{id}"
   end
@@ -27,8 +30,12 @@ class Team < ApplicationRecord
     return 0 unless current_season
 
     contracts
+      .joins(:player)
       .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
       .where(active: true)
+      # Summer contracts only exempt if player has no bbrefid (prospect/minors)
+      # Once they have bbrefid (played in majors), salary counts even if marked summer
+      .where('summer = ? OR (summer = ? AND players.bbrefid IS NOT NULL)', false, true)
       .sum(:amount)
   end
 
@@ -57,9 +64,14 @@ class Team < ApplicationRecord
     current_season = Season.current
     return 0 unless current_season
 
+    # Count summer contracts where player has no bbrefid (prospects/minors)
+    # These don't count against payroll
     contracts
+      .joins(:player)
       .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
-      .where(active: false)
+      .where(active: true)
+      .where(summer: true)
+      .where(players: { bbrefid: nil })
       .count
   end
 

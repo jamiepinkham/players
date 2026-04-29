@@ -42,6 +42,7 @@ const BIDDING_CONSOLE_QUERY = `
                 isLeading
                 createdAt
                 player {
+                    id
                     name
                     bbrefid
                 }
@@ -120,21 +121,18 @@ export default function BiddingConsole() {
   }
 
   return (
-    <Box>
+    <Box gap="medium">
       <Box
-        pad="small"
-        gap="small"
+        pad="medium"
         round="small"
         background="light-1"
         border={{ color: "border", size: "xsmall" }}
         elevation="small"
+        flex={false}
       >
-        <Heading level={3} margin="none">
-          {team.name} Bidding Console
-        </Heading>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box margin={{ top: "medium" }} round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <Box flex>
         <Tabs activeIndex={activeTab} onActive={handleTabChange}>
           <Tab title="Free Agents">
             <Box pad="small">
@@ -165,6 +163,7 @@ export default function BiddingConsole() {
                       header: "Player",
                       render: (bid) => (
                         <PlayerName
+                          playerId={bid.player.id}
                           name={bid.player.name}
                           bbrefid={bid.player.bbrefid}
                         />
@@ -202,6 +201,7 @@ export default function BiddingConsole() {
                     },
                   ]}
                   data={bids}
+                  responsive
                   background={DATA_TABLE_THEME.background}
                   />
                 </Box>

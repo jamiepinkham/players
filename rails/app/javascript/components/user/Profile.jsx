@@ -37,7 +37,7 @@ export default function Profile() {
   const user = data?.currentUser;
 
   return (
-    <Box direction="column" gap="medium" pad={{ vertical: "medium" }}>
+    <Box direction="column" gap="medium">
       <Box
         background="light-1"
         pad="medium"
@@ -50,14 +50,6 @@ export default function Profile() {
           size: "xsmall",
         }}
       >
-        <Box direction="row" gap="xsmall">
-          <Text weight="bold">Username:</Text>
-          <Text>{user?.username}</Text>
-        </Box>
-        <Box direction="row" gap="xsmall">
-          <Text weight="bold">Team:</Text>
-          <Text>{user?.team?.name || "N/A"}</Text>
-        </Box>
         {user?.team && (
           <Box gap="xsmall">
             <Text weight="bold">Team Emails:</Text>
@@ -80,18 +72,6 @@ export default function Profile() {
             )}
           </Box>
         )}
-        <Box pad={{ top: "small" }} border={{ side: "top", color: "light-4" }}>
-          <Button
-            href="/sign_in"
-            label="Sign Out"
-            onClick={() => {
-              auth.signOut().then(() => {
-                navigate("/");
-              });
-            }}
-            alignSelf="start"
-          />
-        </Box>
       </Box>
 
       <Tabs justify="start">

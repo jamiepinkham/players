@@ -11,6 +11,18 @@ import {
   redirectToLogin
 } from "../utils/auth";
 
+// Add axios interceptor to include JWT token in requests
+axios.interceptors.request.use(
+  config => {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
 // Add axios interceptor for 401 responses
 axios.interceptors.response.use(
   response => response,

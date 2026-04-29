@@ -72,3 +72,9 @@ logs/*
 # Database restore files
 db-restore/*
 !db-restore/.gitkeep
+
+# Deployment documentation (local deployment artifacts)
+deployment-docs/
+
+# Backup files
+*.backup

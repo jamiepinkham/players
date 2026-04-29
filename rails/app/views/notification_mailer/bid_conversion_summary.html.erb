@@ -1,0 +1,20 @@
+<h2>Bid Conversion Job Summary</h2>
+
+<p><strong>Season:</strong> <%= @season_name %></p>
+<p><strong>Free Agency Active:</strong> <%= @fa_active ? 'Yes' : 'No' %></p>
+
+<h3>Results:</h3>
+<ul>
+  <li><strong>Contracts Created:</strong> <%= @results[:contracts_created] %></li>
+  <li><strong>Bids Outbid:</strong> <%= @results[:bids_outbid] %></li>
+  <li><strong>New Leading Bids:</strong> <%= @results[:new_leading_bids] %></li>
+  <li><strong>Email Failures:</strong> <%= @results[:email_failures] %></li>
+</ul>
+
+<% if @results[:email_failures] > 0 %>
+<p style="color: red;"><strong>⚠️ Warning:</strong> Some email notifications failed to send. Check logs for details.</p>
+<% end %>
+
+<p>
+  <em>Billy Martin Players League</em>
+</p>

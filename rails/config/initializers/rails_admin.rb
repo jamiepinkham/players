@@ -1,17 +1,14 @@
 # Rails 8/Zeitwerk will autoload these from lib/
 # Manual requires cause Zeitwerk::NameError
-# require 'rails_admin/import_free_agents'
 # require 'rails_admin/import_summer_draft'
 # require 'rails_admin/deactivate_contracts'
 # require 'rails_admin/reset_user_password'
 
 # Ensure classes are loaded before registering
-require Rails.root.join('lib', 'rails_admin', 'import_free_agents')
 require Rails.root.join('lib', 'rails_admin', 'import_summer_draft')
 require Rails.root.join('lib', 'rails_admin', 'deactivate_contracts')
 require Rails.root.join('lib', 'rails_admin', 'reset_user_password')
 
-RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportFreeAgents)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ImportSummerDraft)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::DeactivateContracts)
 RailsAdmin::Config::Actions.register(RailsAdmin::Config::Actions::ResetUserPassword)
@@ -67,7 +64,6 @@ RailsAdmin.config do |config|
     show_in_app
 
     ## Custom import actions
-    import_free_agents
     import_summer_draft
     deactivate_contracts
 
@@ -157,21 +153,35 @@ RailsAdmin.config do |config|
     list do
       field :name
       field :bbrefid
-      field :position
-      field :bbref_minors
-      field :bbref_stats do
-        searchable false
-        queryable false
+      field :positions do
+        pretty_value do
+          value.join(', ') if value.present?
+        end
       end
+      field :is_free_agent do
+        label "Free Agent"
+        help "Player has no active contract"
+      end
+      field :bbref_minors
       field :contract
       field :leading_bid
     end
     edit do
       field :name
       field :bbrefid
-      field :position
+      field :positions, :enum do
+        label "Eligible Positions"
+        help "Select all positions the player is eligible for (multiple selections allowed)"
+        multiple true
+        enum do
+          Player::POSITIONS
+        end
+      end
       field :bbref_minors
-      field :bbref_stats
+      field :is_free_agent do
+        label "Free Agent Status"
+        help "Normally auto-maintained by system. Cannot be true if player has active contract (validation will prevent saving)."
+      end
     end
   end
 
@@ -180,14 +190,22 @@ RailsAdmin.config do |config|
       field :name
       field :is_active
       field :is_finished
+      field :target_stat_year do
+        label "Target Stat Year"
+        help "Year of stats required for eligibility (e.g., BMPL 2026 needs 2025 stats)"
+      end
       field :free_agency_periods
       field :next_season
       field :previous_season
     end
-    edit do 
+    edit do
       field :name
       field :is_active
       field :is_finished
+      field :target_stat_year do
+        label "Target Stat Year"
+        help "Year of stats required for eligibility (e.g., BMPL 2026 needs 2025 stats)"
+      end
       field :free_agency_periods
       field :next_season
       field :previous_season

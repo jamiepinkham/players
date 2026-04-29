@@ -25,7 +25,7 @@ const PLAYER_CONTRACT_QUERY = `
       id
       name
       bbrefid
-      position
+      positions
       isTradeEligible
       contract {
         id
@@ -41,7 +41,7 @@ const PLAYER_CONTRACT_QUERY = `
           id
           name
           bbrefid
-          position
+          positions
           isTradeEligible
         }
       }
@@ -76,7 +76,8 @@ function TradeOfferComponent() {
   const {
     loading,
     error,
-    data = { teams: null, trades: [] }
+    data = { teams: null, trades: [] },
+    refetch
   } = useQuery(TEAMS_QUERY, {
     variables: { teamId }
   });
@@ -89,12 +90,23 @@ function TradeOfferComponent() {
     skip: !playerId
   });
 
+  // Listen for trade updates to refresh pending trades count
+  useEffect(() => {
+    const handleTradeUpdate = () => {
+      refetch();
+    };
+    window.addEventListener('tradeUpdated', handleTradeUpdate);
+    return () => {
+      window.removeEventListener('tradeUpdated', handleTradeUpdate);
+    };
+  }, [refetch]);
+
   // When player data loads, set initial team and contract
   useEffect(() => {
     if (playerData?.player?.contract?.team) {
       setInitialTeam(playerData.player.contract.team);
       setInitialContract(playerData.player.contract);
-      // Open the "Propose New Trade" tab
+      // "Propose New Trade" tab is index 1
       setActiveIndex(1);
     }
   }, [playerData]);
@@ -104,8 +116,8 @@ function TradeOfferComponent() {
   const pendingTradesCount = data.trades?.length || 0;
 
   return (
-    <Box fill>
-      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+    <Box>
+      <Box>
         <Tabs
           activeIndex={activeIndex}
           onActive={(index) => setActiveIndex(index)}
@@ -129,13 +141,15 @@ function TradeOfferComponent() {
             </Box>
           </Tab>
           <Tab title='Propose New Trade'>
-            <ClickTradeBuilder
-              teams={data.teams}
-              currentTeamId={teamId}
-              initialTeamId={initialTeam?.id}
-              initialContract={initialContract}
-              onTradeSubmitted={() => window.location.reload()}
-            />
+            <Box pad={{ top: "medium" }}>
+              <ClickTradeBuilder
+                teams={data.teams}
+                currentTeamId={teamId}
+                initialTeamId={initialTeam?.id}
+                initialContract={initialContract}
+                onTradeSubmitted={() => window.location.reload()}
+              />
+            </Box>
           </Tab>
         </Tabs>
       </Box>

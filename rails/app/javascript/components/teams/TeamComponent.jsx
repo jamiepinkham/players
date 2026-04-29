@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "graphql-hooks";
 import { useParams } from "react-router";
 import CurrencyFormat from "react-currency-format";
-import { Grid, Heading, Box, DataTable, CheckBox, List, Text } from "grommet";
+import { Grid, Heading, Box, DataTable, List, Text } from "grommet";
 
 import { MailOption } from "grommet-icons";
 
@@ -28,8 +28,9 @@ const TEAM_QUERY = `
       }
       currentContracts {
         player {
+          id
           name
-          position
+          positions
           bbrefid
         }
         firstSeason {
@@ -76,10 +77,9 @@ function TeamComponent(props) {
   }
 
   return (
-    <Box>
+    <Box gap="medium">
       <Box
-        gap="small"
-        pad="small"
+        pad="medium"
         elevation="small"
         background="light-1"
         round="small"
@@ -89,25 +89,20 @@ function TeamComponent(props) {
           size: "xsmall",
         }}
       >
-        <Box direction="row" justify="between" align="center">
-          <Box gap="xxsmall">
-            <Heading level="3" margin="none">
-              {team.name}
-            </Heading>
-            <Text size="small" color="text-weak">{team.stadium}</Text>
-          </Box>
+        <Box direction="row-responsive" justify="between" align="center" gap="xsmall" margin={{ bottom: "small" }}>
+          <Text size="medium" color="text-weak">{team.stadium}</Text>
           {team.user && team.primaryEmail && (
             <Box direction="row" gap="xxsmall" align="center">
               <a href={`mailto:${team.primaryEmail}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <MailOption size="small" />
-                <Text size="small">{team.user.name}</Text>
+                <MailOption size="medium" />
+                <Text size="medium">{team.user.name}</Text>
               </a>
             </Box>
           )}
         </Box>
         <TeamBudgetInfo team={team} />
       </Box>
-      <Box margin={{ top: "medium" }} round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
+      <Box round="small" border={{ color: "border", size: "xsmall" }}>
         <DataTable
           columns={[
             {
@@ -116,17 +111,22 @@ function TeamComponent(props) {
               primary: true,
               sortable: true,
               render: (contract) => (
-                <PlayerName
-                  name={contract.player.name}
-                  bbrefid={contract.player.bbrefid}
-                />
+                <Box direction="row" align="center" gap="xsmall">
+                  <PlayerName
+                    playerId={contract.player.id}
+                    name={contract.player.name}
+                    bbrefid={contract.player.bbrefid}
+                  />
+                  {contract.summer && <Text size="xsmall" color="status-ok"> SUMMER</Text>}
+                  {contract.franchise && <Text size="xsmall" color="brand"> FRANCHISE</Text>}
+                </Box>
               )
             },
             {
-              property: "player.position",
+              property: "player.positions",
               header: "Position",
               sortable: true,
-              render: (contract) => contract.player.position,
+              render: (contract) => contract.player.positions?.join(', ') || '',
             },
             {
               property: "amount",
@@ -147,27 +147,11 @@ function TeamComponent(props) {
               header: "Final Season",
               sortable: true,
               render: (contract) => contract.lastSeason?.name,
-            },
-            { 
-              property: "summer",
-              header: "Summer Draftee",
-              sortable: true,
-              render: (contract) => (
-                <CheckBox checked={contract.summer} />
-              )
-            },
-            {  
-              property: "franchise",
-              header: "Franchise Player",
-              sortable: true,
-              render: (contract) => (
-                <CheckBox checked={contract.franchise} />
-              )
             }
           ]}
           data={team.currentContracts}
           sortable={true}
-          fill
+          responsive
           background={DATA_TABLE_THEME.background}
         />
       </Box>

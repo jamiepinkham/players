@@ -14,7 +14,7 @@ const PLAYER_QUERY = `
       id
       name
       bbrefid
-      position
+      positions
       bbrefLink
       stats {
         title
@@ -98,18 +98,12 @@ export default function PlaceBid() {
   };
 
   const stats = formatPlayerStats(player);
-  const isPitcher = player.position === "SP" || player.position === "RP";
+  const isPitcher = player.positions?.includes("SP") || player.positions?.includes("RP");
+  const hasNoBbrefid = !player.bbrefid;
+  const displayStat = (value) => hasNoBbrefid ? "--" : (value || <Spinner size="xsmall" />);
 
   return (
-    <Box>
-      <Box direction="row" align="center" gap="small" margin={{ bottom: "small" }}>
-        <Button
-          icon={<Previous />}
-          label="Back to Free Agents"
-          onClick={() => navigate('/bidding')}
-          plain
-        />
-      </Box>
+    <Box gap="small">
       <Box
         round="small"
         overflow="hidden"
@@ -117,9 +111,9 @@ export default function PlaceBid() {
         margin={{ bottom: "small" }}
       >
         <Box
-          direction="row"
+          direction={{ small: "column", medium: "row" }}
           justify="between"
-          align="center"
+          align={{ small: "start", medium: "center" }}
           pad="medium"
           gap="small"
           background="light-1"
@@ -127,25 +121,25 @@ export default function PlaceBid() {
           style={{ cursor: 'pointer' }}
         >
             <PlayerName name={player.name} bbrefid={player.bbrefid} bold />
-            <Box direction="row" gap="large" align="center">
+            <Box direction="row" gap={{ small: "small", medium: "large" }} align="center" wrap>
               {isPitcher ? (
                 <>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">IP: {stats.IP}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">ERA: {stats.ERA}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">W: {stats.W}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">L: {stats.L}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">SV: {stats.SV}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">IP: {displayStat(stats.IP)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">ERA: {displayStat(stats.ERA)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">W: {displayStat(stats.W)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">L: {displayStat(stats.L)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">SV: {displayStat(stats.SV)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {displayStat(stats.WAR)}</Text></Box>
                 </>
               ) : (
                 <>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">PA: {stats.PA}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">HR: {stats.HR}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">R: {stats.R}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">RBI: {stats.RBI}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">AVG: {stats.BA}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">OPS: {stats.OPS}</Text></Box>
-                  <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {stats.WAR}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">PA: {displayStat(stats.PA)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">HR: {displayStat(stats.HR)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">R: {displayStat(stats.R)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">RBI: {displayStat(stats.RBI)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">AVG: {displayStat(stats.BA)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">OPS: {displayStat(stats.OPS)}</Text></Box>
+                  <Box pad={{ horizontal: "small" }}><Text weight="bold">WAR: {displayStat(stats.WAR)}</Text></Box>
                 </>
               )}
             </Box>

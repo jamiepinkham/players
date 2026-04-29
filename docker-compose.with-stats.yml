@@ -1,0 +1,83 @@
+# Docker Compose configuration with local stats API
+# Use this when you need to test against the real stats API locally
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.with-stats.yml up
+#
+# This will:
+# - Start the players app (from base docker-compose.yml)
+# - Start the stats API services (stats-api, stats-worker, stats-db, stats-redis)
+# - Configure players app to use local stats API instead of mock mode
+
+services:
+  # Override players service to disable mock mode and connect to local stats API
+  players:
+    environment:
+      - STATS_API_URL=http://stats-api:3001
+      - STATS_API_MOCK=false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      stats-api:
+        condition: service_started
+
+  # Stats API web service
+  stats-api:
+    image: ghcr.io/jamiepinkham/players-stats:main
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://postgres@stats-db:5432/players_stats
+      - REDIS_URL=redis://stats-redis:6379/0
+      - CELERY_BROKER_URL=redis://stats-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://stats-redis:6379/0
+      - CACHE_TTL=86400
+    depends_on:
+      stats-db:
+        condition: service_healthy
+      stats-redis:
+        condition: service_started
+    command: uvicorn app.main:app --host 0.0.0.0 --port 3001
+
+  # Stats Celery worker for background jobs
+  stats-worker:
+    image: ghcr.io/jamiepinkham/players-stats:main
+    environment:
+      - DATABASE_URL=postgresql://postgres@stats-db:5432/players_stats
+      - REDIS_URL=redis://stats-redis:6379/0
+      - CELERY_BROKER_URL=redis://stats-redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://stats-redis:6379/0
+    depends_on:
+      stats-db:
+        condition: service_healthy
+      stats-redis:
+        condition: service_started
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+
+  # Stats PostgreSQL database
+  stats-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=players_stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - stats-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d players_stats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Stats Redis (cache and Celery broker)
+  stats-redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru
+    volumes:
+      - stats-redis-data:/data
+
+volumes:
+  stats-db-data:
+  stats-redis-data:

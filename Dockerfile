@@ -1,7 +1,7 @@
 ## Main Rails app
 FROM ruby:3.3.7 AS web
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl gnupg2 postgresql-client python3 python3-pip
 
 # Install supercronic (cron for containers)
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -36,6 +36,10 @@ WORKDIR /app
 
 COPY rails/Gemfile rails/Gemfile.lock ./
 RUN gem install bundler foreman && bundle install
+
+# Install Python dependencies
+COPY requirements.txt ./
+RUN pip3 install --break-system-packages --root-user-action=ignore -r requirements.txt
 
 # Copy the full app from rails/
 COPY rails/ ./

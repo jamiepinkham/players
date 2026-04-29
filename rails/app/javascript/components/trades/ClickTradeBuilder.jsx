@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useMutation, useQuery } from "graphql-hooks";
-import { Box, Text, Heading, Select, Layer, Button, Spinner } from "grommet";
-import { Close, Add } from "grommet-icons";
+import { Box, Text, Heading, Select, Layer, Button, Spinner, TextInput, Collapsible, Tip } from "grommet";
+import { Close, Add, Search, FormDown, FormUp } from "grommet-icons";
 import CurrencyFormat from "react-currency-format";
 import CurrencyInput from "../common/CurrencyInput";
 import PlayerName from "../players/PlayerName";
@@ -33,9 +33,10 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
         summer
         franchise
         player {
+          id
           name
           bbrefid
-          position
+          positions
           isTradeEligible
           tradeIneligibilityReason
           stats {
@@ -48,57 +49,82 @@ query TradingConsoleTeamContractsQuery($teamId: ID!)  {
   }
 `;
 
+// Player Stats Tooltip Component
+function PlayerStatsTooltip({ player, children }) {
+  if (!player.bbrefid) {
+    return children;
+  }
+
+  const statsMap = {};
+  (player.stats || []).forEach(stat => {
+    statsMap[stat.title] = stat.value;
+  });
+
+  const isPitcher = player.positions?.some(pos => pos === 'SP' || pos === 'RP');
+
+  const tooltipContent = (
+    <Box pad="small" gap="xsmall" background="dark-1" round="xsmall">
+      <Text weight="bold" size="small">{player.name}</Text>
+      <Box direction="row" gap="medium" wrap>
+        {isPitcher ? (
+          <>
+            <Text size="small">IP: {statsMap.IP || '--'}</Text>
+            <Text size="small">ERA: {statsMap.ERA || '--'}</Text>
+            <Text size="small">W: {statsMap.W || '--'}</Text>
+            <Text size="small">L: {statsMap.L || '--'}</Text>
+            <Text size="small">SV: {statsMap.SV || '--'}</Text>
+            <Text size="small">WHIP: {statsMap.WHIP || '--'}</Text>
+          </>
+        ) : (
+          <>
+            <Text size="small">PA: {statsMap.PA || '--'}</Text>
+            <Text size="small">HR: {statsMap.HR || '--'}</Text>
+            <Text size="small">R: {statsMap.R || '--'}</Text>
+            <Text size="small">RBI: {statsMap.RBI || '--'}</Text>
+            <Text size="small">AVG: {statsMap.BA || '--'}</Text>
+            <Text size="small">OPS: {statsMap.OPS || '--'}</Text>
+          </>
+        )}
+      </Box>
+    </Box>
+  );
+
+  return <Tip content={tooltipContent}>{children}</Tip>;
+}
+
 // Clickable Player Card Component
-function PlayerCard({ contract, onAdd, onRemove, showAddButton, showRemoveButton, isDisabled }) {
+function PlayerCard({ contract, onAdd, onRemove, showAddButton, showRemoveButton, isDisabled, inTrade }) {
   const isEligible = contract.player.isTradeEligible;
 
   return (
     <Box
       background="white"
       round="xsmall"
-      pad="small"
+      pad="xsmall"
       border={{ color: "border", size: "xsmall" }}
       margin={{ bottom: "xxsmall" }}
-      style={{ opacity: (isEligible && !isDisabled) ? 1 : 0.4 }}
+      style={{ opacity: (isEligible && !isDisabled && !inTrade) ? 1 : 0.5 }}
     >
       <Box direction="row" justify="between" align="center" gap="small">
-        <Box direction="column" gap="xxsmall" flex>
-          <Box direction="row" justify="between" align="center">
-            <Box direction="row" gap="xsmall" align="center">
-              <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
-              {contract.summer && (
-                <Box
-                  background="status-ok"
-                  round="xsmall"
-                  pad={{ horizontal: "xsmall", vertical: "xxsmall" }}
-                >
-                  <Text size="xxsmall" color="white" weight="bold">SUMMER</Text>
-                </Box>
-              )}
-              {contract.franchise && (
-                <Box
-                  background="brand"
-                  round="xsmall"
-                  pad={{ horizontal: "xsmall", vertical: "xxsmall" }}
-                >
-                  <Text size="xxsmall" color="white" weight="bold">FRANCHISE</Text>
-                </Box>
-              )}
-            </Box>
-            {!isEligible && contract.player.tradeIneligibilityReason && (
-              <Text size="xsmall" color="status-error" weight="bold">
-                {contract.player.tradeIneligibilityReason}
-              </Text>
-            )}
-          </Box>
+        <Box direction="row" gap="small" align="center" flex>
+          <PlayerStatsTooltip player={contract.player}>
+            <PlayerName playerId={contract.player.id} name={contract.player.name} bbrefid={contract.player.bbrefid} />
+          </PlayerStatsTooltip>
           <Text size="xsmall" color="text-weak">
-            {contract.player.position} • <CurrencyFormat
+            {contract.player.positions?.join(', ')} • <CurrencyFormat
               value={contract.amount}
               displayType={"text"}
               thousandSeparator={true}
               prefix={"$"}
             /> • {contract.lastSeason.name}
           </Text>
+          {contract.summer && <Text size="xsmall" color="status-ok">SUMMER</Text>}
+          {contract.franchise && <Text size="xsmall" color="brand">FRAN</Text>}
+          {!isEligible && contract.player.tradeIneligibilityReason && (
+            <Text size="xsmall" color="status-critical" weight="bold">
+              {contract.player.tradeIneligibilityReason}
+            </Text>
+          )}
         </Box>
         {showAddButton && isEligible && (
           <Button
@@ -129,6 +155,9 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
   const [toCash, setToCash] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [fromRosterSearch, setFromRosterSearch] = useState("");
+  const [toRosterSearch, setToRosterSearch] = useState("");
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   // Track which contracts are in the trade zone
   const [fromTradeZone, setFromTradeZone] = useState([]); // contracts from your team
@@ -261,11 +290,36 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
   };
 
   // Get all contracts from rosters
-  const fromRosterContracts = fromTeamData?.team?.currentContracts || [];
-  const toRosterContracts = toTeamData?.team?.currentContracts || [];
+  const allFromRosterContracts = fromTeamData?.team?.currentContracts || [];
+  const allToRosterContracts = toTeamData?.team?.currentContracts || [];
+
+  // Filter and sort rosters: selected players first, then alphabetical
+  const fromRosterContracts = allFromRosterContracts
+    .filter(contract =>
+      contract.player.name.toLowerCase().includes(fromRosterSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aInTrade = fromTradeZone.some(c => c.id === a.id);
+      const bInTrade = fromTradeZone.some(c => c.id === b.id);
+      if (aInTrade && !bInTrade) return -1;
+      if (!aInTrade && bInTrade) return 1;
+      return a.player.name.localeCompare(b.player.name);
+    });
+
+  const toRosterContracts = allToRosterContracts
+    .filter(contract =>
+      contract.player.name.toLowerCase().includes(toRosterSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aInTrade = toTradeZone.some(c => c.id === a.id);
+      const bInTrade = toTradeZone.some(c => c.id === b.id);
+      if (aInTrade && !bInTrade) return -1;
+      if (!aInTrade && bInTrade) return 1;
+      return a.player.name.localeCompare(b.player.name);
+    });
 
   return (
-    <Box gap="small">
+    <Box gap="medium">
       {/* Trade Summary / Actions at top */}
       <Box
         round="small"
@@ -275,13 +329,46 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
       >
         <Box direction="column" gap="small">
           <Box direction="row" justify="between" align="center">
-            <Text weight="bold" size="large">Trade Summary</Text>
-            {toTeam && (
-              <Text size="small" color="text-weak">
-                {fromTeam?.name} ↔ {toTeam.name}
-              </Text>
-            )}
+            <Box direction="column" gap="xsmall">
+              <Text weight="bold" size="large">Trade Summary</Text>
+              {toTeam && (
+                <Box direction="row" gap="medium">
+                  <Box>
+                    <Text size="small" color="text-weak">Sending: </Text>
+                    <Text size="small" weight="bold">
+                      {fromTradeZone.length === 0 && fromCash === 0 ? (
+                        '—'
+                      ) : (
+                        <>
+                          {fromTradeZone.length > 0 && `${fromTradeZone.length} player${fromTradeZone.length !== 1 ? 's' : ''}`}
+                          {fromCash > 0 && (fromTradeZone.length > 0 ? ` + $${fromCash.toLocaleString()}` : `$${fromCash.toLocaleString()}`)}
+                        </>
+                      )}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text size="small" color="text-weak">Receiving: </Text>
+                    <Text size="small" weight="bold">
+                      {toTradeZone.length === 0 && toCash === 0 ? (
+                        '—'
+                      ) : (
+                        <>
+                          {toTradeZone.length > 0 && `${toTradeZone.length} player${toTradeZone.length !== 1 ? 's' : ''}`}
+                          {toCash > 0 && (toTradeZone.length > 0 ? ` + $${toCash.toLocaleString()}` : `$${toCash.toLocaleString()}`)}
+                        </>
+                      )}
+                    </Text>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+            <Button
+              icon={summaryExpanded ? <FormUp /> : <FormDown />}
+              onClick={() => setSummaryExpanded(!summaryExpanded)}
+              plain
+            />
           </Box>
+          <Collapsible open={summaryExpanded}>
           {!toTeam ? (
             <Box pad="medium" align="center">
               <Text size="small" color="text-weak">
@@ -291,69 +378,156 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
           ) : (
             <Box direction="row" gap="large">
               {/* Sending column */}
-              <Box flex gap="xsmall">
-                <Box pad="small">
-                  <Text size="small" margin={{ bottom: 'xsmall' }} weight="bold">{fromTeam?.name} sends:</Text>
-                  {fromTradeZone.length === 0 && fromCash === 0 ? (
-                    <Text size="small" color="text-weak">—</Text>
-                  ) : (
-                    <Box gap="xxsmall">
-                      {fromTradeZone.map(contract => (
-                        <Text key={contract.id} size="small">
-                          • {contract.player.name}
-                          {contract.summer && <Text size="xsmall" color="status-ok"> SUMMER</Text>}
-                          {contract.franchise && <Text size="xsmall" color="brand"> FRANCHISE</Text>}
-                        </Text>
-                      ))}
-                      {fromCash > 0 && (
+              <Box flex basis="1/2">
+                <Text size="small" margin={{ bottom: 'small' }} weight="bold">You send:</Text>
+                {fromTradeZone.length === 0 && fromCash === 0 ? (
+                  <Text size="small" color="text-weak">—</Text>
+                ) : (
+                  <Box
+                    round="xsmall"
+                    border={{ color: "border", size: "xsmall" }}
+                    background="white"
+                  >
+                    {fromTradeZone.map((contract, index) => (
+                      <Box
+                        key={contract.id}
+                        direction="row"
+                        align="center"
+                        justify="between"
+                        pad={{ horizontal: "small", vertical: "xsmall" }}
+                        border={index > 0 ? { side: "top", color: "border", size: "xsmall" } : undefined}
+                      >
+                        <Box direction="column" gap="xxsmall" flex>
+                          <Box direction="row" align="center" gap="xsmall">
+                            <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
+                            {contract.summer && <Text size="xsmall" color="status-ok">SUMMER</Text>}
+                            {contract.franchise && <Text size="xsmall" color="brand">FRANCHISE</Text>}
+                          </Box>
+                          <Text size="xsmall" color="text-weak">
+                            {contract.player.position} • <CurrencyFormat
+                              value={contract.amount}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"$"}
+                            /> • {contract.lastSeason.name}
+                          </Text>
+                        </Box>
+                        <Button
+                          icon={<Close size="small" />}
+                          onClick={() => handleRemoveFromTeam(contract)}
+                          size="small"
+                          plain
+                          tip="Remove"
+                        />
+                      </Box>
+                    ))}
+                    {fromCash > 0 && (
+                      <Box
+                        direction="row"
+                        align="center"
+                        justify="between"
+                        pad={{ horizontal: "small", vertical: "xsmall" }}
+                        border={(fromTradeZone.length > 0) ? { side: "top", color: "border", size: "xsmall" } : undefined}
+                      >
                         <Text size="small">
-                          • <CurrencyFormat
+                          <CurrencyFormat
                             value={fromCash}
                             displayType={"text"}
                             thousandSeparator={true}
                             prefix={"$"}
                           /> cash
                         </Text>
-                      )}
-                    </Box>
-                  )}
-                </Box>
+                        <Button
+                          icon={<Close size="small" />}
+                          onClick={() => setFromCash(0)}
+                          size="small"
+                          plain
+                          tip="Remove"
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                )}
               </Box>
 
               {/* Receiving column */}
-              <Box flex gap="xsmall">
-                <Box pad="small">
-                  <Text size="small" margin={{ bottom: 'xsmall' }} weight="bold">{toTeam?.name} sends:</Text>
-                  {toTradeZone.length === 0 && toCash === 0 ? (
-                    <Text size="small" color="text-weak">—</Text>
-                  ) : (
-                    <Box gap="xxsmall">
-                      {toTradeZone.map(contract => (
-                        <Text key={contract.id} size="small">
-                          • {contract.player.name}
-                          {contract.summer && <Text size="xsmall" color="status-ok"> SUMMER</Text>}
-                          {contract.franchise && <Text size="xsmall" color="brand"> FRANCHISE</Text>}
-                        </Text>
-                      ))}
-                      {toCash > 0 && (
+              <Box flex basis="1/2">
+                <Text size="small" margin={{ bottom: 'small' }} weight="bold">You receive:</Text>
+                {toTradeZone.length === 0 && toCash === 0 ? (
+                  <Text size="small" color="text-weak">—</Text>
+                ) : (
+                  <Box
+                    round="xsmall"
+                    border={{ color: "border", size: "xsmall" }}
+                    background="white"
+                  >
+                    {toTradeZone.map((contract, index) => (
+                      <Box
+                        key={contract.id}
+                        direction="row"
+                        align="center"
+                        justify="between"
+                        pad={{ horizontal: "small", vertical: "xsmall" }}
+                        border={index > 0 ? { side: "top", color: "border", size: "xsmall" } : undefined}
+                      >
+                        <Box direction="column" gap="xxsmall" flex>
+                          <Box direction="row" align="center" gap="xsmall">
+                            <PlayerName name={contract.player.name} bbrefid={contract.player.bbrefid} />
+                            {contract.summer && <Text size="xsmall" color="status-ok">SUMMER</Text>}
+                            {contract.franchise && <Text size="xsmall" color="brand">FRANCHISE</Text>}
+                          </Box>
+                          <Text size="xsmall" color="text-weak">
+                            {contract.player.position} • <CurrencyFormat
+                              value={contract.amount}
+                              displayType={"text"}
+                              thousandSeparator={true}
+                              prefix={"$"}
+                            /> • {contract.lastSeason.name}
+                          </Text>
+                        </Box>
+                        <Button
+                          icon={<Close size="small" />}
+                          onClick={() => handleRemoveToTeam(contract)}
+                          size="small"
+                          plain
+                          tip="Remove"
+                        />
+                      </Box>
+                    ))}
+                    {toCash > 0 && (
+                      <Box
+                        direction="row"
+                        align="center"
+                        justify="between"
+                        pad={{ horizontal: "small", vertical: "xsmall" }}
+                        border={(toTradeZone.length > 0) ? { side: "top", color: "border", size: "xsmall" } : undefined}
+                      >
                         <Text size="small">
-                          • <CurrencyFormat
+                          <CurrencyFormat
                             value={toCash}
                             displayType={"text"}
                             thousandSeparator={true}
                             prefix={"$"}
                           /> cash
                         </Text>
-                      )}
-                    </Box>
-                  )}
-                </Box>
+                        <Button
+                          icon={<Close size="small" />}
+                          onClick={() => setToCash(0)}
+                          size="small"
+                          plain
+                          tip="Remove"
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                )}
               </Box>
             </Box>
           )}
+          </Collapsible>
 
-          {/* Action button at bottom left */}
-          <Box direction="row" justify="between" align="center">
+          {/* Action button at bottom - always visible */}
+          <Box direction="row" justify="between" align="center" margin={{ top: "small" }}>
             <Box direction="row" gap="small" align="center">
               <Button
                 primary
@@ -362,7 +536,7 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
                 disabled={!validation.isValid || isSubmitting}
               />
               {validation.errors.length > 0 && (
-                <Text size="xsmall" color="status-error">
+                <Text size="small" color="status-critical">
                   {validation.errors[0]}
                 </Text>
               )}
@@ -371,10 +545,10 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
         </Box>
       </Box>
 
-      {/* Three column layout */}
-      <Box direction="row" gap="small">
+      {/* Two column layout */}
+      <Box direction={{ small: "column", medium: "row" }} gap="small">
         {/* Your Roster - Left */}
-        <Box flex basis="1/3">
+        <Box flex>
           <Box
             round="small"
             border={{ color: "border", size: "xsmall" }}
@@ -382,7 +556,16 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
             pad="small"
             style={{ minHeight: "400px" }}
           >
-            <Text weight="bold" margin={{ bottom: "small" }}>{fromTeam?.name || "Your Team"}</Text>
+            <Box
+              margin={{ bottom: "small" }}
+              height={{ min: "48px" }}
+              justify="center"
+              style={{ paddingLeft: "12px" }}
+            >
+              <Text weight="bold" size="large">
+                {fromTeam?.name || "Your Team"}
+              </Text>
+            </Box>
             <Box
               background="white"
               round="xsmall"
@@ -391,125 +574,98 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
               margin={{ bottom: "small" }}
             >
               <Text size="small" margin={{ bottom: 'xsmall' }}>Cash to send:</Text>
-              <CurrencyInput
-                value={fromCash}
-                onChange={(event) => {
-                  setFromCash(parseInt(event.target.value) || 0);
-                }}
-                placeholder='Enter amount'
-              />
-            </Box>
-            <Box overflow="auto" flex>
-              {fromTeamLoading ? (
-                <Spinner size="small" />
-              ) : (
-                fromRosterContracts.map(contract => (
-                  <PlayerCard
-                    key={contract.id}
-                    contract={contract}
-                    onAdd={handleAddFromTeam}
-                    showAddButton={true}
-                    isDisabled={fromTradeZone.find(c => c.id === contract.id)}
+              <Box style={{ position: 'relative' }}>
+                <CurrencyInput
+                  value={fromCash}
+                  onChange={(event) => {
+                    setFromCash(parseInt(event.target.value) || 0);
+                  }}
+                  placeholder='Enter amount'
+                  disabled={!toTeam}
+                />
+                {fromCash > 0 && (
+                  <Button
+                    icon={<Close />}
+                    onClick={() => setFromCash(0)}
+                    plain
+                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)' }}
                   />
-                ))
-              )}
+                )}
+              </Box>
             </Box>
-          </Box>
-        </Box>
-
-        {/* Trade Zone - Center */}
-        <Box flex basis="1/3">
-          <Box
-            round="small"
-            border={{ color: "brand", size: "small" }}
-            background="light-2"
-            pad="small"
-            style={{ minHeight: "400px" }}
-          >
-            <Text weight="bold" margin={{ bottom: "small" }}>Trade Zone</Text>
-            <Box gap="small" overflow="auto" flex>
-              {fromTradeZone.length === 0 && toTradeZone.length === 0 && fromCash === 0 && toCash === 0 ? (
-                <Box align="center" pad="large">
-                  <Text color="text-weak" textAlign="center" size="small">
-                    Click the + button on players to add them to the trade
-                  </Text>
+            {fromTeamLoading ? (
+              <Spinner size="small" />
+            ) : (
+              <>
+                {fromTradeZone.length > 0 && fromRosterContracts.some(c => fromTradeZone.find(t => t.id === c.id)) && (
+                  <>
+                    <Box
+                      background="status-ok"
+                      pad={{ horizontal: "small", vertical: "xxsmall" }}
+                      margin={{ bottom: "xsmall" }}
+                      round="xxsmall"
+                    >
+                      <Text size="xsmall" weight="bold" color="white">IN TRADE</Text>
+                    </Box>
+                    {fromRosterContracts.filter(c => fromTradeZone.find(t => t.id === c.id)).map(contract => (
+                      <PlayerCard
+                        key={contract.id}
+                        contract={contract}
+                        onAdd={handleAddFromTeam}
+                        onRemove={handleRemoveFromTeam}
+                        showAddButton={false}
+                        showRemoveButton={true}
+                        isDisabled={!toTeam}
+                        inTrade={true}
+                      />
+                    ))}
+                    <Box
+                      border={{ side: "bottom", color: "border", size: "small" }}
+                      margin={{ vertical: "small" }}
+                    />
+                  </>
+                )}
+                <Box margin={{ bottom: "small" }}>
+                  <TextInput
+                    placeholder="Search players..."
+                    value={fromRosterSearch}
+                    onChange={(event) => setFromRosterSearch(event.target.value)}
+                    icon={<Search />}
+                  />
                 </Box>
-              ) : (
-                <>
-                  {(fromTradeZone.length > 0 || fromCash > 0) && (
-                    <Box>
-                      <Text size="small" weight="bold" color="text-weak" margin={{ bottom: "xxsmall" }}>
-                        You're sending:
-                      </Text>
-                      {fromTradeZone.map(contract => (
-                        <PlayerCard
-                          key={contract.id}
-                          contract={contract}
-                          onRemove={handleRemoveFromTeam}
-                          showRemoveButton={true}
-                        />
-                      ))}
-                      {fromCash > 0 && (
-                        <Box
-                          background="white"
-                          round="xsmall"
-                          pad="small"
-                          border={{ color: "border", size: "xsmall" }}
-                          margin={{ bottom: "xxsmall" }}
-                        >
-                          <Text size="small" weight="bold">
-                            <CurrencyFormat
-                              value={fromCash}
-                              displayType={"text"}
-                              thousandSeparator={true}
-                              prefix={"$"}
-                            /> cash
-                          </Text>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-                  {(toTradeZone.length > 0 || toCash > 0) && (
-                    <Box>
-                      <Text size="small" weight="bold" color="text-weak" margin={{ bottom: "xxsmall" }}>
-                        You're receiving:
-                      </Text>
-                      {toTradeZone.map(contract => (
-                        <PlayerCard
-                          key={contract.id}
-                          contract={contract}
-                          onRemove={handleRemoveToTeam}
-                          showRemoveButton={true}
-                        />
-                      ))}
-                      {toCash > 0 && (
-                        <Box
-                          background="white"
-                          round="xsmall"
-                          pad="small"
-                          border={{ color: "border", size: "xsmall" }}
-                          margin={{ bottom: "xxsmall" }}
-                        >
-                          <Text size="small" weight="bold">
-                            <CurrencyFormat
-                              value={toCash}
-                              displayType={"text"}
-                              thousandSeparator={true}
-                              prefix={"$"}
-                            /> cash
-                          </Text>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-                </>
-              )}
-            </Box>
+                {fromRosterContracts.filter(c => !fromTradeZone.find(t => t.id === c.id)).length > 0 && (
+                  <Box overflow="auto" flex>
+                    {fromTradeZone.length > 0 && (
+                      <Box
+                        background="light-3"
+                        pad={{ horizontal: "small", vertical: "xxsmall" }}
+                        margin={{ bottom: "xsmall" }}
+                        round="xxsmall"
+                      >
+                        <Text size="xsmall" weight="bold" color="text-weak">AVAILABLE</Text>
+                      </Box>
+                    )}
+                    {fromRosterContracts.filter(c => !fromTradeZone.find(t => t.id === c.id)).map(contract => (
+                      <PlayerCard
+                        key={contract.id}
+                        contract={contract}
+                        onAdd={handleAddFromTeam}
+                        onRemove={handleRemoveFromTeam}
+                        showAddButton={true}
+                        showRemoveButton={false}
+                        isDisabled={!toTeam}
+                        inTrade={false}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </>
+            )}
           </Box>
         </Box>
 
         {/* Their Roster - Right */}
-        <Box flex basis="1/3">
+        <Box flex>
           <Box
             round="small"
             border={{ color: "border", size: "xsmall" }}
@@ -517,15 +673,17 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
             pad="small"
             style={{ minHeight: "400px" }}
           >
-            <Select
-              options={availableTeams}
-              labelKey={(option) => option.name}
-              valueKey={{ key: 'id', reduce: true }}
-              value={toTeam?.id}
-              onChange={({ option }) => handleTeamChange(option)}
-              placeholder='Select trade partner...'
-              margin={{ bottom: "small" }}
-            />
+            <Box margin={{ bottom: "small" }}>
+              <Select
+                options={availableTeams}
+                labelKey={(option) => option.name}
+                valueKey={{ key: 'id', reduce: true }}
+                value={toTeam?.id}
+                onChange={({ option }) => handleTeamChange(option)}
+                placeholder='Select trade partner...'
+                size="large"
+              />
+            </Box>
             {toTeam && (
               <>
                 <Box
@@ -536,29 +694,92 @@ function ClickTradeBuilder({ teams, currentTeamId, initialTeamId, initialContrac
                   margin={{ bottom: "small" }}
                 >
                   <Text size="small" margin={{ bottom: 'xsmall' }}>Cash to receive:</Text>
-                  <CurrencyInput
-                    value={toCash}
-                    onChange={(event) => {
-                      setToCash(parseInt(event.target.value) || 0);
-                    }}
-                    placeholder='Enter amount'
-                  />
-                </Box>
-                <Box overflow="auto" flex>
-                  {toTeamLoading ? (
-                    <Spinner size="small" />
-                  ) : (
-                    toRosterContracts.map(contract => (
-                      <PlayerCard
-                        key={contract.id}
-                        contract={contract}
-                        onAdd={handleAddToTeam}
-                        showAddButton={true}
-                        isDisabled={toTradeZone.find(c => c.id === contract.id)}
+                  <Box style={{ position: 'relative' }}>
+                    <CurrencyInput
+                      value={toCash}
+                      onChange={(event) => {
+                        setToCash(parseInt(event.target.value) || 0);
+                      }}
+                      placeholder='Enter amount'
+                    />
+                    {toCash > 0 && (
+                      <Button
+                        icon={<Close />}
+                        onClick={() => setToCash(0)}
+                        plain
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)' }}
                       />
-                    ))
-                  )}
+                    )}
+                  </Box>
                 </Box>
+                {toTeamLoading ? (
+                  <Spinner size="small" />
+                ) : (
+                  <>
+                    {toTradeZone.length > 0 && toRosterContracts.some(c => toTradeZone.find(t => t.id === c.id)) && (
+                      <>
+                        <Box
+                          background="status-ok"
+                          pad={{ horizontal: "small", vertical: "xxsmall" }}
+                          margin={{ bottom: "xsmall" }}
+                          round="xxsmall"
+                        >
+                          <Text size="xsmall" weight="bold" color="white">IN TRADE</Text>
+                        </Box>
+                        {toRosterContracts.filter(c => toTradeZone.find(t => t.id === c.id)).map(contract => (
+                          <PlayerCard
+                            key={contract.id}
+                            contract={contract}
+                            onAdd={handleAddToTeam}
+                            onRemove={handleRemoveToTeam}
+                            showAddButton={false}
+                            showRemoveButton={true}
+                            isDisabled={false}
+                            inTrade={true}
+                          />
+                        ))}
+                        <Box
+                          border={{ side: "bottom", color: "border", size: "small" }}
+                          margin={{ vertical: "small" }}
+                        />
+                      </>
+                    )}
+                    <Box margin={{ bottom: "small" }}>
+                      <TextInput
+                        placeholder="Search players..."
+                        value={toRosterSearch}
+                        onChange={(event) => setToRosterSearch(event.target.value)}
+                        icon={<Search />}
+                      />
+                    </Box>
+                    {toRosterContracts.filter(c => !toTradeZone.find(t => t.id === c.id)).length > 0 && (
+                      <Box overflow="auto" flex>
+                        {toTradeZone.length > 0 && (
+                          <Box
+                            background="light-3"
+                            pad={{ horizontal: "small", vertical: "xxsmall" }}
+                            margin={{ bottom: "xsmall" }}
+                            round="xxsmall"
+                          >
+                            <Text size="xsmall" weight="bold" color="text-weak">AVAILABLE</Text>
+                          </Box>
+                        )}
+                        {toRosterContracts.filter(c => !toTradeZone.find(t => t.id === c.id)).map(contract => (
+                          <PlayerCard
+                            key={contract.id}
+                            contract={contract}
+                            onAdd={handleAddToTeam}
+                            onRemove={handleRemoveToTeam}
+                            showAddButton={true}
+                            showRemoveButton={false}
+                            isDisabled={false}
+                            inTrade={false}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                )}
               </>
             )}
             {!toTeam && (

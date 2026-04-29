@@ -8,13 +8,14 @@ import {
   Pagination,
   Anchor,
   Button,
+  Spinner,
 } from 'grommet';
 import { FormUp, FormDown } from 'grommet-icons';
 import { useManualQuery } from 'graphql-hooks';
 import { useAuth } from '../../hooks/use_auth';
+import { Link } from 'react-router-dom';
 import CurrencyFormat from 'react-currency-format';
 import PlayerName from './PlayerName';
-import LoadingState from '../common/LoadingState';
 import { DATA_TABLE_THEME } from '../../constants/ui';
 
 const PLAYERS_QUERY = `
@@ -32,12 +33,8 @@ query GetPlayersPaginated($page: Int!, $perPage: Int!, $nameSearch: String, $pos
       bbrefid
       bbrefMinors
       name
-      position
-      bbrefStats
-      stats {
-        title
-        value
-      }
+      positions
+      isFreeAgent
       contract {
         firstSeason { name }
         lastSeason { name }
@@ -192,34 +189,39 @@ const AllPlayersListSearch = () => {
     { label: 'Ineligible', value: 'Ineligible' },
   ];
 
-  if (loading) return <LoadingState message="Loading players..." />;
   if (error) return <Text color="status-critical">Error: {error.message}</Text>;
 
   return (
-    <Box fill pad="medium" overflow="auto">
-      <Box direction="row" gap="small" margin={{ bottom: 'small' }}>
-        <TextInput
-          ref={searchInputRef}
-          placeholder="Search by name"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          onFocus={() => wasFocused.current = true}
-          onBlur={() => wasFocused.current = false}
-        />
-        <Select
-          placeholder="All Positions"
-          options={uniquePositions}
-          value={positionFilter}
-          onChange={({ option }) => setPositionFilter(option || '')}
-          clear
-        />
-        <Select
-          placeholder="All Statuses"
-          options={statusOptions}
-          value={statusFilter}
-          onChange={({ option }) => setStatusFilter(option || '')}
-          clear
-        />
+    <Box gap="small">
+      <Box direction="row-responsive" gap="small" margin={{ bottom: 'small' }}>
+        <Box flex>
+          <TextInput
+            ref={searchInputRef}
+            placeholder="Search by name"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            onFocus={() => wasFocused.current = true}
+            onBlur={() => wasFocused.current = false}
+          />
+        </Box>
+        <Box width={{ min: "150px", max: "200px" }}>
+          <Select
+            placeholder="All Positions"
+            options={uniquePositions}
+            value={positionFilter}
+            onChange={({ option }) => setPositionFilter(option || '')}
+            clear
+          />
+        </Box>
+        <Box width={{ min: "150px", max: "200px" }}>
+          <Select
+            placeholder="All Statuses"
+            options={statusOptions}
+            value={statusFilter}
+            onChange={({ option }) => setStatusFilter(option || '')}
+            clear
+          />
+        </Box>
       </Box>
 
       <Box direction="row" justify="between" align="center" margin={{ bottom: 'small' }}>
@@ -237,74 +239,80 @@ const AllPlayersListSearch = () => {
         )}
       </Box>
 
-      <Box round="small" overflow="hidden" border={{ color: "border", size: "xsmall" }}>
-        <DataTable
-          columns={[
-          {
-            property: 'name',
-            header: renderSortableHeader('Name'),
-            primary: true,
-            render: (player) => <PlayerName name={player.name} bbrefid={player.bbrefid} bold />,
-          },
-          {
-            property: 'position',
-            header: "Position",
-            render: (player) => <Text>{player.position}</Text>,
-          },
-          {
-            property: 'contract',
-            header: "Contract Status",
-            align: 'end',
-            render: (player) => {
-              const hasStats = player.stats && player.stats.length > 0;
-
-              if (player.contract) {
-                return (
-                  <Text>
-                    {player.contract.team?.name || 'Unknown'} - <CurrencyFormat
-                      value={player.contract.amount}
-                      thousandSeparator={true}
-                      prefix={'$'}
-                      displayType={'text'}
-                    /> - Ends: {player.contract.lastSeason?.name || '?'}
-                  </Text>
-                );
-              } else if (hasStats) {
-                return <Text>Free Agent</Text>;
-              } else {
-                return <Text color="status-critical">Ineligible</Text>;
-              }
+      {loading ? (
+        <Box align="center" justify="center" pad="large">
+          <Spinner size="medium" />
+          <Text margin={{ top: 'small' }} color="dark-4">Loading players...</Text>
+        </Box>
+      ) : (
+        <Box round="small" overflow={{ horizontal: "hidden" }} border={{ color: "border", size: "xsmall" }}>
+          <DataTable
+            columns={[
+            {
+              property: 'name',
+              header: renderSortableHeader('Name'),
+              primary: true,
+              render: (player) => (
+                <PlayerName playerId={player.id} name={player.name} bbrefid={player.bbrefid} bold />
+              ),
             },
-          },
-          {
-            property: 'action',
-            header: "Action",
-            align: 'end',
-            render: (player) => {
-              const hasStats = player.stats && player.stats.length > 0;
-
-              if (!hasTeam) {
-                return <Text color="dark-5">N/A</Text>;
-              }
-
-              if (player.contract) {
-                return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
-              } else if (hasStats && hasActiveFAPeriod) {
-                return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
-              } else if (hasStats && !hasActiveFAPeriod) {
-                return <Text color="dark-5">Bid (N/A)</Text>;
-              } else {
-                return <Text color="dark-5">N/A</Text>;
-              }
+            {
+              property: 'positions',
+              header: "Position",
+              render: (player) => <Text>{player.positions?.join(', ') || ''}</Text>,
             },
-          },
-        ]}
-        data={players}
-        background={DATA_TABLE_THEME.background}
-        />
-      </Box>
+            {
+              property: 'contract',
+              header: "Contract Status",
+              align: 'end',
+              render: (player) => {
+                if (player.contract) {
+                  return (
+                    <Text>
+                      {player.contract.team?.name || 'Unknown'} - <CurrencyFormat
+                        value={player.contract.amount}
+                        thousandSeparator={true}
+                        prefix={'$'}
+                        displayType={'text'}
+                      /> - Ends: {player.contract.lastSeason?.name || '?'}
+                    </Text>
+                  );
+                } else if (player.isFreeAgent) {
+                  return <Text>Free Agent</Text>;
+                } else {
+                  return <Text color="status-critical">Ineligible</Text>;
+                }
+              },
+            },
+            {
+              property: 'action',
+              header: "Action",
+              align: 'end',
+              render: (player) => {
+                if (!hasTeam) {
+                  return <Text color="dark-5">N/A</Text>;
+                }
 
-      {totalPages > 1 && (
+                if (player.contract) {
+                  return <Anchor href={`/trade?player_id=${player.id}`} label="Trade" />;
+                } else if (player.isFreeAgent && hasActiveFAPeriod) {
+                  return <Anchor href={`/bidding?player_id=${player.id}`} label="Bid" />;
+                } else if (player.isFreeAgent && !hasActiveFAPeriod) {
+                  return <Text color="dark-5">Bid (N/A)</Text>;
+                } else {
+                  return <Text color="dark-5">N/A</Text>;
+                }
+              },
+            },
+          ]}
+          data={players}
+          responsive
+          background={DATA_TABLE_THEME.background}
+          />
+        </Box>
+      )}
+
+      {!loading && totalPages > 1 && (
         <Box align="center" margin={{ top: 'medium' }}>
           <Pagination
             numberItems={totalCount}
