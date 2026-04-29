@@ -22,7 +22,7 @@ class Player < ApplicationRecord
   # Returns players who either:
    # 1. Have a bbrefid (potentially eligible for FA based on stats), OR
    # 2. Have an active contract in the given season.
-   scope :with_stats_or_current_contract, ->(season_id) {
+   scope :with_bbrefid_or_contract, ->(season_id) {
      season = Season.find_by(id: season_id)
      return none unless season
 
@@ -86,9 +86,9 @@ class Player < ApplicationRecord
     if contract.present?
       update_column(:is_free_agent, false) # Skip validations/callbacks
     end
-    # When contract is destroyed, do nothing - leave flag unchanged
-    # Admin must manually verify stats eligibility before setting to true
-    # (See season switch rake tasks for stats verification implementation)
+    # When contract is destroyed, Contract model's after_destroy callback
+    # will call update_free_agent_status! to recalculate the flag
+    # based on stats eligibility
   end
 
   private
@@ -129,7 +129,7 @@ class Player < ApplicationRecord
 
   # Check if player has stats for a given season's target year
   # This is the source of truth for eligibility
-  def self.has_stats_in_pybaseball?(bbrefid, target_year, positions)
+  def self.has_stats?(bbrefid, target_year, positions)
     return false if bbrefid.blank? || target_year.blank?
 
     # Fetch stats from stats API microservice

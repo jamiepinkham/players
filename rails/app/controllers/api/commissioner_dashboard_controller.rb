@@ -302,7 +302,7 @@ class Api::CommissionerDashboardController < ApplicationController
       # New status: free agent if no active contract AND has stats
       if player.contract.present?
         new_status = false
-      elsif Player.has_stats_in_pybaseball?(player.bbrefid, current_season.target_stat_year, player.positions)
+      elsif Player.has_stats?(player.bbrefid, current_season.target_stat_year, player.positions)
         new_status = true
       else
         new_status = false

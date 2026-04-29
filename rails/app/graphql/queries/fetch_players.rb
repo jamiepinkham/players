@@ -105,7 +105,7 @@ module Queries
         type [Types::PlayerType], null: false
         def resolve
             season_id = Season.current.id
-            Player.with_stats_or_current_contract(season_id).includes(contract: [:first_season, :last_season, :team])
+            Player.with_bbrefid_or_contract(season_id).includes(contract: [:first_season, :last_season, :team])
         end
     end
 
@@ -128,7 +128,7 @@ module Queries
                 players = Player.all
             else
                 # For other statuses, use the optimized query
-                players = Player.with_stats_or_current_contract(season_id)
+                players = Player.with_bbrefid_or_contract(season_id)
             end
 
             # Apply name and position filters (these work on player attributes)
