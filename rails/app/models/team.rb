@@ -30,12 +30,8 @@ class Team < ApplicationRecord
     return 0 unless current_season
 
     contracts
-      .joins(:player)
       .where('first_season_id <= ? AND last_season_id >= ?', current_season.id, current_season.id)
       .where(active: true)
-      # Summer contracts only exempt if player has no bbrefid (prospect/minors)
-      # Once they have bbrefid (played in majors), salary counts even if marked summer
-      .where('summer = ? OR (summer = ? AND players.bbrefid IS NOT NULL)', false, true)
       .sum(:amount)
   end
 
