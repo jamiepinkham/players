@@ -137,11 +137,13 @@ rails/
 Root files:
 ├── docker-compose.yml                  # Local development
 ├── docker-compose.with-stats.yml       # Optional: real stats API locally
-├── docker-compose.portainer.yml        # Production deployment config
 ├── Dockerfile                          # Multi-stage build
 ├── web-entrypoint.sh                   # Container startup
 ├── README.md                           # Full setup docs
 └── COMMISSIONER_RUNBOOK.md             # Season management guide
+
+Note: Production deployment configs are in a separate repo:
+https://github.com/jamiepinkham/players-deployment
 ```
 
 ## Development Workflow
@@ -374,6 +376,62 @@ docker compose exec db pg_dump -Fc --no-acl --no-owner \
 
 ## Deployment
 
+### ⚠️ DEPLOYMENT REPO COORDINATION ⚠️
+
+**Deployment configs**: https://github.com/jamiepinkham/players-deployment
+
+Portainer deployment configuration (docker-compose, environment vars) is managed in a separate repo.
+
+**IMPORTANT**: Always check if changes require updates to the deployment repo!
+
+### Changes That Require Deployment Repo Updates
+
+**Always call out when making these changes:**
+
+1. **New Environment Variables**
+   - Add to `stack.env.txt` or equivalent in deployment repo
+   - Document required vs optional
+   - Provide example values
+
+2. **New Required Services**
+   - New containers (Redis, background workers, etc.)
+   - External service dependencies
+   - Update docker-compose in deployment repo
+
+3. **Port or Networking Changes**
+   - Exposed ports changed
+   - Internal service communication ports
+   - Network configuration changes
+
+4. **New Volumes or Persistent Storage**
+   - Database volumes
+   - File uploads
+   - Cache directories
+
+5. **Database Migrations**
+   - Major schema changes may need manual intervention
+   - New migrations need to run on deploy
+   - Data migrations or backfill scripts
+
+6. **Scheduled Tasks/Cron Changes**
+   - New cron jobs in `config/crontab`
+   - Changed schedules
+   - Scheduler container config updates
+
+7. **Health Check Endpoints**
+   - Changes to `/health`, `/health/ready`, `/health/live`
+   - New health check requirements
+
+8. **Secret Management**
+   - New API keys needed
+   - Certificate requirements
+   - Authentication tokens
+
+9. **Build Process Changes**
+   - Changes to Dockerfile that affect deployment
+   - New build args needed
+   - Multi-stage build changes
+
 ### CI/CD Pipeline
 - **Trigger**: Push to any branch
 - **Builds**: Multi-arch Docker image (amd64, arm64)
@@ -383,12 +441,10 @@ docker compose exec db pg_dump -Fc --no-acl --no-owner \
   - `ghcr.io/jamiepinkham/players:sha-abc123`
 
 ### Production Stack
-- **Portainer** deploys via `docker-compose.portainer.yml`
-- **Services**:
-  - `players` - Rails web app
-  - `scheduler` - Cron sidecar (nightly bid conversion)
-  - `db` - PostgreSQL
-  - `stats-api` - Shared microservice (separate stack)
+- `players` - Rails web app
+- `scheduler` - Cron sidecar (nightly bid conversion)
+- `db` - PostgreSQL
+- `stats-api` - Shared microservice (separate stack)
 
 ### Key Environment Variables
 ```bash
@@ -399,6 +455,8 @@ DEVISE_JWT_SECRET_KEY      # JWT secret
 MAILGUN_SMTP_PASSWORD      # Email delivery
 STATS_API_URL              # Stats service URL
 STATS_API_MOCK             # true/false (dev only)
+DISABLE_FORCE_SSL          # true if using reverse proxy SSL
+RAILS_ENV                  # production/development
 ```
 
 ## RailsAdmin
@@ -527,5 +585,8 @@ player.bids.where(is_leading: true, is_active: true)
 - **Full setup guide**: `README.md`
 - **Season management**: `COMMISSIONER_RUNBOOK.md`
 - **CI/CD**: `.github/workflows/`
-- **Docker configs**: `docker-compose*.yml`
+- **Docker configs**:
+  - `docker-compose.yml` (local development)
+  - `docker-compose.with-stats.yml` (optional: test with real stats API)
 - **Environment template**: `.env.example`
+- **Production deployment**: https://github.com/jamiepinkham/players-deployment
