@@ -33,7 +33,9 @@ class StatsClient
   # Default to mock-stats service for best developer experience
   # Override with STATS_API_URL env var to point to real stats API
   BASE_URL = ENV.fetch('STATS_API_URL', 'http://mock-stats:3001')
-  TIMEOUT = 5 # seconds
+  # Reduced timeout for faster failover when cache is empty
+  # Stats API triggers async background fetch, so first request returns empty quickly
+  TIMEOUT = 2 # seconds
   # Allow STATS_API_MOCK env var to override (useful for testing)
   # Default: mock in dev/test, real API in production/staging
   MOCK_MODE = if ENV['STATS_API_MOCK'] == 'false'
@@ -98,7 +100,8 @@ class StatsClient
         requests: requests.map { |r| { bbrefid: r[:bbrefid], year: r[:year] } }
       }.to_json
 
-      response = Net::HTTP.start(uri.host, uri.port, read_timeout: TIMEOUT * 2) do |http|
+      # Batch requests get slightly longer timeout since they fetch multiple players
+      response = Net::HTTP.start(uri.host, uri.port, read_timeout: 5) do |http|
         request = Net::HTTP::Post.new(uri)
         request['Content-Type'] = 'application/json'
         request['Accept'] = 'application/json'

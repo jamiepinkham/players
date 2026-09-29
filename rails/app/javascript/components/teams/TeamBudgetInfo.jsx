@@ -40,9 +40,6 @@ function TeamBudgetInfo({ team }) {
         {"  |  "}
         <Text color="text-weak">Players: </Text>
         <Text weight="bold">{team.totalPlayers}</Text>
-        {"  |  "}
-        <Text color="text-weak">Unsalaried: </Text>
-        <Text weight="bold">{team.unsalariedPlayers}</Text>
       </Text>
     </Box>
   );

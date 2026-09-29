@@ -52,6 +52,12 @@ fi
 # Run migrations if needed (uncomment for production deploys)
 # bundle exec rails db:migrate
 
+# Warm stats cache in production/staging (skip in development which uses mock stats)
+if [ "$RAILS_ENV" = "production" ] || [ "$RAILS_ENV" = "staging" ]; then
+  echo "Warming stats cache..."
+  bundle exec rails cache:warmup_quick || echo "Cache warmup failed (non-fatal), continuing..."
+fi
+
 # Start all processes with foreman (Rails + asset watchers)
 # Run in background and wait to allow signal trapping
 foreman start &
