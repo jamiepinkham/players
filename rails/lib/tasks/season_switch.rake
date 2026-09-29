@@ -37,7 +37,7 @@ namespace :season do
       player = contract.player
 
       # Check if player has stats for next season's target year
-      has_stats = Player.has_stats_in_pybaseball?(player.bbrefid, next_season.target_stat_year, player.positions)
+      has_stats = Player.has_stats?(player.bbrefid, next_season.target_stat_year, player.positions)
 
       if has_stats
         eligible << { player: player, team: contract.team, contract: contract }
