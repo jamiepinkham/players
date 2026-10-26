@@ -1,17 +1,28 @@
 namespace :fa_report do
-  desc 'Generate 2026 Free Agent Class Report'
-  task generate_2026: :environment do
+  desc 'Generate Free Agent Class Report'
+  task generate: :environment do
     require 'net/http'
     require 'json'
     require 'csv'
 
-    puts "\n🔍 GENERATING 2026 FREE AGENT CLASS REPORT"
+    # Determine the upcoming season and target stat year
+    current_season = Season.current
+    next_season = current_season.next_season
+
+    if next_season.nil?
+      puts "❌ No next season configured. Please create next season first."
+      exit 1
+    end
+
+    target_year = next_season.target_stat_year
+
+    puts "\n🔍 GENERATING #{next_season.name.upcase} FREE AGENT CLASS REPORT"
     puts "=" * 80
     puts ""
 
-    # Step 1: Get all 2026 players from MLB Stats API
-    puts "📊 Fetching all 2026 players from MLB Stats API..."
-    uri = URI('https://statsapi.mlb.com/api/v1/sports/1/players?season=2026')
+    # Step 1: Get all players from MLB Stats API for target year
+    puts "📊 Fetching all #{target_year} players from MLB Stats API..."
+    uri = URI("https://statsapi.mlb.com/api/v1/sports/1/players?season=#{target_year}")
     response = Net::HTTP.get_response(uri)
 
     unless response.is_a?(Net::HTTPSuccess)
@@ -22,7 +33,7 @@ namespace :fa_report do
     mlb_data = JSON.parse(response.body)
     mlb_players = mlb_data['people'] || []
 
-    puts "   Found #{mlb_players.count} players in MLB 2026 season"
+    puts "   Found #{mlb_players.count} players in MLB #{target_year} season"
     puts ""
 
     # Step 2: Load Chadwick Register to map MLB IDs to BBRef IDs
@@ -91,7 +102,7 @@ namespace :fa_report do
         local_minors.include?(mlb_player[:bbrefid])
     end
 
-    puts "   Found #{missing_players.count} players in 2026 MLB not in database"
+    puts "   Found #{missing_players.count} players in #{target_year} MLB not in database"
     puts ""
 
     # Step 6: Identify current FAs and expiring contracts
@@ -109,16 +120,16 @@ namespace :fa_report do
     puts ""
 
     # Step 7: Generate report
-    report_path = Rails.root.join('2026_FREE_AGENT_CLASS.md')
+    report_path = Rails.root.join("#{next_season.name}_FREE_AGENT_CLASS.md")
 
     File.open(report_path, 'w') do |f|
-      f.puts "# 2026 Free Agent Class Report"
+      f.puts "# #{next_season.name} Free Agent Class Report"
       f.puts ""
       f.puts "Generated: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
       f.puts ""
       f.puts "## Summary"
       f.puts ""
-      f.puts "- **Total 2026 MLB Players**: #{mlb_players.count}"
+      f.puts "- **Total #{target_year} MLB Players**: #{mlb_players.count}"
       f.puts "- **Mapped to BBRef IDs**: #{mlb_players_with_bbref.count}"
       f.puts "- **Players in Database**: #{Player.count}"
       f.puts "- **Players without Contracts**: #{players_without_contracts.count}"
@@ -130,7 +141,7 @@ namespace :fa_report do
 
       f.puts "## Part 1: New Players to Add (#{missing_players.count})"
       f.puts ""
-      f.puts "These players have 2026 MLB stats but are NOT in the database:"
+      f.puts "These players have #{target_year} MLB stats but are NOT in the database:"
       f.puts ""
 
       if missing_players.any?
